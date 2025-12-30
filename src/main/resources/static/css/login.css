@@ -1,0 +1,12 @@
+.login-bg {
+    background: linear-gradient(135deg, #1f3dcc, #4b6cb7);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn-primary {
+    background-color: #1f3dcc;
+    border-color: #1f3dcc;
+}

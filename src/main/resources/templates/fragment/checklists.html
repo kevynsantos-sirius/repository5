@@ -1,0 +1,32 @@
+<!-- fragments/documentos.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <th:block th:fragment="tabelaChecklist(documentos)">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Unidade de Negócio</th>
+          <th>Responsável</th>
+          <th></th>
+          <!-- <th class="text-end">Ações</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="d : ${documentos}">
+          <td th:text="${d.nomeDocumento}"></td>
+          <td th:text="${d.nomeRamo}"></td>
+          <td th:text="${d.usuario.nomeUsuario}"></td>
+          <td class="text-end">
+            <button class="btn btn-outline-primary btn-sm">Abrir</button>
+            <button class="btn btn-outline-primary btn-sm">Produção (PRD)</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </th:block>
+
+</body>
+</html>

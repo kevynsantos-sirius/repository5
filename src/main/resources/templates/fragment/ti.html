@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="ti">
+
+<div id="ti" class="card form-card mt-4">
+
+    <div class="card-header bg-white border-0 pb-0">
+        <h5 class="mb-0">TI – Layout e Forma de Envio</h5>
+    </div>
+
+    <div class="card-body pt-3">
+
+        <form id="formTi" onsubmit="return false;">
+
+            <!-- TEM LAYOUT -->
+            <div class="form-switch mb-3">
+                <input type="checkbox" class="form-check-input" id="hasLayout">
+                <label class="form-check-label" for="hasLayout">Tem layout?</label>
+            </div>
+
+            <!-- LISTA DE LAYOUTS -->
+            <div id="inputLayoutDiv" style="display:none;">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Layouts</h6>
+                    <button type="button" id="btnAddLayout" class="btn btn-sm btn-outline-primary">
+                        + Adicionar Layout
+                    </button>
+                </div>
+
+                <div id="inputsLayoutContainer"></div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- FORMA DE ENVIO -->
+            <label class="label-tooltip">
+                Forma de envio 
+                <span class="tooltip-icon">❔</span>
+                <span class="tooltip-text">
+                    Escolha como o arquivo será enviado: via serviço ou arquivo .txt.
+                </span>
+            </label>
+
+            <div class="d-flex gap-4 mt-2">
+
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="envioServico">
+                    <label class="form-check-label" for="envioServico">Via serviço</label>
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="envioTxt">
+                    <label class="form-check-label" for="envioTxt">Arquivo .txt</label>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</th:block>
+
+</body>
+</html>

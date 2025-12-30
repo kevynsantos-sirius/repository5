@@ -1,0 +1,157 @@
+/* Estrutura geral */
+/* body {
+  background-color: #4b6fd6;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  height: 100vh;
+}
+ */ 
+/* ====== Estilo base GIMP ====== */
+body {
+	margin: 0;
+	font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI",
+		Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	font-size: 0.9rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #4b5563;
+	text-align: left;
+	background-color: #4b6fd6;
+}
+
+ 
+h5 {
+	color: #FFFFFF
+}
+
+/* Layout principal */
+.main-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+ /* background-color: #324dcf; */
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 260px;
+  /* color: #fff; */
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  /* border-radius: 0 12px 12px 0; */
+  height: 100vh;
+  /* box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15); */
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+/* Botão principal */
+.btn-novo {
+  width: 100%;
+  background-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  border: 1.8px solid #fff;
+  border-radius: 8px;
+  padding: 10px 0;
+  transition: all 0.2s ease-in-out;
+}
+
+
+.btn-novo:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-novo.active {
+  background-color: #fff;
+  color: #2d43c0;
+}
+
+/* Submenu */
+.submenu {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.btn-submenu:hover {
+  background-color: #edf0ff;
+}
+
+.btn-submenu.active {
+  background-color: #2d43c0;
+  color: #fff;
+}
+
+/* Responsivo opcional */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+  }
+}
+
+
+/* Logo */
+.logo {
+  font-weight: 700;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  margin-left: 8px;
+}
+
+
+.btn-novo:hover {
+  background-color: #edf0ff;
+  transform: scale(1.01);
+}
+
+
+.btn-submenu {
+  background-color: #fff;
+  color: #2d43c0;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  transition: 0.2s;
+}
+
+.btn-submenu:hover {
+  background-color: #edf0ff;
+}
+
+/* Botão ativo */
+.btn-submenu.active {
+  background-color: #2d43c0;
+  color: #fff;
+}
+
+/* Conteúdo principal */
+.content-area {
+  flex-grow: 1;
+/*  background-color: #324dcf;*/
+  padding: 32px;
+  color: #4e73df;
+}
+
+/* Cartões */
+.documentos-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
