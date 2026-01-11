@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.totaldocs","com.sirius.checklistfront"})
+@ComponentScan(basePackages = "com.totaldocs")
 public class ChecklistonlineApplication {
-	public static void main(String[] args) throws NoSuchAlgorithmException {
+	public static void main(String[	] args) throws NoSuchAlgorithmException {
 		SpringApplication.run(ChecklistonlineApplication.class, args);
 	}
 }

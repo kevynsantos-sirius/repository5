@@ -15,6 +15,6 @@ public class LogoCapa {
     @Id
     private Integer id;
     
-    @Column(name = "Nome")
-    private String nome;
+    @Column(name = "NomeImagem")
+    private String nomeImagem;
 }

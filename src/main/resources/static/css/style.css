@@ -36,15 +36,12 @@ h5 {
 /* --- SIDEBAR --- */
 .sidebar {
   width: 260px;
-  /* color: #fff; */
   color: #000000;
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
-  /* border-radius: 0 12px 12px 0; */
   height: 100vh;
-  /* box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15); */
-}
+ }
 
 .sidebar-header {
   display: flex;
@@ -64,10 +61,9 @@ h5 {
   transition: all 0.2s ease-in-out;
 }
 
-
-.btn-novo:hover {
+/* .btn-novo:hover {
   background-color: rgba(255, 255, 255, 0.2);
-}
+} */
 
 .btn-novo.active {
   background-color: #fff;
@@ -111,10 +107,10 @@ h5 {
 }
 
 
-.btn-novo:hover {
+/* .btn-novo:hover {
   background-color: #edf0ff;
   transform: scale(1.01);
-}
+} */
 
 
 .btn-submenu {
@@ -154,4 +150,92 @@ h5 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+ /* Rodapé fixo */
+.sidebar-user-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 260px;              /* mesma largura da sidebar */
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+/* Avatar redondo */
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff; /* fundo branco */
+  color: #2d43c0;            /* azul do tema */
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* Nome do usuário – mesma cara do sistema */
+.nome-usuario {
+  display: block;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Botão sair: mais visível */
+.btn-logout {
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.btn-logout:hover {
+  background-color: #ffffff;
+  color: #2d43c0;
+  border-color: #ffffff;
+}
+
+
+.btn-salvar {
+    background-color: #3D5CE5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-salvar:hover:not(:disabled) {
+    background-color: #2f4acf;
+    cursor: pointer;
+}
+
+.btn-salvar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Botão secundário - Cancelar */
+.btn-cancelar {
+    background-color: transparent;
+    color: #3D5CE5;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+}
+
+.btn-cancelar:hover {
+    color: #2f4acf;
+    cursor: pointer;
+}

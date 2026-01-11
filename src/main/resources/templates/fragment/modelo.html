@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<th:block th:fragment="modelo">
+		<div id="modelo" class="card form-card mt-4">
+			<div class="card-header bg-white border-0 pb-0">
+        		<h5 class="mb-0">Modelo do Documento</h5>
+      		</div>
+			<div class="card-body pt-3">
+			<form id="formModelo" onsubmit="return false;">
+					 <!-- <div class="row mb-3"> -->
+						<!-- <div class="col-md-6">
+							<label for="idLogoCapa" class="form-label">Logo Capa</label>
+							<select id="idLogoCapa" class="form-select" th:field="*{LogoCapa.id}">
+							  <option value="">Nenhuma</option>	
+							  <option th:each="c : ${listaLogoCapas}" th:value="${c.id}" th:text="${c.nomeImagem}"></option>
+							</select>
+						</div>	  -->
+					<!--	<div class="col-md-6">
+							<label for="idLogoProduto" class="form-label">Logo Produto</label>
+							<select id="idLogoProduto" class="form-select" th:field="*{logoProduto.id}">
+							  <option value="">Nenhum</option>	
+							  <option th:each="p : ${logoProdutoList}" th:value="${p.id}" th:text="${p.nome}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label for="codAssIH" class="form-label">Assinatura IH</label>
+							<select id="codAssIH" class="form-select" th:field="*{codigoAssIH}">
+							  <option value="">Nenhuma</option>	
+							  <option th:each="a : ${assinatIcatuList}" th:value="${a.codigoAssIH}" th:text="${a.codigoAssIH}">
+							  </option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label for="codAssParc" class="form-label">Assinatura Parceiro</label>
+							<select id="codAssParc" class="form-select" th:field="*{codAssParc}">
+							  <option value="">Nenhuma</option>	
+							  <option th:each="a : ${assinatParcList}" th:value="${a.codAssParc}" th:text="${a.codAssParc}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-12">
+								<label for="nomeRecurso" class="form-label">Nome Recurso</label>
+								<input name="nomeRecurso" type="text" class="form-control me-2" placeholder="Nome Recurso" maxlength="100" required disabled>
+						</div>									
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-12">
+							<label for="arquivoModelo" class="form-label">Arquivo de Modelo</label>
+								 <input type="file" class="form-control me-2" id="arquivoModelo" name="arquivoModelo" required>
+						</div>		 
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-12">
+							<label for="observacao" class="form-label">Observação</label>
+							<div id="toolbar-observacao">
+							  <span class="ql-formats">
+							    <select class="ql-header">
+							      <option value="1"></option>
+							      <option value="2"></option>
+							      <option value="3"></option>
+							      <option selected></option>
+							    </select>
+							  </span>
+							  <span class="ql-formats">
+							    <button class="ql-bold"></button>
+							    <button class="ql-italic"></button>
+							    <button class="ql-underline"></button>
+							    <button class="ql-link"></button>
+							  </span>
+							  <span class="ql-formats">
+							    <button class="ql-list" value="ordered"></button>
+							    <button class="ql-list" value="bullet"></button>
+							  </span>
+							  <span class="ql-formats">
+							    <button class="ql-clean"></button>
+							  </span>
+							</div>
+							<div id="editor-observacao" class="quillLayout" style="background:white;height:100px;"></div>
+							<input type="hidden" name="observacao" id="observacao-hidden" class="obsLayoutHidden">
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-4">
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" value="" id="checkImpresso" required>
+		  							<label class="form-check-label" for="checkImpresso">
+		    							Impresso
+		  							</label>
+	  							</div>
+						</div>
+						<div class="col-md-4">
+								<div class="form-check">
+		  							<input class="form-check-input d-none" type="checkbox" value="" id="checkCrc" required>
+		  							<label class="form-check-label d-none" for="checkCrc">
+		    							CRC
+		  							</label>
+		  						</div>	
+						</div>
+						<div class="col-md-4">
+								<div class="form-check">
+		  							<input class="form-check-input d-none" type="checkbox" value="" id="checkDuplex">
+		  							<label class="form-check-label d-none" for="checkDuplex">
+		    							Duplex
+		  							</label>
+		  						</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+							<div class="col-md-6">
+								<label for="preImpresso" class="form-label">Pré Impresso</label>
+								<select id="preImpresso" class="form-select" th:field="*{preImpresso.id}">
+								  <option value="">Nenhum</option>
+								  <option th:each="i : ${preImpressoList}" th:value="${i.nome}" th:text="${i.nome}"></option>
+								</select>
+							</div>
+							<div class="col-md-6">
+								<label for="acabamento" class="form-label d-none">Acabamento</label>
+								<select id="acabamento" class="form-select d-none">
+								  <option value="">Nenhum</option>
+								  <option value="1">Autoenvelopado A3</option>
+								  <option value="2">Autoenvelopado A4</option>
+								  <option value="3">Envelopado A4 (Manuseio/Inserção)</option>
+								</select>
+							</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<div class="form-check">
+	  							<input class="form-check-input" type="checkbox" value="" id="checkArmazenamento">
+	  							<label class="form-check-label" for="checkArmazenamento">
+	    							Armazenamento
+	  							</label>
+	  						</div>
+						</div>
+						<div class="col-md-6 isArmazenamento d-none">
+							<label for="tempoArmazenamento" class="form-label">Tempo Armazenamento</label>
+							<input id="tempoArmazenamento" name="tempoArmazenamento" type="number" class="form-control" placeholder="Dias de Tempo Armazenamento" maxlength="150">
+						</div>
+					</div>
+					<h6 class="">Campos de Busca</h6>
+					<div class="card">
+						<div class="row mb-3 ms-4 mt-2">
+							<div class="col-md-2">
+								<div class="form-check">
+		  							<input class="form-check-input" type="checkbox" value="" id="checkBackoffice">
+		  							<label class="form-check-label" for="checkBackoffice">
+		    							BackOffice
+		  							</label>
+		  						</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-check">
+		  							<input class="form-check-input" type="checkbox" value="" id="checkCliente">
+		  							<label class="form-check-label" for="checkCliente">
+		    							Cliente
+		  							</label>
+		  						</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-check">
+		  							<input class="form-check-input" type="checkbox" value="" id="checkCorretor">
+		  							<label class="form-check-label" for="checkCorretor">
+		    							Corretor
+		  							</label>
+		  						</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-check">
+		  							<input class="form-check-input" type="checkbox" value="" id="checkEstipulante">
+		  							<label class="form-check-label" for="checkEstipulante">
+		    							Estipulante
+		  							</label>
+		  						</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-check">
+		  							<input class="form-check-input" type="checkbox" value="" id="checkSubestipulante">
+		  							<label class="form-check-label" for="checkSubestipulante">
+		    							Subestipulante
+		  							</label>
+		  						</div>
+							</div>
+						</div>
+						<div class="row mb-3 ms-4">
+							<div class="col-md-2 backoffice d-none">
+							    <label for="camposBackoffice" class="form-label">
+							        Campos de Busca BackOffice
+							    </label>
+							    <textarea name="camposBackoffice"
+							              class="form-control"
+							              placeholder="Campos de Busca BackOffice"
+							              maxlength="300"
+							              rows="20"></textarea>
+							</div>
+							
+							<div class="col-md-2 cliente d-none">
+							    <label for="camposCliente" class="form-label">
+							        Campos de Busca Cliente
+							    </label>
+							    <textarea name="camposCliente"
+							              class="form-control"
+							              placeholder="Campos de Busca Cliente"
+							              maxlength="300"
+							              rows="20"></textarea>
+							</div>
+							
+							<div class="col-md-2 corretor d-none">
+							    <label for="camposCorretor" class="form-label">
+							        Campos de Busca Corretor
+							    </label>
+							    <textarea name="camposCorretor"
+							              class="form-control"
+							              placeholder="Campos de Busca Corretor"
+							              maxlength="300"
+							              rows="20"></textarea>
+							</div>
+							
+							<div class="col-md-2 estipulante d-none">
+							    <label for="camposEstipulante" class="form-label">
+							        Campos de Busca Estipulante
+							    </label>
+							    <textarea name="camposEstipulante"
+							              class="form-control"
+							              placeholder="Campos de Busca Estipulante"
+							              maxlength="300"
+							              rows="20"></textarea>
+							</div>
+							
+							<div class="col-md-2 subestipulante d-none">
+							    <label for="camposSubestipulante" class="form-label">
+							        Campos de Busca Subestipulante
+							    </label>
+							    <textarea name="camposSubestipulante"
+							              class="form-control"
+							              placeholder="Campos de Busca Subestipulante"
+							              maxlength="300"
+							              rows="20"></textarea>
+							</div>
+						</div>
+					</div> -->
+				</form>
+			</div>
+		</div>
+	</th:block>
+</body>
+</html>

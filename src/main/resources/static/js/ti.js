@@ -5,8 +5,8 @@ window.buildTI = function () {
 
     const ti = {
         temLayout:  document.getElementById("hasLayout").checked,
-        viaServico: document.getElementById("envioServico").checked,
-        viaTxt:     document.getElementById("envioTxt").checked,
+        viaServico: document.getElementById("envioServico")?.checked || false,
+		viaTxt:document.getElementById("envioTxt")?.checked || false,
         layouts: [],
         _filesLayout: [],
         _filesMassas: []
@@ -94,8 +94,8 @@ window.initTiEvents = function () {
                 </button>
             </div>
 
-            <label>Layout</label>
-            <input class="form-control fileLayout" type="file">
+            <label>Arquivo Layout</label>
+            <input class="form-control fileLayout" type="file" >
 
             <label class="form-label mt-2">Observação</label>
             <div class="quillLayout" style="height:120px;background:white;"></div>
@@ -185,3 +185,52 @@ function limparTI() {
     layoutContainer.innerHTML = "";
     layoutDiv.style.display = "none";
 }
+
+// Validação da aba TI (layouts)
+window.validarTi = function () {
+    const erros = [];
+
+    const hasLayout = document.getElementById("hasLayout")?.checked;
+
+    // Se não tem layout marcado, ignoramos validação dessa parte
+    if (!hasLayout) {
+        return erros;
+    }
+
+    const layoutCards = document.querySelectorAll(".layout-card");
+
+    // Pelo menos um layout se checkbox marcado
+    if (layoutCards.length === 0) {
+        erros.push("• Marcou 'Tem layout?', mas não adicionou nenhum layout.");
+        return erros;
+    }
+
+    // Validação por layout
+    layoutCards.forEach((card, layoutIndex) => {
+        const numLayout = layoutIndex + 1;
+
+        // arquivo do layout obrigatório
+        const fileLayout = card.querySelector(".fileLayout");
+        if (!fileLayout || fileLayout.files.length === 0) {
+            erros.push(`• Selecione o arquivo do Layout ${numLayout}.`);
+        }
+
+        // massas dentro deste layout
+        const massaCards = card.querySelectorAll(".massa-card");
+
+        // Agora regra nova:
+        // Massa só é obrigatória SE usuario adicionou pelo menos uma
+        massaCards.forEach((massaCard, massaIndex) => {
+            const fileMassa = massaCard.querySelector(".fileMassa");
+            const numMassa = massaIndex + 1;
+
+            if (!fileMassa || fileMassa.files.length === 0) {
+                erros.push(
+                    `• Massa ${numMassa} do Layout ${numLayout} está sem arquivo.`
+                );
+            }
+        });
+    });
+
+    return erros;
+};

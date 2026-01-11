@@ -1,7 +1,7 @@
-package com.sirius.checklistfront.service;
+package com.totaldocs.service;
 
-import com.sirius.checklistfront.dto.PageResponse;
 import com.totaldocs.dto.ChecklistDTO;
+import com.totaldocs.dto.PageResponse;
 import com.totaldocs.modelo.Checklist;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,5 +47,4 @@ public class ChecklistService {
 
         return response.getBody();
     }
-    
 }

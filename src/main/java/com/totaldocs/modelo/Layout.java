@@ -38,6 +38,12 @@ public class Layout {
     @Lob
     @Column(name = "Observacao")
     private String observacao;
+    
+    @Column(name = "ViaServico", nullable = false)
+    private boolean viaServico;
+    
+    @Column(name = "ViaTxt", nullable = false)
+    private boolean viaTxt;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MassaDados> massasDados;

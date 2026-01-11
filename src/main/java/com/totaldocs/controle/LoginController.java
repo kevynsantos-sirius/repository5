@@ -1,4 +1,4 @@
-package com.sirius.checklistfront.controle;
+package com.totaldocs.controle;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

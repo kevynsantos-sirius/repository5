@@ -94,7 +94,9 @@ public class ChecklistServiceAPI {
                 layout.setChecklist(checklist);
                 layout.setObservacao(layoutDTO.getObservacao());
                 layout.setDataAtualizacao(LocalDateTime.now());
-
+                layout.setViaServico(dto.isViaServico());
+                layout.setViaTxt(dto.isViaTxt());
+                
                 // arquivo do layout
                 if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
                     MultipartFile fl = filesLayout.get(fileLayoutIndex++);
@@ -124,6 +126,8 @@ public class ChecklistServiceAPI {
                             massa.setNomeMassaDados(fm.getOriginalFilename());
                             massa.setTipoMIME(fm.getContentType());
                             massa.setConteudoMassaDados(fm.getBytes());
+//                            massa.setViaServico(layoutDTO.isViaServico());
+//                            massa.setViaTxt(layoutDTO.isViaTxt());
                         }
 
                         massa = arquivoRepository.save(massa);

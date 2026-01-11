@@ -22,7 +22,7 @@ public class ChecklistDTO {
     private boolean temLayout;
     private boolean viaServico;
     private boolean viaTxt;
-    
+
     private UsuarioDTO usuario; 
     
     private List<LayoutDTO> layouts;

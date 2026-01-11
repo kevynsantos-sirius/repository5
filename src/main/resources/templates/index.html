@@ -15,8 +15,7 @@
 </head>
 
 <body>
-<div class="main-wrapper">
-
+<div class="main-wrapper">	
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-header d-flex align-items-center mb-4">
@@ -27,14 +26,38 @@
 
         <!-- BOTÃO NOVO DOCUMENTO -->
         <button id="btnNovo" class="btn btn-novo active" onclick="toggleMenu()">Novo documento</button>
-        <!-- <button id="btnNovo" class="btn btn-novo active" onclick="novoDocumento()">Novo documento</button> -->
         
         <!-- SUBMENU DAS ABAS -->
         <div id="submenu" class="submenu mt-3" style="display: none;">
             <button class="btn-submenu" onclick="mostrarAba('aba-identificacao')">Identificação do Documento</button>
             <button class="btn-submenu" onclick="mostrarAba('aba-ti')">TI</button>
+            <button class="btn-submenu" onclick="mostrarAba('aba-modelo')">Modelo</button>
         </div>
-
+	
+		<!-- Rodapé fixo com usuário + sair -->
+		<div class="sidebar-user-footer d-flex align-items-center gap-2">
+		
+		    <!-- Avatar com inicial -->
+		    <div class="avatar-circle">
+		        <span th:text="${#strings.substring(usuarioLogado.nome, 0, 1)}"></span>
+		    </div>
+		
+		    <div class="flex-grow-1">
+		        <!-- Nome do usuário -->
+		        <span class="nome-usuario"
+		              th:text="${usuarioLogado.nome}">
+		            Usuário
+		        </span>
+		
+		        <!-- Botão sair -->
+		        <form th:action="@{/logout}" method="post" class="mt-1">
+		            <button class="btn btn-sm btn-logout w-100 text-start">
+		                Sair
+		            </button>
+		        </form>
+		    </div>
+		
+		</div>
     </aside>
 
     <!-- CONTEÚDO PRINCIPAL -->
@@ -72,13 +95,23 @@
             <div th:replace="~{fragment/ti :: ti}"></div>
         </div>
         
+        <!-- ABA: Modelo -->
+        <div id="aba-modelo" class="aba" style="display:none;">
+            <div th:replace="~{fragment/modelo :: modelo}"></div>
+        </div>
+        
         <!-- BOTÃO SALVAR FINAL -->
-    <div class="d-flex justify-content-end mt-4">
-        <button class="btn btn-primary btn-lg" onclick="salvarChecklist()">
-            Salvar Documento
-        </button>
-    </div>
+    	<!-- <div class="d-flex justify-content-end mt-4">
+        	<button id="btnSalvar" class="btn-salvar" onclick="salvarChecklist()">Salvar Documento</button>
 
+			<button id="btnCancelar" class="btn-cancelar ms-2" onclick="cancelarCriacao()">Cancelar</button>
+	
+    	</div> -->
+    	<!-- <div class="d-flex justify-content-end mt-4">
+        	<button id="btnCancelar" class="btn btn-danger btn-lg" onclick="cancelarCriacao()">Cancelar</button>
+        	
+    	</div> -->
+    	
     </main>
 </div>
 

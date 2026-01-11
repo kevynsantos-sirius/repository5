@@ -1,4 +1,4 @@
-package com.sirius.checklistfront.dto;
+package com.totaldocs.dto;
 
 import java.util.List;
 

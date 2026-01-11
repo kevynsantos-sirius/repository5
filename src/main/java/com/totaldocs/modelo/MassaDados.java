@@ -29,13 +29,7 @@ public class MassaDados {
 
     @Column(name = "TipoMIME", nullable = false, length = 40)
     private String tipoMIME;
-    
-    @Column(name = "ViaServico", nullable = false)
-    private boolean viaServic;
-    
-    @Column(name = "ViaTxt", nullable = false)
-    private boolean viaTxt;
-    
+        
     @Lob
     @Column(name = "ConteudoMassaDados", nullable = false)
     private byte[] conteudoMassaDados;
