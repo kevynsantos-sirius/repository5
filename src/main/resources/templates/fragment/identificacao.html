@@ -61,8 +61,11 @@
                         <label class="form-label">
                             Responsável <span class="text-danger">*</span>
                         </label>
-                        <span class="form-control">[[${usuarioLogado.nome}]]</span>
-                        <input type="hidden" id="responsavel" th:value="${usuarioLogado.id}" readonly="readonly">
+                        <!-- <span class="form-control">[[${usuarioLogado.nome}]]</span>
+                        <input type="hidden" id="responsavel" th:value="${usuarioLogado.id}" readonly="readonly"> -->
+                        <span class="form-control" id="responsavelNome"></span>
+						<input type="hidden" id="responsavel">
+                        
 
                         <!-- <input type="text" id="responsavel" class="form-control" th:value="${usuarioLogado.get().getNome}" > -->
                     </div>

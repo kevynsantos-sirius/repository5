@@ -56,8 +56,13 @@ public class ChecklistControleAPI {
 		return checklistServiceAPI.listarPaginadoDTO(pageable);
 	}
 
+	/*
+	 * @GetMapping("/{id}") public Checklist getDocumentoById(@PathVariable Integer
+	 * id) { return checklistServiceAPI.getDocumentoById(id); }
+	 */
+	
 	@GetMapping("/{id}")
-	public Checklist getDocumentoById(@PathVariable Integer id) {
-		return checklistServiceAPI.getDocumentoById(id);
+	public ChecklistDTO getDocumentoDTOById(@PathVariable Integer id) {
+		return checklistServiceAPI.getChecklistDTOById(id);
 	}
 }

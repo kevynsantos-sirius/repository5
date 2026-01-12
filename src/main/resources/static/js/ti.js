@@ -1,191 +1,278 @@
 /***************************************************
- * CONSTRUIR OBJETO TI PARA O BACKEND
+ * CONTROLE DE INICIALIZAÇÃO (ANTI DUPLICAÇÃO)
+ ***************************************************/
+window.tiEventsInicializados = false;
+
+/***************************************************
+ * INIT TI (executa apenas uma vez)
+ ***************************************************/
+document.addEventListener("DOMContentLoaded", () => {
+    initTiEvents();
+});
+
+/***************************************************
+ * Eventos iniciais TI
+ ***************************************************/
+function initTiEvents() {
+
+    if (window.tiEventsInicializados) return;
+    window.tiEventsInicializados = true;
+
+    const chkHasLayout = document.getElementById("hasLayout");
+    const layoutDiv    = document.getElementById("inputLayoutDiv");
+    const btnAddLayout = document.getElementById("btnAddLayout");
+
+    if (chkHasLayout) {
+        chkHasLayout.onchange = () => {
+            layoutDiv.style.display = chkHasLayout.checked ? "block" : "none";
+
+            if (!chkHasLayout.checked) {
+                limparLayoutsTela();
+            }
+        };
+    }
+
+    if (btnAddLayout) {
+        // ⚠️ onclick substitui handler anterior (não duplica)
+        btnAddLayout.onclick = () => window.criarLayoutCard();
+    }
+}
+
+/***************************************************
+ * Criar Layout Card
+ ***************************************************/
+window.criarLayoutCard = function () {
+
+    const layoutContainer = document.getElementById("inputsLayoutContainer");
+
+    const card = document.createElement("div");
+    card.className = "card p-4 mb-3 layout-card";
+
+    card.innerHTML = `
+        <div class="d-flex justify-content-end mb-2">
+            <button class="btn btn-sm btn-outline-danger"
+                type="button"
+                onclick="this.closest('.layout-card').remove()">
+                - Remover
+            </button>
+        </div>
+
+        <label>Arquivo Layout</label>
+        <input class="form-control fileLayout" type="file">
+
+        <label class="form-label mt-2">Observação</label>
+        <div class="quillLayout" style="height:120px;background:white;"></div>
+        <input type="hidden" class="obsLayoutHidden">
+
+        <hr>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Massas de Dados</h6>
+            <button class="btn btn-sm btn-secondary"
+                type="button"
+                onclick="addMassa(this)">
+                + Adicionar Massa
+            </button>
+        </div>
+
+        <div class="massasContainer mt-2"></div>
+    `;
+
+    layoutContainer.appendChild(card);
+
+    /* 🔥 CRIA O QUILL AGORA (SEM TIMEOUT) */
+    const quillLayoutDiv = card.querySelector(".quillLayout");
+    const quillLayout = new Quill(quillLayoutDiv, { theme: "snow" });
+
+    /* guarda a instância no próprio card */
+    card._quillLayout = quillLayout;
+
+    quillLayout.on("text-change", () => {
+        card.querySelector(".obsLayoutHidden").value =
+            quillLayout.root.innerHTML;
+    });
+
+    return card;
+};
+
+
+/***************************************************
+ * Adicionar Massa
+ ***************************************************/
+window.addMassa = function (btn) {
+
+    const layoutCard = btn.closest(".layout-card");
+    const container  = layoutCard.querySelector(".massasContainer");
+
+    const massa = document.createElement("div");
+    massa.className = "card p-2 mb-2 massa-card";
+
+    massa.innerHTML = `
+        <label>Arquivo da Massa</label>
+        <input class="form-control fileMassa" type="file">
+
+        <label class="form-label mt-2">Observação</label>
+        <div class="quillMassa" style="height:120px;background:white;"></div>
+        <input type="hidden" class="obsMassaHidden">
+
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-sm btn-outline-danger"
+                type="button"
+                onclick="this.closest('.massa-card').remove()">
+                - Remover
+            </button>
+        </div>
+    `;
+
+    container.appendChild(massa);
+
+    const quillMassaDiv = massa.querySelector(".quillMassa");
+    const quillMassa = new Quill(quillMassaDiv, { theme: "snow" });
+
+    massa._quillMassa = quillMassa;
+
+    quillMassa.on("text-change", () => {
+        massa.querySelector(".obsMassaHidden").value =
+            quillMassa.root.innerHTML;
+    });
+};
+
+
+/***************************************************
+ * Limpar Layouts
+ ***************************************************/
+window.limparLayoutsTela = function () {
+    const container = document.getElementById("inputsLayoutContainer");
+    if (container) container.innerHTML = "";
+};
+
+/***************************************************
+ * Preencher TI (flags)
+ ***************************************************/
+window.preencherTI = function (dto) {
+
+    const hasLayout = document.getElementById("hasLayout");
+    const layoutDiv = document.getElementById("inputLayoutDiv");
+    const envioServico = document.getElementById("envioServico");
+    const envioTxt     = document.getElementById("envioTxt");
+
+    if (hasLayout) hasLayout.checked = !!dto.temLayout;
+    if (layoutDiv) layoutDiv.style.display = dto.temLayout ? "block" : "none";
+    if (envioServico) envioServico.checked = !!dto.viaServico;
+    if (envioTxt) envioTxt.checked = !!dto.viaTxt;
+};
+
+window.carregarLayouts = function (layouts) {
+
+    if (!layouts || layouts.length === 0) return;
+
+    layouts.forEach(layout => {
+
+        const layoutCard = window.criarLayoutCard();
+
+        /* OBS LAYOUT */
+        if (layoutCard._quillLayout && layout.observacao) {
+            layoutCard._quillLayout.root.innerHTML = layout.observacao;
+            layoutCard.querySelector(".obsLayoutHidden").value =
+                layout.observacao;
+        }
+
+        /* MASSAS */
+        if (layout.massasDados) {
+            layout.massasDados.forEach(massa => {
+
+                const fakeBtn = { closest: () => layoutCard };
+                window.addMassa(fakeBtn);
+
+                const ultimaMassa =
+                    layoutCard.querySelector(".massa-card:last-child");
+
+                if (ultimaMassa && ultimaMassa._quillMassa && massa.observacao) {
+                    ultimaMassa._quillMassa.root.innerHTML = massa.observacao;
+                    ultimaMassa.querySelector(".obsMassaHidden").value =
+                        massa.observacao;
+                }
+            });
+        }
+    });
+};
+
+
+/***************************************************
+ * Limpar TI COMPLETO
+ ***************************************************/
+window.limparTI = function () {
+
+    const hasLayout = document.getElementById("hasLayout");
+    const layoutDiv = document.getElementById("inputLayoutDiv");
+    const envioServico = document.getElementById("envioServico");
+    const envioTxt     = document.getElementById("envioTxt");
+
+    if (hasLayout) hasLayout.checked = false;
+    if (layoutDiv) layoutDiv.style.display = "none";
+    if (envioServico) envioServico.checked = false;
+    if (envioTxt) envioTxt.checked = false;
+
+    limparLayoutsTela();
+};
+
+/***************************************************
+ * BUILD TI (JSON + arquivos para backend)
  ***************************************************/
 window.buildTI = function () {
 
-    const ti = {
-        temLayout:  document.getElementById("hasLayout").checked,
-        viaServico: document.getElementById("envioServico")?.checked || false,
-		viaTxt:document.getElementById("envioTxt")?.checked || false,
-        layouts: [],
-        _filesLayout: [],
-        _filesMassas: []
-    };
+    const hasLayout    = document.getElementById("hasLayout");
+    const envioServico = document.getElementById("envioServico");
+    const envioTxt     = document.getElementById("envioTxt");
 
-    // ============================
-    // 1) LAYOUTS
-    // ============================
+    const layouts = [];
+    const filesLayout = [];
+    const filesMassas = [];
 
-    const layoutCards = document.querySelectorAll(".layout-card");
+    document.querySelectorAll(".layout-card").forEach(layoutCard => {
 
-    layoutCards.forEach(card => {
-
-        const layoutObj = {
-            nomeLayout: card.querySelector(".nomeLayout")?.value || null,
-            observacao: card.querySelector(".obsLayoutHidden")?.value || "",
-            massasDados: []
-        };
-
-        // arquivos do layout
-        const fileLayoutInput = card.querySelector(".fileLayout");
-        if (fileLayoutInput && fileLayoutInput.files.length > 0) {
-            Array.from(fileLayoutInput.files).forEach(f => ti._filesLayout.push(f));
+        const layoutFileInput = layoutCard.querySelector(".fileLayout");
+        if (layoutFileInput && layoutFileInput.files.length > 0) {
+            filesLayout.push(layoutFileInput.files[0]);
         }
 
-        // ============================
-        // 2) MASSAS DENTRO DO LAYOUT
-        // ============================
-        const massaCards = card.querySelectorAll(".massa-card");
+        const obsLayout =
+            layoutCard.querySelector(".obsLayoutHidden")?.value || "";
 
-        massaCards.forEach(mc => {
+        const massas = [];
 
-            layoutObj.massasDados.push({
-                observacao: mc.querySelector(".obsMassaHidden")?.value || ""
-            });
+        layoutCard.querySelectorAll(".massa-card").forEach(massaCard => {
 
-            const fileMassaInput = mc.querySelector(".fileMassa");
-
-            if (fileMassaInput && fileMassaInput.files.length > 0) {
-                Array.from(fileMassaInput.files).forEach(f => ti._filesMassas.push(f));
+            const massaFileInput = massaCard.querySelector(".fileMassa");
+            if (massaFileInput && massaFileInput.files.length > 0) {
+                filesMassas.push(massaFileInput.files[0]);
             }
+
+            const obsMassa =
+                massaCard.querySelector(".obsMassaHidden")?.value || "";
+
+            massas.push({
+                observacao: obsMassa
+            });
         });
 
-        ti.layouts.push(layoutObj);
+        layouts.push({
+            observacao: obsLayout,
+            massasDados: massas
+        });
     });
 
-    return ti;
-};
+    return {
+        temLayout: hasLayout?.checked || false,
+        viaServico: envioServico?.checked || false,
+        viaTxt: envioTxt?.checked || false,
+        layouts: layouts,
 
-
-
-/***************************************************
- * INICIALIZAR EVENTOS DO FORMULÁRIO TI
- ***************************************************/
-window.initTiEvents = function () {
-
-    console.log("⚙ TI carregado");
-
-    const hasLayout       = document.getElementById("hasLayout");
-    const layoutDiv       = document.getElementById("inputLayoutDiv");
-    const layoutContainer = document.getElementById("inputsLayoutContainer");
-    const btnAddLayout    = document.getElementById("btnAddLayout");
-
-    if (!hasLayout || !layoutContainer) return;
-
-    hasLayout.onchange = () => {
-        layoutDiv.style.display = hasLayout.checked ? "block" : "none";
-    };
-
-    btnAddLayout.onclick = () => criarLayoutCard();
-
-    /***************************************************
-     * Criar um layout
-     ***************************************************/
-    function criarLayoutCard() {
-
-        const card = document.createElement("div");
-        card.className = "card p-4 mb-3 layout-card";
-
-        card.innerHTML = `
-            <div class="d-flex justify-content-end align-items-start mb-0">
-                <button class="btn btn-sm btn-outline-danger" type="button"
-                    onclick="this.closest('.layout-card').remove()">
-                    - Remover
-                </button>
-            </div>
-
-            <label>Arquivo Layout</label>
-            <input class="form-control fileLayout" type="file" >
-
-            <label class="form-label mt-2">Observação</label>
-            <div class="quillLayout" style="height:120px;background:white;"></div>
-            <input type="hidden" class="obsLayoutHidden">
-
-            <hr>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Massas de Dados</h6>
-                <button class="btn btn-sm btn-secondary" type="button" onclick="addMassa(this)">
-                    + Adicionar Massa
-                </button>
-            </div>
-
-            <div class="massasContainer mt-2"></div>
-        `;
-
-        layoutContainer.appendChild(card);
-
-        // Inicializar Quill
-        setTimeout(() => {
-            const quill = new Quill(card.querySelector(".quillLayout"), { theme: "snow" });
-            quill.on("text-change", () => {
-                card.querySelector(".obsLayoutHidden").value = quill.root.innerHTML;
-            });
-        }, 0);
-    }
-
-    /***************************************************
-     * Criar massa
-     ***************************************************/
-    window.addMassa = function (btn) {
-
-        const layoutCard = btn.closest(".layout-card");
-        const container = layoutCard.querySelector(".massasContainer");
-
-        const massaCard = document.createElement("div");
-        massaCard.className = "card p-2 mb-2 massa-card";
-
-        massaCard.innerHTML = `
-            <label>Arquivo da Massa</label>
-            <input class="form-control fileMassa" type="file">
-
-            <label class="form-label mt-2">Observação</label>
-            <div class="quillMassa" style="height:120px;background:white;"></div>
-            <input type="hidden" class="obsMassaHidden">
-
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-sm btn-outline-danger" type="button"
-                    onclick="this.closest('.massa-card').remove()">
-                    - Remover
-                </button>
-            </div>
-        `;
-
-        container.appendChild(massaCard);
-
-        // Inicializar Quill
-        setTimeout(() => {
-            const quill = new Quill(massaCard.querySelector(".quillMassa"), { theme: "snow" });
-            quill.on("text-change", () => {
-                massaCard.querySelector(".obsMassaHidden").value = quill.root.innerHTML;
-            });
-        }, 10);
+        // campos internos (removidos antes do envio)
+        _filesLayout: filesLayout,
+        _filesMassas: filesMassas
     };
 };
-
-/***************************************************
- * Reset total do formulário TI
- ***************************************************/
-function limparTI() {
-
-    console.log("🔄 Limpando TI...");
-
-    const hasLayout       = document.getElementById("hasLayout");
-    const envioServico    = document.getElementById("envioServico");
-    const envioTxt        = document.getElementById("envioTxt");
-    const layoutDiv       = document.getElementById("inputLayoutDiv");
-    const layoutContainer = document.getElementById("inputsLayoutContainer");
-
-    if (!hasLayout) return;
-
-    hasLayout.checked = false;
-    envioServico.checked = false;
-    envioTxt.checked = false;
-
-    layoutContainer.innerHTML = "";
-    layoutDiv.style.display = "none";
-}
-
 // Validação da aba TI (layouts)
 window.validarTi = function () {
     const erros = [];

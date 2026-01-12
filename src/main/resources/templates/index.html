@@ -25,7 +25,7 @@
 		</div>
 
         <!-- BOTÃO NOVO DOCUMENTO -->
-        <button id="btnNovo" class="btn btn-novo active" onclick="toggleMenu()">Novo documento</button>
+        <button id="btnNovo" class="btn btn-novo active" onclick="NovoDocumento()">Novo documento</button>
         
         <!-- SUBMENU DAS ABAS -->
         <div id="submenu" class="submenu mt-3" style="display: none;">
@@ -100,24 +100,38 @@
             <div th:replace="~{fragment/modelo :: modelo}"></div>
         </div>
         
-        <!-- BOTÃO SALVAR FINAL -->
-    	<!-- <div class="d-flex justify-content-end mt-4">
-        	<button id="btnSalvar" class="btn-salvar" onclick="salvarChecklist()">Salvar Documento</button>
-
-			<button id="btnCancelar" class="btn-cancelar ms-2" onclick="cancelarCriacao()">Cancelar</button>
-	
-    	</div> -->
-    	<!-- <div class="d-flex justify-content-end mt-4">
-        	<button id="btnCancelar" class="btn btn-danger btn-lg" onclick="cancelarCriacao()">Cancelar</button>
-        	
-    	</div> -->
+        <div id="acoesChecklist" class="d-flex justify-content-end gap-2 mt-3">
+		    <!-- Cancelar -->
+		    <button id="btnCancelar"
+		            type="button"
+		            class="btn-acoes btn-cancelar d-none"
+		            onclick="cancelarCriacaoChecklist()">
+		        Cancelar
+		    </button>
+		
+		    <!-- Salvar -->
+		    <button id="btnSalvar"
+		            type="button"
+		            class="btn-acoes btn-salvar d-none"
+		            onclick="salvarChecklist()">
+		        Salvar Documento
+		    </button>
+		</div>
     	
     </main>
 </div>
 
+<script>
+    window.USUARIO_LOGADO_ID   = '[[${usuarioLogado.id}]]';
+    window.USUARIO_LOGADO_NOME = '[[${usuarioLogado.nome}]]';
+</script>
+
+
 <script th:inline="javascript">
     window.API_BASE_URL = /*[[${apiUrl}]]*/ "";
 </script>
+
+
 <script src="/js/identificacao.js"></script>
 <script src="/js/ti.js"></script>
 <script src="/js/app.js"></script>

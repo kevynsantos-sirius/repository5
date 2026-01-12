@@ -27,16 +27,14 @@ import com.totaldocs.service.UsuarioService;
 public class ChecklistController {
 	@Value("${backend.api.base-url}")
 	private String API_URL;
-	
 	@Autowired
     private ChecklistServiceAPI checklistServiceAPI;
-
 	@Autowired
 	private RamoService ramoService;
-	
-	@Autowired UsuarioService usuarioService;
-	
-	@Autowired LogoCapaService logoCapaService;
+	@Autowired 
+	private UsuarioService usuarioService;
+	@Autowired 
+	private LogoCapaService logoCapaService;
 	
     @GetMapping({"/", "/index"})
     public String index(@RequestParam(name = "page", defaultValue = "0") int page, 

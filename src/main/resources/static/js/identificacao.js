@@ -6,11 +6,11 @@ window.limparIdentificacao = function() {
 	const form = document.getElementById("formIdentificacao");
 
 	if (!form) {
-		console.warn("⚠ Formulário Identificação não está no DOM.");
+		console.warn("Formulário Identificação não está no DOM.");
 		return;
 	}
 
-	console.log("🔄 Limpando Identificação...");
+	console.log("Limpando Identificação...");
 
 	// Limpa todos os campos automaticamente
 	form.reset();
@@ -80,4 +80,32 @@ window.validarIdentificacao = function() {
 	}
 
 	return erros;
+};
+
+window.preencherIdentificacao = function (dto) {
+	window.modoEdicao = true;
+	
+    console.log("Preenchendo Identificação com DTO:", dto);
+
+    document.getElementById("nomeDocumento").value = dto.nomeDocumento || "";
+    document.getElementById("centroCusto").value  = dto.centroCusto || "";
+    document.getElementById("ramo").value          = dto.idRamo || "";
+    document.getElementById("statusDocumento").value = dto.status || "";
+
+    document.getElementById("isIcatu").checked  = !!dto.icatu;
+    document.getElementById("isCaixa").checked  = !!dto.caixa;
+    document.getElementById("isRG").checked     = !!dto.rioGrande;
+
+    const spanNome = document.getElementById("responsavelNome");
+    const inputId  = document.getElementById("responsavel");
+
+    if (window.modoEdicao) {
+        // ✏️ edição → dados do banco
+        if (spanNome) spanNome.textContent = dto.usuario?.nomeUsuario || "";
+        if (inputId)  inputId.value = dto.idUsuario || "";
+    } else {
+        // 🆕 criação → usuário logado
+        if (spanNome) spanNome.textContent = window.USUARIO_LOGADO_NOME;
+        if (inputId)  inputId.value = window.USUARIO_LOGADO_ID;
+    }
 };
