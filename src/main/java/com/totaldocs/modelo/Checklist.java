@@ -50,6 +50,9 @@ public class Checklist {
 
     @Column(name = "Status", nullable = false)
     private Integer status;
+    
+    @Column(name = "IdDemanda", nullable = false)
+    private Integer idDemanda;
 
     // --- RELACIONAMENTOS ONE TO MANY ---
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)

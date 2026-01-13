@@ -123,8 +123,6 @@ public class ChecklistServiceAPI {
 							massa.setNomeMassaDados(fm.getOriginalFilename());
 							massa.setTipoMIME(fm.getContentType());
 							massa.setConteudoMassaDados(fm.getBytes());
-//                            massa.setViaServico(layoutDTO.isViaServico());
-//                            massa.setViaTxt(layoutDTO.isViaTxt());
 						}
 
 						massa = arquivoRepository.save(massa);
@@ -157,7 +155,7 @@ public class ChecklistServiceAPI {
 			dto.setIdUsuario(c.getUsuario().getId());
 
 			UsuarioDTO usuarioDTO = new UsuarioDTO();
-			Optional<Usuario> usuarioEntity = usuarioService.getUsuario(1);
+			Optional<Usuario> usuarioEntity = usuarioService.getUsuario(dto.getIdUsuario());
 
 			if (usuarioEntity.isPresent()) {
 				Usuario user = usuarioEntity.get();
@@ -240,6 +238,7 @@ public class ChecklistServiceAPI {
 	            }
 
 	            LayoutDTO layoutDTO = new LayoutDTO();
+	            layoutDTO.setId(layout.getId());
 	            layoutDTO.setNomeLayout(layout.getNomeLayout());
 	            layoutDTO.setObservacao(layout.getObservacao());
 
@@ -247,16 +246,9 @@ public class ChecklistServiceAPI {
 	            if (layout.getMassasDados() != null) {
 	                for (MassaDados massa : layout.getMassasDados()) {
 	                    MassaDTO massaDTO = new MassaDTO();
+	                    massaDTO.setId(massa.getId());
 	                    massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
 	                    massaDTO.setObservacao(massa.getObservacao());
-
-	                    // Se quiser ainda usar viaServico/viaTxt em MassaDTO,
-	                    // pode espelhar o valor do Layout:
-						/*
-						 * massaDTO.setViaServico(layout.isViaServico());
-						 * massaDTO.setViaTxt(layout.isViaTxt());
-						 */
-
 	                    massaDtos.add(massaDTO);
 	                }
 	            }

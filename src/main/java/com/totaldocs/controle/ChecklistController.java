@@ -50,7 +50,7 @@ public class ChecklistController {
         
         List<LogoCapa> listaLogoCapas = logoCapaService.ListarTodos();
         
-        int size = 20; // ou 20, como preferir
+        int size = 10; // ou 20, como preferir
 
         Pageable pageable = PageRequest.of(page, size);
         Page<ChecklistDTO> pagina = checklistServiceAPI.listarPaginadoDTO(pageable);

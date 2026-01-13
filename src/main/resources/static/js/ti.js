@@ -3,53 +3,57 @@
  ***************************************************/
 window.tiEventsInicializados = false;
 
-/***************************************************
+/**************************************************
  * INIT TI (executa apenas uma vez)
- ***************************************************/
+ **************************************************/
 document.addEventListener("DOMContentLoaded", () => {
-    initTiEvents();
+	initTiEvents();
 });
 
-/***************************************************
+/**************************************************
  * Eventos iniciais TI
- ***************************************************/
+ **************************************************/
 function initTiEvents() {
 
-    if (window.tiEventsInicializados) return;
-    window.tiEventsInicializados = true;
+	if (window.tiEventsInicializados) return;
+	window.tiEventsInicializados = true;
 
-    const chkHasLayout = document.getElementById("hasLayout");
-    const layoutDiv    = document.getElementById("inputLayoutDiv");
-    const btnAddLayout = document.getElementById("btnAddLayout");
+	const chkHasLayout = document.getElementById("hasLayout");
+	const layoutDiv = document.getElementById("inputLayoutDiv");
+	const btnAddLayout = document.getElementById("btnAddLayout");
 
-    if (chkHasLayout) {
-        chkHasLayout.onchange = () => {
-            layoutDiv.style.display = chkHasLayout.checked ? "block" : "none";
+	if (chkHasLayout) {
+		chkHasLayout.onchange = () => {
+			layoutDiv.style.display = chkHasLayout.checked ? "block" : "none";
 
-            if (!chkHasLayout.checked) {
-                limparLayoutsTela();
-            }
-        };
-    }
+			if (!chkHasLayout.checked) {
+				limparLayoutsTela();
+			}
+		};
+	}
 
-    if (btnAddLayout) {
-        // ⚠️ onclick substitui handler anterior (não duplica)
-        btnAddLayout.onclick = () => window.criarLayoutCard();
-    }
+	if (btnAddLayout) {
+		// conclick substitui handler anterior (não duplica)
+		btnAddLayout.onclick = () => window.criarLayoutCard();
+	}
 }
 
-/***************************************************
+/**************************************************
  * Criar Layout Card
- ***************************************************/
-window.criarLayoutCard = function () {
+ **************************************************/
+window.criarLayoutCard = function() {
 
-    const layoutContainer = document.getElementById("inputsLayoutContainer");
+	const layoutContainer = document.getElementById("inputsLayoutContainer");
 
-    const card = document.createElement("div");
-    card.className = "card p-4 mb-3 layout-card";
+	const card = document.createElement("div");
+	card.className = "card p-4 mb-3 layout-card";
 
-    card.innerHTML = `
-        <div class="d-flex justify-content-end mb-2">
+	card.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="nomeArquivoLayout text-muted">
+                <i class="bi bi-file-earmark-text me-1"></i>
+            </span>
+
             <button class="btn btn-sm btn-outline-danger"
                 type="button"
                 onclick="this.closest('.layout-card').remove()">
@@ -78,246 +82,338 @@ window.criarLayoutCard = function () {
         <div class="massasContainer mt-2"></div>
     `;
 
-    layoutContainer.appendChild(card);
+	layoutContainer.appendChild(card);
 
-    /* 🔥 CRIA O QUILL AGORA (SEM TIMEOUT) */
-    const quillLayoutDiv = card.querySelector(".quillLayout");
-    const quillLayout = new Quill(quillLayoutDiv, { theme: "snow" });
+	/* Quill */
+	const quill = new Quill(card.querySelector(".quillLayout"), { theme: "snow" });
+	card._quillLayout = quill;
 
-    /* guarda a instância no próprio card */
-    card._quillLayout = quillLayout;
+	quill.on("text-change", () => {
+		card.querySelector(".obsLayoutHidden").value = quill.root.innerHTML;
+	});
 
-    quillLayout.on("text-change", () => {
-        card.querySelector(".obsLayoutHidden").value =
-            quillLayout.root.innerHTML;
-    });
+	/*Input file*/ 
+	const fileInput = card.querySelector(".fileLayout");
+	const nomeSpan = card.querySelector(".nomeArquivoLayout");
 
-    return card;
+	fileInput.addEventListener("change", () => {
+		if (fileInput.files.length > 0) {
+			card._arquivoAlterado = true;
+
+			nomeSpan.textContent =
+				`Novo arquivo: ${fileInput.files[0].name}`;
+
+			nomeSpan.classList.remove("text-primary");
+			nomeSpan.style.cursor = "default";
+			nomeSpan.onclick = null; // 🔒 bloqueia download		
+		}
+	});
+
+	return card;
 };
 
-
-/***************************************************
+/**************************************************
  * Adicionar Massa
- ***************************************************/
-window.addMassa = function (btn) {
+ **************************************************/
+window.addMassa = function(btn) {
 
-    const layoutCard = btn.closest(".layout-card");
-    const container  = layoutCard.querySelector(".massasContainer");
+	const layoutCard = btn.closest(".layout-card");
+	const container = layoutCard.querySelector(".massasContainer");
 
-    const massa = document.createElement("div");
-    massa.className = "card p-2 mb-2 massa-card";
+	const massa = document.createElement("div");
+	massa.className = "card p-2 mb-2 massa-card";
 
-    massa.innerHTML = `
-        <label>Arquivo da Massa</label>
-        <input class="form-control fileMassa" type="file">
+	massa.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="nomeArquivoMassa text-muted"></span>
 
-        <label class="form-label mt-2">Observação</label>
-        <div class="quillMassa" style="height:120px;background:white;"></div>
-        <input type="hidden" class="obsMassaHidden">
-
-        <div class="d-flex justify-content-end">
             <button class="btn btn-sm btn-outline-danger"
                 type="button"
                 onclick="this.closest('.massa-card').remove()">
                 - Remover
             </button>
         </div>
+
+        <label>Arquivo da Massa</label>
+        <input class="form-control fileMassa" type="file">
+
+        <label class="form-label mt-2">Observação</label>
+        <div class="quillMassa" style="height:120px;background:white;"></div>
+        <input type="hidden" class="obsMassaHidden">
     `;
 
-    container.appendChild(massa);
+	container.appendChild(massa);
 
-    const quillMassaDiv = massa.querySelector(".quillMassa");
-    const quillMassa = new Quill(quillMassaDiv, { theme: "snow" });
+	/* ===== QUILL ===== */
+	const quillDiv = massa.querySelector(".quillMassa");
+	const quill = new Quill(quillDiv, { theme: "snow" });
+	massa._quillMassa = quill;
 
-    massa._quillMassa = quillMassa;
+	quill.on("text-change", () => {
+		massa.querySelector(".obsMassaHidden").value =
+			quill.root.innerHTML;
+	});
 
-    quillMassa.on("text-change", () => {
-        massa.querySelector(".obsMassaHidden").value =
-            quillMassa.root.innerHTML;
-    });
+	 /*===== INPUT FILE CHANGE ===== */
+	const fileInput = massa.querySelector(".fileMassa");
+	const nomeSpan = massa.querySelector(".nomeArquivoMassa");
+
+	fileInput.addEventListener("change", () => {
+		if (fileInput.files.length > 0) {
+			nomeSpan.textContent = `Novo arquivo: ${fileInput.files[0].name}`;
+			nomeSpan.classList.remove("text-primary");
+			nomeSpan.onclick = null;
+		}
+	});
+
+	return massa;
 };
 
-
-/***************************************************
+/**************************************************
  * Limpar Layouts
- ***************************************************/
-window.limparLayoutsTela = function () {
-    const container = document.getElementById("inputsLayoutContainer");
-    if (container) container.innerHTML = "";
+ **************************************************/
+window.limparLayoutsTela = function() {
+	const container = document.getElementById("inputsLayoutContainer");
+	if (container) container.innerHTML = "";
 };
 
-/***************************************************
+/**************************************************
  * Preencher TI (flags)
- ***************************************************/
-window.preencherTI = function (dto) {
+ **************************************************/
+window.preencherTI = function(dto) {
 
-    const hasLayout = document.getElementById("hasLayout");
-    const layoutDiv = document.getElementById("inputLayoutDiv");
-    const envioServico = document.getElementById("envioServico");
-    const envioTxt     = document.getElementById("envioTxt");
+	const hasLayout = document.getElementById("hasLayout");
+	const layoutDiv = document.getElementById("inputLayoutDiv");
+	const envioServico = document.getElementById("envioServico");
+	const envioTxt = document.getElementById("envioTxt");
 
-    if (hasLayout) hasLayout.checked = !!dto.temLayout;
-    if (layoutDiv) layoutDiv.style.display = dto.temLayout ? "block" : "none";
-    if (envioServico) envioServico.checked = !!dto.viaServico;
-    if (envioTxt) envioTxt.checked = !!dto.viaTxt;
+	const possuiLayouts = dto.layouts && dto.layouts.length > 0;
+
+	// força layout se veio do banco
+	if (hasLayout) {
+		hasLayout.checked = !!dto.temLayout || possuiLayouts;
+	}
+
+	if (layoutDiv) {
+		layoutDiv.style.display =
+			(dto.temLayout || possuiLayouts) ? "block" : "none";
+	}
+
+	if (envioServico) envioServico.checked = !!dto.viaServico;
+	if (envioTxt) envioTxt.checked = !!dto.viaTxt;
 };
 
-window.carregarLayouts = function (layouts) {
+window.carregarLayouts = function(layouts) {
 
-    if (!layouts || layouts.length === 0) return;
+	if (!layouts || layouts.length === 0) return;
 
-    layouts.forEach(layout => {
+	layouts.forEach(layout => {
 
-        const layoutCard = window.criarLayoutCard();
+		const layoutCard = window.criarLayoutCard();
 
-        /* OBS LAYOUT */
-        if (layoutCard._quillLayout && layout.observacao) {
-            layoutCard._quillLayout.root.innerHTML = layout.observacao;
-            layoutCard.querySelector(".obsLayoutHidden").value =
-                layout.observacao;
-        }
+		 /*=================================================
+		 * NOME DO ARQUIVO — LINK SÓ NA EDIÇÃO
+		 * ================================================= */
+		const nomeSpan = layoutCard.querySelector(".nomeArquivoLayout");
 
-        /* MASSAS */
-        if (layout.massasDados) {
-            layout.massasDados.forEach(massa => {
+		if (nomeSpan && layout.nomeLayout && window.modoEdicao && layout.id) {
 
-                const fakeBtn = { closest: () => layoutCard };
-                window.addMassa(fakeBtn);
+			// cria o link
+			const link = document.createElement("a");
+			link.href = `${API}layouts/${layout.id}/download`;
+			link.className = "nomeArquivoLayout text-primary text-decoration-none";
+			link.style.cursor = "pointer";
 
-                const ultimaMassa =
-                    layoutCard.querySelector(".massa-card:last-child");
+			link.innerHTML =
+				`<i class="bi bi-file-earmark-text me-1"></i> ${layout.nomeLayout}`;
 
-                if (ultimaMassa && ultimaMassa._quillMassa && massa.observacao) {
-                    ultimaMassa._quillMassa.root.innerHTML = massa.observacao;
-                    ultimaMassa.querySelector(".obsMassaHidden").value =
-                        massa.observacao;
-                }
-            });
-        }
-    });
+			// substituição segura (remove span e adiciona link)
+			const parent = nomeSpan.parentNode;
+			parent.insertBefore(link, nomeSpan);
+			parent.removeChild(nomeSpan);
+		}
+		else if (nomeSpan && layout.nomeLayout) {
+			// modo novo → apenas texto
+			nomeSpan.innerHTML =
+				`<i class="bi bi-file-earmark-text me-1"></i> ${layout.nomeLayout}`;
+		}
+
+		if (layoutCard._quillLayout && layout.observacao) {
+			layoutCard._quillLayout.root.innerHTML = layout.observacao;
+			layoutCard.querySelector(".obsLayoutHidden").value =
+				layout.observacao;
+		}
+
+		if (layout.massasDados && layout.massasDados.length > 0) {
+
+			layout.massasDados.forEach(massa => {
+
+				const fakeBtn = { closest: () => layoutCard };
+				const massaCard = window.addMassa(fakeBtn);
+
+				const nomeSpan = massaCard.querySelector(".nomeArquivoMassa");
+
+				if (nomeSpan && massa.nomeMassaDados) {
+
+					// texto base (sempre)
+					nomeSpan.innerHTML =
+						`<i class="bi bi-file-earmark-text me-1"></i> ${massa.nomeMassaDados}`;
+
+					// 👉 SOMENTE NA EDIÇÃO cria LINK REAL
+					if (
+						window.modoEdicao &&
+						massa.id &&
+						!massaCard._arquivoAlterado
+					) {
+						const link = document.createElement("a");
+						link.href = `${API}massas/${massa.id}/download`;
+						link.className =
+							"nomeArquivoMassa text-primary text-decoration-none";
+						link.style.cursor = "pointer";
+
+						link.innerHTML =
+							`<i class="bi bi-file-earmark-text me-1"></i> ${massa.nomeMassaDados}`;
+
+						// substitui o span pelo link
+						const parent = nomeSpan.parentNode;
+						parent.insertBefore(link, nomeSpan);
+						parent.removeChild(nomeSpan);
+					}
+				}
+
+				 /*===== OBSERVAÇÃO ===== */
+				if (massaCard._quillMassa && massa.observacao) {
+					massaCard._quillMassa.root.innerHTML = massa.observacao;
+					massaCard.querySelector(".obsMassaHidden").value =
+						massa.observacao;
+				}
+			});
+		}
+	});
 };
 
 
-/***************************************************
+/**************************************************
  * Limpar TI COMPLETO
- ***************************************************/
-window.limparTI = function () {
+ **************************************************/
+window.limparTI = function() {
 
-    const hasLayout = document.getElementById("hasLayout");
-    const layoutDiv = document.getElementById("inputLayoutDiv");
-    const envioServico = document.getElementById("envioServico");
-    const envioTxt     = document.getElementById("envioTxt");
+	const hasLayout = document.getElementById("hasLayout");
+	const layoutDiv = document.getElementById("inputLayoutDiv");
+	const envioServico = document.getElementById("envioServico");
+	const envioTxt = document.getElementById("envioTxt");
 
-    if (hasLayout) hasLayout.checked = false;
-    if (layoutDiv) layoutDiv.style.display = "none";
-    if (envioServico) envioServico.checked = false;
-    if (envioTxt) envioTxt.checked = false;
+	if (hasLayout) hasLayout.checked = false;
+	if (layoutDiv) layoutDiv.style.display = "none";
+	if (envioServico) envioServico.checked = false;
+	if (envioTxt) envioTxt.checked = false;
 
-    limparLayoutsTela();
+	limparLayoutsTela();
 };
 
-/***************************************************
+/**************************************************
  * BUILD TI (JSON + arquivos para backend)
- ***************************************************/
-window.buildTI = function () {
+ **************************************************/
+window.buildTI = function() {
 
-    const hasLayout    = document.getElementById("hasLayout");
-    const envioServico = document.getElementById("envioServico");
-    const envioTxt     = document.getElementById("envioTxt");
+	const hasLayout = document.getElementById("hasLayout");
+	const envioServico = document.getElementById("envioServico");
+	const envioTxt = document.getElementById("envioTxt");
 
-    const layouts = [];
-    const filesLayout = [];
-    const filesMassas = [];
+	const layouts = [];
+	const filesLayout = [];
+	const filesMassas = [];
 
-    document.querySelectorAll(".layout-card").forEach(layoutCard => {
+	document.querySelectorAll(".layout-card").forEach(layoutCard => {
 
-        const layoutFileInput = layoutCard.querySelector(".fileLayout");
-        if (layoutFileInput && layoutFileInput.files.length > 0) {
-            filesLayout.push(layoutFileInput.files[0]);
-        }
+		const layoutFileInput = layoutCard.querySelector(".fileLayout");
+		if (layoutFileInput && layoutFileInput.files.length > 0) {
+			filesLayout.push(layoutFileInput.files[0]);
+		}
 
-        const obsLayout =
-            layoutCard.querySelector(".obsLayoutHidden")?.value || "";
+		const obsLayout =
+			layoutCard.querySelector(".obsLayoutHidden")?.value || "";
 
-        const massas = [];
+		const massas = [];
 
-        layoutCard.querySelectorAll(".massa-card").forEach(massaCard => {
+		layoutCard.querySelectorAll(".massa-card").forEach(massaCard => {
 
-            const massaFileInput = massaCard.querySelector(".fileMassa");
-            if (massaFileInput && massaFileInput.files.length > 0) {
-                filesMassas.push(massaFileInput.files[0]);
-            }
+			const massaFileInput = massaCard.querySelector(".fileMassa");
+			if (massaFileInput && massaFileInput.files.length > 0) {
+				filesMassas.push(massaFileInput.files[0]);
+			}
 
-            const obsMassa =
-                massaCard.querySelector(".obsMassaHidden")?.value || "";
+			const obsMassa =
+				massaCard.querySelector(".obsMassaHidden")?.value || "";
 
-            massas.push({
-                observacao: obsMassa
-            });
-        });
+			massas.push({
+				observacao: obsMassa
+			});
+		});
 
-        layouts.push({
-            observacao: obsLayout,
-            massasDados: massas
-        });
-    });
+		layouts.push({
+			observacao: obsLayout,
+			massasDados: massas
+		});
+	});
 
-    return {
-        temLayout: hasLayout?.checked || false,
-        viaServico: envioServico?.checked || false,
-        viaTxt: envioTxt?.checked || false,
-        layouts: layouts,
+	return {
+		temLayout: hasLayout?.checked || false,
+		viaServico: envioServico?.checked || false,
+		viaTxt: envioTxt?.checked || false,
+		layouts: layouts,
 
-        // campos internos (removidos antes do envio)
-        _filesLayout: filesLayout,
-        _filesMassas: filesMassas
-    };
+		// campos internos (removidos antes do envio)
+		_filesLayout: filesLayout,
+		_filesMassas: filesMassas
+	};
 };
+
 // Validação da aba TI (layouts)
-window.validarTi = function () {
-    const erros = [];
+window.validarTi = function() {
+	const erros = [];
 
-    const hasLayout = document.getElementById("hasLayout")?.checked;
+	const hasLayout = document.getElementById("hasLayout")?.checked;
 
-    // Se não tem layout marcado, ignoramos validação dessa parte
-    if (!hasLayout) {
-        return erros;
-    }
+	// Se não tem layout marcado, ignoramos validação dessa parte
+	if (!hasLayout) {
+		return erros;
+	}
 
-    const layoutCards = document.querySelectorAll(".layout-card");
+	const layoutCards = document.querySelectorAll(".layout-card");
 
-    // Pelo menos um layout se checkbox marcado
-    if (layoutCards.length === 0) {
-        erros.push("• Marcou 'Tem layout?', mas não adicionou nenhum layout.");
-        return erros;
-    }
+	// Pelo menos um layout se checkbox marcado
+	if (layoutCards.length === 0) {
+		erros.push("• Marcou 'Tem layout?', mas não adicionou nenhum layout.");
+		return erros;
+	}
 
-    // Validação por layout
-    layoutCards.forEach((card, layoutIndex) => {
-        const numLayout = layoutIndex + 1;
+	// Validação por layout
+	layoutCards.forEach((card, layoutIndex) => {
+		const numLayout = layoutIndex + 1;
 
-        // arquivo do layout obrigatório
-        const fileLayout = card.querySelector(".fileLayout");
-        if (!fileLayout || fileLayout.files.length === 0) {
-            erros.push(`• Selecione o arquivo do Layout ${numLayout}.`);
-        }
+		// arquivo do layout obrigatório
+		const fileLayout = card.querySelector(".fileLayout");
+		if (!fileLayout || fileLayout.files.length === 0) {
+			erros.push(`• Selecione o arquivo do Layout ${numLayout}.`);
+		}
 
-        // massas dentro deste layout
-        const massaCards = card.querySelectorAll(".massa-card");
+		// massas dentro deste layout
+		const massaCards = card.querySelectorAll(".massa-card");
 
-        // Agora regra nova:
-        // Massa só é obrigatória SE usuario adicionou pelo menos uma
-        massaCards.forEach((massaCard, massaIndex) => {
-            const fileMassa = massaCard.querySelector(".fileMassa");
-            const numMassa = massaIndex + 1;
+		// Agora regra nova:
+		// Massa só é obrigatória SE usuario adicionou pelo menos uma
+		massaCards.forEach((massaCard, massaIndex) => {
+			const fileMassa = massaCard.querySelector(".fileMassa");
+			const numMassa = massaIndex + 1;
 
-            if (!fileMassa || fileMassa.files.length === 0) {
-                erros.push(
-                    `• Massa ${numMassa} do Layout ${numLayout} está sem arquivo.`
-                );
-            }
-        });
-    });
+			if (!fileMassa || fileMassa.files.length === 0) {
+				erros.push(
+					`• Massa ${numMassa} do Layout ${numLayout} está sem arquivo.`
+				);
+			}
+		});
+	});
 
-    return erros;
+	return erros;
 };
