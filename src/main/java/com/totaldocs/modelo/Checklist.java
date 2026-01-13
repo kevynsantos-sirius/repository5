@@ -52,7 +52,7 @@ public class Checklist {
     private Integer status;
     
     @Column(name = "IdDemanda", nullable = false)
-    private Integer idDemanda;
+    private String idDemanda;
 
     // --- RELACIONAMENTOS ONE TO MANY ---
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -10,8 +10,10 @@
           <th>Nome</th>
           <th>Unidade de Negócio</th>
           <th>Responsável</th>
-          <th></th>
+          <th>Identificação da Demanda</th>
+          <th>Situação</th>
           <!-- <th class="text-end">Ações</th> -->
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -19,9 +21,13 @@
           <td th:text="${d.nomeDocumento}"></td>
           <td th:text="${d.nomeRamo}"></td>
           <td th:text="${d.usuario.nomeUsuario}"></td>
+          <td th:text="${d.idDemanda}"></td>
+          <td>
+          	PRD
+          </td>
+          
           <td class="text-end">
             <button class="btn btn-outline-primary btn-sm" th:onclick="'abrirChecklist(' + ${d.id} + ')'">Abrir</button>
-            <button class="btn btn-outline-primary btn-sm">Produção (PRD)</button>
           </td>
         </tr>
       </tbody>

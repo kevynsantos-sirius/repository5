@@ -31,7 +31,9 @@ window.buildIdentificacao = function() {
 		idUsuario: document.getElementById("responsavel")?.value || "",
 		icatu: document.getElementById("isIcatu")?.checked || false,
 		caixa: document.getElementById("isCaixa")?.checked || false,
-		rioGrande: document.getElementById("isRG")?.checked || false
+		rioGrande: document.getElementById("isRG")?.checked || false,
+		idDemanda: document.getElementById("demanda")?.value || "",
+
 	};
 };
 
@@ -48,6 +50,7 @@ window.validarIdentificacao = function() {
 	const chkIcatu = document.getElementById("isIcatu")?.checked;
 	const chkCaixa = document.getElementById("isCaixa")?.checked;
 	const chkRioGrande = document.getElementById("isRG")?.checked;
+	const idDemanda = document.getElementById("demanda")?.value.trim();
 
 	// Campos obrigatórios
 	if (!nomeDocumento) {
@@ -80,32 +83,39 @@ window.validarIdentificacao = function() {
 	}
 
 	return erros;
+
+	// Campos obrigatórios
+	if (!idDemanda) {
+		erros.push("• Informe a identificação da demanda.");
+	}
 };
 
-window.preencherIdentificacao = function (dto) {
+window.preencherIdentificacao = function(dto) {
 	window.modoEdicao = true;
+
+	console.log("Preenchendo Identificação com DTO:", dto);
+
+	document.getElementById("nomeDocumento").value = dto.nomeDocumento || "";
+	document.getElementById("centroCusto").value = dto.centroCusto || "";
+	document.getElementById("ramo").value = dto.idRamo || "";
+	document.getElementById("statusDocumento").value = dto.status || "";
+
+	document.getElementById("isIcatu").checked = !!dto.icatu;
+	document.getElementById("isCaixa").checked = !!dto.caixa;
+	document.getElementById("isRG").checked = !!dto.rioGrande;
+
+	const spanNome = document.getElementById("responsavelNome");
+	const inputId = document.getElementById("responsavel");
+
+	if (window.modoEdicao) {
+		// ✏️ edição → dados do banco
+		if (spanNome) spanNome.textContent = dto.usuario?.nomeUsuario || "";
+		if (inputId) inputId.value = dto.idUsuario || "";
+	} else {
+		// 🆕 criação → usuário logado
+		if (spanNome) spanNome.textContent = window.USUARIO_LOGADO_NOME;
+		if (inputId) inputId.value = window.USUARIO_LOGADO_ID;
+	}
 	
-    console.log("Preenchendo Identificação com DTO:", dto);
-
-    document.getElementById("nomeDocumento").value = dto.nomeDocumento || "";
-    document.getElementById("centroCusto").value  = dto.centroCusto || "";
-    document.getElementById("ramo").value          = dto.idRamo || "";
-    document.getElementById("statusDocumento").value = dto.status || "";
-
-    document.getElementById("isIcatu").checked  = !!dto.icatu;
-    document.getElementById("isCaixa").checked  = !!dto.caixa;
-    document.getElementById("isRG").checked     = !!dto.rioGrande;
-
-    const spanNome = document.getElementById("responsavelNome");
-    const inputId  = document.getElementById("responsavel");
-
-    if (window.modoEdicao) {
-        // ✏️ edição → dados do banco
-        if (spanNome) spanNome.textContent = dto.usuario?.nomeUsuario || "";
-        if (inputId)  inputId.value = dto.idUsuario || "";
-    } else {
-        // 🆕 criação → usuário logado
-        if (spanNome) spanNome.textContent = window.USUARIO_LOGADO_NOME;
-        if (inputId)  inputId.value = window.USUARIO_LOGADO_ID;
-    }
+	document.getElementById("demanda").value = dto.idDemanda || "";
 };

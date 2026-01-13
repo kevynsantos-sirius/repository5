@@ -58,6 +58,7 @@ public class ChecklistServiceAPI {
 		checklist.setIcatu(dto.isIcatu());
 		checklist.setCaixa(dto.isCaixa());
 		checklist.setRioGrande(dto.isRioGrande());
+		checklist.setIdDemanda(dto.getIdDemanda());
 		checklist.setDataCadastro(LocalDateTime.now());
 		checklist.setDataAtualizacao(LocalDateTime.now());
 
@@ -151,6 +152,7 @@ public class ChecklistServiceAPI {
 			dto.setNomeRamo(c.getRamo().getNomeRamo());
 			dto.setCentroCusto(c.getCentroCusto());
 			dto.setStatus(c.getStatus());
+			dto.setIdDemanda(c.getIdDemanda());
 
 			dto.setIdUsuario(c.getUsuario().getId());
 
@@ -212,7 +214,8 @@ public class ChecklistServiceAPI {
 	    dto.setRioGrande(c.isRioGrande());
 	    dto.setIdRamo(c.getRamo().getIdRamo());
 	    dto.setIdUsuario(c.getUsuario().getId());
-
+	    dto.setIdDemanda(c.getIdDemanda());
+	    
 	    // (Opcional) preencher usuarioDTO se você usa:
 	    UsuarioDTO usuarioDTO = new UsuarioDTO();
 	    usuarioDTO.setId(c.getUsuario().getId());

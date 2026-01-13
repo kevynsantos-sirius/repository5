@@ -11,25 +11,6 @@ function buildChecklist() {
     };
 }
 
-/***************************************************
- * Alternar exibição das abas
- ***************************************************/
-/*function mostrarAba(abaId) {
-
-    document.querySelectorAll(".aba").forEach(aba => {
-        aba.style.display = "none";
-    });
-
-    document.getElementById(abaId).style.display = "block";
-
-    if (abaId === "aba-ti" && window.initTiEvents) {
-        setTimeout(() => window.initTiEvents(), 20);
-    }
-
-    if (abaId === "aba-modelo" && window.initTiEvents) {
-        setTimeout(() => window.initTiEvents(), 20);
-    }
-}*/
 function mostrarAba(abaId) {
 
     document.querySelectorAll(".aba").forEach(aba => {
@@ -219,9 +200,12 @@ window.abrirChecklist = function (id) {
 
     if (submenu) submenu.style.display = "flex";
 
-    if (btnNovo)     btnNovo.classList.add("d-none");
-    if (btnSalvar)   btnSalvar.classList.remove("d-none");
-    if (btnCancelar) btnCancelar.classList.remove("d-none");
+    if (btnNovo) btnNovo.classList.add("d-none");
+	if (btnSalvar) btnSalvar.classList.add("d-none");
+	if (btnCancelar) btnCancelar.classList.add("d-none");
+    
+	/*if (btnSalvar)   btnSalvar.classList.remove("d-none");
+    if (btnCancelar) btnCancelar.classList.remove("d-none");*/
 
     fetch(`${API}Checklists/${id}`)
         .then(res => {

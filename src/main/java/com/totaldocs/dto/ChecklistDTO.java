@@ -17,13 +17,13 @@ public class ChecklistDTO {
     private boolean icatu;
     private boolean caixa;
     private boolean rioGrande;
-
+    private String idDemanda;
+    
     // -------- TI Layout --------
     private boolean temLayout;
     private boolean viaServico;
     private boolean viaTxt;
 
     private UsuarioDTO usuario; 
-    
     private List<LayoutDTO> layouts;
 }
