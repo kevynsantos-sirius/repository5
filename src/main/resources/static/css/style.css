@@ -271,42 +271,53 @@ h5 {
     pointer-events: none;
 }
 
-
-/* .btn-salvar {
-    background-color: #3D5CE5;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out;
+.painel-versoes {
+    position: fixed;
+    top: 80px;              /* abaixo do header */
+    right: 20px;
+    width: 220px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    padding: 10px;
+    z-index: 999;
 }
 
-.btn-salvar:hover:not(:disabled) {
-    background-color: #2f4acf;
+.painel-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+
+.lista-versoes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista-versoes li {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    background: #f5f7fb;
+    font-size: 14px;
 }
 
-.btn-salvar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.lista-versoes li:hover {
+    background: #e6edff;
 }
 
-Botão secundário - Cancelar
-.btn-cancelar {
-    background-color: transparent;
-    color: #3D5CE5;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s ease-in-out;
+.lista-versoes li.atual {
+    background: #1f5cff;
+    color: #fff;
+    font-weight: bold;
+    cursor: default;
 }
 
-.btn-cancelar:hover {
-    color: #2f4acf;
-    cursor: pointer;
+.lista-versoes li small {
+    display: block;
+    font-size: 11px;
+    opacity: 0.8;
 }
- */

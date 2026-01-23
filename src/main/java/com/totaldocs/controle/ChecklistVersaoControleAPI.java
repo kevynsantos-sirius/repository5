@@ -2,11 +2,13 @@ package com.totaldocs.controle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.totaldocs.dto.ChecklistDTO;
+import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.modelo.*;
-import com.totaldocs.service.ChecklistServiceAPI;
+import com.totaldocs.service.ChecklistService;
+import com.totaldocs.service.ChecklistVersaoServiceAPI;
 
+import java.io.IOException;
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,13 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/Checklists")
-public class ChecklistControleAPI {
+public class ChecklistVersaoControleAPI {
 
-	private final ChecklistServiceAPI checklistServiceAPI;
+	private final ChecklistVersaoServiceAPI checklistVersaoServiceAPI;
+//	private final ChecklistVersaoServiceAPI checklistService;              
 
-	public ChecklistControleAPI(ChecklistServiceAPI service) {
-		this.checklistServiceAPI = service;
+	public ChecklistVersaoControleAPI(ChecklistVersaoServiceAPI serviceVersao) {
+		this.checklistVersaoServiceAPI = serviceVersao;
 	}
 
 	@PostMapping(value = "/salvar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -35,9 +38,9 @@ public class ChecklistControleAPI {
 	    	ObjectMapper mapper = new ObjectMapper();
 
 	        // Agora convertemos JSON corretamente → ChecklistDTO
-	        ChecklistDTO dto = mapper.readValue(dadosJson, ChecklistDTO.class);
+	        ChecklistVersaoDTO dto = mapper.readValue(dadosJson, ChecklistVersaoDTO.class);
 	        
-	        ChecklistDTO salvo = checklistServiceAPI.criar(dto, arquivosLayout, arquivosMassas);
+	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas);
 
 	        return ResponseEntity
 	                .status(HttpStatus.CREATED)
@@ -51,9 +54,22 @@ public class ChecklistControleAPI {
 	    }
 	}
 	
+	@PostMapping("/{idChecklist}/editar")
+	public ChecklistVersaoDTO editar(@PathVariable Integer idChecklist,
+								     @RequestPart("dto") ChecklistVersaoDTO dto,
+								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
+								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws IOException {
+	    return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas);
+	}
+	
+//	@GetMapping("/page")
+//	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
+//		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
+//	}
+	
 	@GetMapping("/page")
-	public Page<ChecklistDTO> getDocumentos(Pageable pageable) {
-		return checklistServiceAPI.listarPaginadoDTO(pageable);
+	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
+		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
 	}
 
 	/*
@@ -62,7 +78,7 @@ public class ChecklistControleAPI {
 	 */
 	
 	@GetMapping("/{id}")
-	public ChecklistDTO getDocumentoDTOById(@PathVariable Integer id) {
-		return checklistServiceAPI.getChecklistDTOById(id);
+	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable Integer id) {
+		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
 	}
 }

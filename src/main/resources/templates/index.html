@@ -67,11 +67,24 @@
 
         <!-- ABA: HOME (padrão) -->
         <div id="aba-home" class="aba" style="display:block;">
+			<!-- 🔹 Painel lateral de versões -->
+<div id="painel-versoes" class="painel-versoes" style="display:none">
 
+    <div class="painel-header">
+        <span>📜 Versões</span>
+    </div>
+
+    <ul id="listaVersoesLateral" class="lista-versoes" >
+        <!-- preenchido via JS -->
+    </ul>
+
+</div>
+			
             <div class="card documentos-card">
                 <div class="card-header d-flex justify-content-between align-items-center bg-white border-0 pb-0">
                     <h5 class="mb-0">Meus documentos</h5>
                     <button class="btn btn-recarregar" onclick="location.reload()">Recarregar</button>
+              
                 </div>
 
                 <div class="card-body pt-3">
@@ -113,13 +126,11 @@
 		
 		    <!-- Salvar -->
 		    <button id="btnSalvar"
-		            type="button"
-		            class="btn-acoes btn-salvar d-none"
-		            onclick="salvarChecklist()">
-		        Salvar Documento
-		    </button>
+			        type="button"
+			        class="btn-acoes btn-salvar d-none">
+			    Salvar Documento
+			</button>
 		</div>
-    	
     </main>
 </div>
 

@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.totaldocs.dto.ChecklistDTO;
+import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.modelo.LogoCapa;
 import com.totaldocs.modelo.Ramo;
 import com.totaldocs.modelo.Usuario;
-import com.totaldocs.service.ChecklistServiceAPI;
+import com.totaldocs.service.ChecklistVersaoServiceAPI;
 import com.totaldocs.service.LogoCapaService;
 import com.totaldocs.service.RamoService;
 import com.totaldocs.service.UsuarioService;
@@ -28,7 +29,7 @@ public class ChecklistController {
 	@Value("${backend.api.base-url}")
 	private String API_URL;
 	@Autowired
-    private ChecklistServiceAPI checklistServiceAPI;
+    private ChecklistVersaoServiceAPI checkVersaoServiceAPI;
 	@Autowired
 	private RamoService ramoService;
 	@Autowired 
@@ -53,7 +54,7 @@ public class ChecklistController {
         int size = 10; // ou 20, como preferir
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<ChecklistDTO> pagina = checklistServiceAPI.listarPaginadoDTO(pageable);
+        Page<ChecklistVersaoDTO> pagina = checkVersaoServiceAPI.listarPaginadoDTO(pageable);
         
         model.addAttribute("listaLogoCapas", listaLogoCapas);
         model.addAttribute("usuarioLogado",usuarioLogado.get());

@@ -1,0 +1,413 @@
+package com.totaldocs.service;
+
+import com.totaldocs.dto.ChecklistVersaoDTO;
+import com.totaldocs.dto.LayoutDTO;
+import com.totaldocs.dto.MassaDTO;
+import com.totaldocs.dto.UsuarioDTO;
+import com.totaldocs.modelo.Checklist;
+import com.totaldocs.modelo.ChecklistVersao;
+import com.totaldocs.modelo.Layout;
+import com.totaldocs.modelo.MassaDados;
+import com.totaldocs.modelo.Ramo;
+import com.totaldocs.modelo.Usuario;
+import com.totaldocs.repository.ChecklistRepository;
+import com.totaldocs.repository.ChecklistVersaoRepository;
+import com.totaldocs.repository.LayoutRepository;
+import com.totaldocs.repository.MassaDadoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class ChecklistVersaoServiceAPI {
+	private final ChecklistVersaoRepository checklistVersaoRepository;
+	private final ChecklistRepository checklistRepository;
+	private final LayoutRepository layoutRepository;
+	private final MassaDadoRepository arquivoRepository;
+	private final UsuarioService usuarioService;
+
+	public ChecklistVersaoServiceAPI(ChecklistVersaoRepository checklistVersaoRepository,
+			ChecklistRepository checklistRepository, LayoutRepository layoutRepository,
+			MassaDadoRepository arquivoRepository, UsuarioService usuarioService) {
+		this.checklistVersaoRepository = checklistVersaoRepository;
+		this.checklistRepository = checklistRepository;
+		this.layoutRepository = layoutRepository;
+		this.arquivoRepository = arquivoRepository;
+		this.usuarioService = usuarioService;
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto, List<MultipartFile> filesLayout,
+			List<MultipartFile> filesMassas) throws IOException {
+
+		// ===============================
+		// IDENTIFICAÇÃO DO DOCUMENTO
+		// ===============================
+		Checklist checklist = new Checklist();
+		checklist.setNomeDocumento(dto.getNomeDocumento());
+		checklist.setCentroCusto(dto.getCentroCusto());
+
+		// Ramo
+		Ramo ramo = new Ramo();
+		ramo.setIdRamo(dto.getIdRamo());
+		checklist.setRamo(ramo);
+
+		checklist = checklistRepository.save(checklist);
+
+		ChecklistVersao checklistVersao = new ChecklistVersao();
+		checklistVersao.setChecklist(checklist);
+		checklistVersao.setStatus(dto.getStatus());
+		checklistVersao.setIcatu(dto.isIcatu());
+		checklistVersao.setCaixa(dto.isCaixa());
+		checklistVersao.setRioGrande(dto.isRioGrande());
+		checklistVersao.setIdDemanda(dto.getIdDemanda());
+		checklistVersao.setDataCadastro(LocalDateTime.now());
+		checklistVersao.setDataAtualizacao(LocalDateTime.now());
+
+		// Usuário
+		Usuario usuario = new Usuario();
+		usuario.setId(dto.getIdUsuario());
+		checklistVersao.setUsuario(usuario);
+
+		// ===============================
+		// SALVAR CHECKLIST PRIMEIRO
+		// ===============================
+		Integer versao = checklistVersaoRepository.findMaxVersaoByChecklistId(checklistVersao.getIdChecklistVersao()).orElse(0);
+		checklistVersao.setVersao(versao + 1);
+		checklistVersao = checklistVersaoRepository.save(checklistVersao);
+
+		// ===============================
+		// TI → LAYOUTS
+		// ===============================
+		List<Layout> listaLayouts = new ArrayList<>();
+		int fileLayoutIndex = 0;
+		int fileMassaIndex = 0;
+
+		if (dto.getLayouts() != null) {
+
+			for (LayoutDTO layoutDTO : dto.getLayouts()) {
+
+				Layout layout = new Layout();
+				layout.setChecklistVersao(checklistVersao);
+				layout.setObservacao(layoutDTO.getObservacao());
+				layout.setDataAtualizacao(LocalDateTime.now());
+				layout.setViaServico(dto.isViaServico());
+				layout.setViaTxt(dto.isViaTxt());
+
+				// arquivo do layout
+				if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
+					MultipartFile fl = filesLayout.get(fileLayoutIndex++);
+
+					layout.setTipoMIME(fl.getContentType());
+					layout.setConteudoLayout(fl.getBytes());
+					layout.setNomeLayout(fl.getOriginalFilename());
+				}
+
+				layout = layoutRepository.save(layout);
+
+				// ===============================
+				// MASSAS DO LAYOUT
+				// ===============================
+				List<MassaDados> listaMassas = new ArrayList<>();
+
+				if (layoutDTO.getMassasDados() != null) {
+					for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
+
+						MassaDados massa = new MassaDados();
+						massa.setLayout(layout);
+						massa.setObservacao(massaDTO.getObservacao());
+						massa.setDataAtualizacao(LocalDateTime.now());
+
+						if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
+							MultipartFile fm = filesMassas.get(fileMassaIndex++);
+							massa.setNomeMassaDados(fm.getOriginalFilename());
+							massa.setTipoMIME(fm.getContentType());
+							massa.setConteudoMassaDados(fm.getBytes());
+						}
+
+						massa = arquivoRepository.save(massa);
+						listaMassas.add(massa);
+					}
+				}
+
+				layout.setMassasDados(listaMassas);
+				listaLayouts.add(layout);
+			}
+		}
+
+		checklistVersao.setLayouts(listaLayouts);
+
+		return dto;
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public ChecklistVersaoDTO salvarVersao(Integer idChecklistVersao, ChecklistVersaoDTO dto, List<MultipartFile> filesLayout,
+			List<MultipartFile> filesMassas) throws IOException {
+		// ===============================
+		// IDENTIFICAÇÃO DO DOCUMENTO
+		// ===============================
+		ChecklistVersao checklistVersaoAtual  = checklistVersaoRepository.findById(idChecklistVersao).orElse(null);
+		
+		ChecklistVersao checklistVersaoNova = new ChecklistVersao();
+		checklistVersaoNova.setVersao(checklistVersaoAtual.getVersao() + 1);
+		checklistVersaoNova.setChecklist(checklistVersaoAtual.getChecklist());
+		checklistVersaoNova.setStatus(dto.getStatus());
+		checklistVersaoNova.setIcatu(dto.isIcatu());
+		checklistVersaoNova.setCaixa(dto.isCaixa());
+		checklistVersaoNova.setRioGrande(dto.isRioGrande());
+		checklistVersaoNova.setIdDemanda(dto.getIdDemanda());
+		checklistVersaoNova.setDataCadastro(LocalDateTime.now());
+		checklistVersaoNova.setDataAtualizacao(LocalDateTime.now());
+
+		// Usuário
+		Usuario usuario = new Usuario();
+		usuario.setId(dto.getIdUsuario());
+		checklistVersaoNova.setUsuario(usuario);
+
+		// ===============================
+		// SALVAR CHECKLIST PRIMEIRO
+		// ===============================
+		checklistVersaoNova = checklistVersaoRepository.save(checklistVersaoNova);
+
+ 		// ===============================
+		// TI → LAYOUTS
+		// ===============================
+		List<Layout> listaLayouts = new ArrayList<>();
+		int fileLayoutIndex = 0;
+		int fileMassaIndex = 0;
+
+		if (dto.getLayouts() != null) {
+			checklistVersaoNova.setLayouts(new ArrayList<>());
+			
+			for (LayoutDTO layoutDTO : dto.getLayouts()) {
+
+				Layout layout = new Layout();
+				layout.setChecklistVersao(checklistVersaoNova);
+				layout.setObservacao(layoutDTO.getObservacao());
+				layout.setDataAtualizacao(LocalDateTime.now());
+				layout.setViaServico(dto.isViaServico());
+				layout.setViaTxt(dto.isViaTxt());
+
+				// arquivo do layout
+				if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
+					MultipartFile fl = filesLayout.get(fileLayoutIndex++);
+
+					layout.setTipoMIME(fl.getContentType());
+					layout.setConteudoLayout(fl.getBytes());
+					layout.setNomeLayout(fl.getOriginalFilename());
+				}
+
+				layout = layoutRepository.save(layout);
+
+				// ===============================
+				// MASSAS DO LAYOUT
+				// ===============================
+				List<MassaDados> listaMassas = new ArrayList<>();
+
+				if (layoutDTO.getMassasDados() != null) {
+					for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
+
+						MassaDados massa = new MassaDados();
+						massa.setLayout(layout);
+						massa.setObservacao(massaDTO.getObservacao());
+						massa.setDataAtualizacao(LocalDateTime.now());
+
+						if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
+							MultipartFile fm = filesMassas.get(fileMassaIndex++);
+							massa.setNomeMassaDados(fm.getOriginalFilename());
+							massa.setTipoMIME(fm.getContentType());
+							massa.setConteudoMassaDados(fm.getBytes());
+						}
+
+						massa = arquivoRepository.save(massa);
+						listaMassas.add(massa);
+					}
+				}
+
+				layout.setMassasDados(listaMassas);
+				listaLayouts.add(layout);
+			}
+			
+			checklistVersaoNova.setLayouts(listaLayouts);
+			
+		}else {
+			// REUTILIZA layouts e massas
+			if(checklistVersaoAtual.getLayouts() != null)
+				checklistVersaoNova.setLayouts(checklistVersaoAtual.getLayouts());
+		}
+//		checklistVersaoNova.setLayouts(new ArrayList<>());
+
+		return dto;
+	}
+
+	public Page<ChecklistVersaoDTO> listarPaginadoDTO(Pageable pageable) {
+
+	    return checklistVersaoRepository
+	            .findUltimasVersoes(pageable)
+	            .map(c -> {
+
+	                ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
+
+	                dto.setIdChecklist(c.getChecklist().getId()); // ID DO CHECKLIST
+	                dto.setIdChecklistVersao(c.getIdChecklistVersao());
+	                dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
+	                dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
+	                dto.setNomeRamo(c.getChecklist().getRamo().getNomeRamo());
+	                dto.setCentroCusto(c.getChecklist().getCentroCusto());
+	                dto.setStatus(c.getStatus());
+	                dto.setIdDemanda(c.getIdDemanda());
+
+	                UsuarioDTO usuarioDTO = new UsuarioDTO();
+	                Usuario user = c.getUsuario();
+	                usuarioDTO.setId(user.getId());
+	                usuarioDTO.setNomeUsuario(user.getNome());
+
+	                dto.setUsuario(usuarioDTO);
+
+	                // Flags
+	                dto.setIcatu(c.isIcatu());
+	                dto.setCaixa(c.isCaixa());
+	                dto.setRioGrande(c.isRioGrande());
+
+	                return dto;
+	            });
+	}
+
+//	public Page<ChecklistVersaoDTO> listarPaginadoDTO(Pageable pageable) {
+//
+//		return checklistVersaoRepository.findAll(pageable).map(c -> {
+//
+//			ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
+//			dto.setId(c.getId());
+//			dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
+//			dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
+//			dto.setNomeRamo(c.getChecklist().getRamo().getNomeRamo());
+//			dto.setCentroCusto(c.getChecklist().getCentroCusto());
+//			dto.setStatus(c.getStatus());
+//			dto.setIdDemanda(c.getIdDemanda());
+//
+//			dto.setIdUsuario(c.getUsuario().getId());
+//
+//			UsuarioDTO usuarioDTO = new UsuarioDTO();
+//			Optional<Usuario> usuarioEntity = usuarioService.getUsuario(dto.getIdUsuario());
+//
+//			if (usuarioEntity.isPresent()) {
+//				Usuario user = usuarioEntity.get();
+//				usuarioDTO.setId(user.getId());
+//				usuarioDTO.setNomeUsuario(user.getNome());
+//			}
+//
+//			dto.setUsuario(usuarioDTO);
+//
+//			// Flags
+//			dto.setIcatu(c.isIcatu());
+//			dto.setCaixa(c.isCaixa());
+//			dto.setRioGrande(c.isRioGrande());
+//
+//			/*
+//			 * dto.setTemLayout(c.isTemLayout()); dto.setViaServico(c.isViaServico());
+//			 * dto.setViaTxt(c.isViaTxt());
+//			 */
+//
+//			// NÃO carregamos layouts/massas aqui (para evitar lentidão)
+//
+//			return dto;
+//		});
+//	}
+
+	public Checklist getDocumentoById(Integer id) {
+		Checklist checkList = new Checklist();
+
+		checkList = checklistRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Documento não localizado id " + id));
+
+//    	ArquivoLayout arquivoLayout = new ArquivoLayout();
+//    	arquivoLayout = arquivoService.getArquivoById(id);
+
+		return checkList;
+	}
+
+	@Transactional(readOnly = true)
+	public ChecklistVersaoDTO getChecklistVersaoDTOById(Integer idChecklistVersao) {
+
+		ChecklistVersao c = checklistVersaoRepository.findById(idChecklistVersao)
+				.orElseThrow(() -> new RuntimeException("Documento não localizado id " + idChecklistVersao));
+
+		ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
+
+		// -------- Identificação --------
+		// Checklist
+		dto.setIdChecklist(c.getChecklist().getId());
+		dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
+		dto.setCentroCusto(c.getChecklist().getCentroCusto());
+		dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
+
+		// ChecklistVersao
+		dto.setIdChecklistVersao(c.getIdChecklistVersao());
+		dto.setStatus(c.getStatus());
+		dto.setIcatu(c.isIcatu());
+		dto.setCaixa(c.isCaixa());
+		dto.setRioGrande(c.isRioGrande());
+		dto.setIdUsuario(c.getUsuario().getId());
+		dto.setIdDemanda(c.getIdDemanda());
+
+		// (Opcional) preencher usuarioDTO se você usa:
+		UsuarioDTO usuarioDTO = new UsuarioDTO();
+		usuarioDTO.setId(c.getUsuario().getId());
+		usuarioDTO.setNomeUsuario(c.getUsuario().getNome());
+		dto.setUsuario(usuarioDTO);
+
+		// -------- Layouts + Massas --------
+		List<LayoutDTO> layoutDtos = new ArrayList<>();
+
+		boolean temLayout = c.getLayouts() != null && !c.getLayouts().isEmpty();
+		boolean viaServico = false;
+		boolean viaTxt = false;
+
+		if (c.getLayouts() != null) {
+			for (Layout layout : c.getLayouts()) {
+
+				// acumula flags globais para o DTO principal
+				if (layout.isViaServico()) {
+					viaServico = true;
+				}
+				if (layout.isViaTxt()) {
+					viaTxt = true;
+				}
+
+				LayoutDTO layoutDTO = new LayoutDTO();
+				layoutDTO.setId(layout.getId());
+				layoutDTO.setNomeLayout(layout.getNomeLayout());
+				layoutDTO.setObservacao(layout.getObservacao());
+
+				List<MassaDTO> massaDtos = new ArrayList<>();
+				if (layout.getMassasDados() != null) {
+					for (MassaDados massa : layout.getMassasDados()) {
+						MassaDTO massaDTO = new MassaDTO();
+						massaDTO.setId(massa.getId());
+						massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
+						massaDTO.setObservacao(massa.getObservacao());
+						massaDtos.add(massaDTO);
+					}
+				}
+
+				layoutDTO.setMassasDados(massaDtos);
+				layoutDtos.add(layoutDTO);
+			}
+		}
+
+		dto.setTemLayout(temLayout);
+		dto.setViaServico(viaServico);
+		dto.setViaTxt(viaTxt);
+		dto.setLayouts(layoutDtos);
+
+		return dto;
+	}
+}

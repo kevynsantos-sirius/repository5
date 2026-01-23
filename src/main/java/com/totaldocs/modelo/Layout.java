@@ -3,7 +3,6 @@ package com.totaldocs.modelo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,8 +18,8 @@ public class Layout {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IdCheckList", nullable = false)
-    private Checklist checklist;
+    @JoinColumn(name = "IdChecklistVersao", nullable = false)
+    private ChecklistVersao checklistVersao;
 
     @Column(name = "DataAtualizacao", nullable = false)
     private LocalDateTime dataAtualizacao;
