@@ -44,6 +44,7 @@ public class Layout {
     @Column(name = "ViaTxt", nullable = false)
     private boolean viaTxt;
 
-    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, orphanRemoval = true)
+//	@OneToMany(mappedBy = "layout"/* , cascade = CascadeType.ALL, orphanRemoval = true */)
+	@OneToMany(mappedBy = "layout")
     private List<MassaDados> massasDados;
 }

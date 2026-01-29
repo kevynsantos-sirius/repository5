@@ -3,6 +3,7 @@ package com.totaldocs.controle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.totaldocs.dto.ChecklistDTO;
 import com.totaldocs.dto.ChecklistVersaoDTO;
+import com.totaldocs.dto.ChecklistVersaoResumoDTO;
 import com.totaldocs.modelo.*;
 import com.totaldocs.service.ChecklistService;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
@@ -61,24 +62,20 @@ public class ChecklistVersaoControleAPI {
 								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws IOException {
 	    return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas);
 	}
-	
-//	@GetMapping("/page")
-//	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
-//		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
-//	}
-	
+		
 	@GetMapping("/page")
 	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
 		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
 	}
 
-	/*
-	 * @GetMapping("/{id}") public Checklist getDocumentoById(@PathVariable Integer
-	 * id) { return checklistServiceAPI.getDocumentoById(id); }
-	 */
-	
+
 	@GetMapping("/{id}")
 	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable Integer id) {
 		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
+	}
+	
+	@GetMapping("/{idChecklist}/versoes")
+	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable Integer idChecklist) {
+	    return checklistVersaoServiceAPI.listarVersoesChecklist(idChecklist);
 	}
 }

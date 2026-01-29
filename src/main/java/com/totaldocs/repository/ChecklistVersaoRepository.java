@@ -1,6 +1,7 @@
 package com.totaldocs.repository;
 
 import java.awt.print.Pageable;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ public interface ChecklistVersaoRepository extends JpaRepository<ChecklistVersao
 	    """)
 	Optional<Integer> findMaxVersaoByChecklistId(@Param("idChecklist") Integer idChecklist);
 	
+	
 	@Query("""
 		    SELECT v
 		    FROM ChecklistVersao v
@@ -26,7 +28,11 @@ public interface ChecklistVersaoRepository extends JpaRepository<ChecklistVersao
 		        FROM ChecklistVersao v2
 		        WHERE v2.checklist.id = v.checklist.id
 		    )
+		    
+		     ORDER BY v.dataAtualizacao DESC
 		""")
 		Page<ChecklistVersao> findUltimasVersoes(org.springframework.data.domain.Pageable pageable);
 	
+	
+	List<ChecklistVersao> findByChecklistIdOrderByVersaoDesc(Integer idChecklist);
 }

@@ -49,38 +49,41 @@ window.criarLayoutCard = function() {
 	card.className = "card p-4 mb-3 layout-card";
 
 	card.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="nomeArquivoLayout text-muted">
-                <i class="bi bi-file-earmark-text me-1"></i>
-            </span>
+	    <!-- 🔑 ID DO LAYOUT (EDIÇÃO) -->
+	    <input type="hidden" class="layoutIdHidden" value="0">
 
-            <button class="btn btn-sm btn-outline-danger"
-                type="button"
-                onclick="this.closest('.layout-card').remove()">
-                - Remover
-            </button>
-        </div>
+	    <div class="d-flex justify-content-between align-items-center mb-2">
+	        <span class="nomeArquivoLayout text-muted">
+	            <i class="bi bi-file-earmark-text me-1"></i>
+	        </span>
 
-        <label>Arquivo Layout</label>
-        <input class="form-control fileLayout" type="file">
+	        <button class="btn btn-sm btn-outline-danger"
+	            type="button"
+	            onclick="this.closest('.layout-card').remove()">
+	            - Remover
+	        </button>
+	    </div>
 
-        <label class="form-label mt-2">Observação</label>
-        <div class="quillLayout" style="height:120px;background:white;"></div>
-        <input type="hidden" class="obsLayoutHidden">
+	    <label>Arquivo Layout</label>
+	    <input class="form-control fileLayout" type="file">
 
-        <hr>
+	    <label class="form-label mt-2">Observação</label>
+	    <div class="quillLayout" style="height:120px;background:white;"></div>
+	    <input type="hidden" class="obsLayoutHidden">
 
-        <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">Massas de Dados</h6>
-            <button class="btn btn-sm btn-secondary"
-                type="button"
-                onclick="addMassa(this)">
-                + Adicionar Massa
-            </button>
-        </div>
+	    <hr>
 
-        <div class="massasContainer mt-2"></div>
-    `;
+	    <div class="d-flex justify-content-between align-items-center">
+	        <h6 class="mb-0">Massas de Dados</h6>
+	        <button class="btn btn-sm btn-secondary"
+	            type="button"
+	            onclick="addMassa(this)">
+	            + Adicionar Massa
+	        </button>
+	    </div>
+	    <div class="massasContainer mt-2"></div>
+	`;
+
 
 	layoutContainer.appendChild(card);
 
@@ -115,7 +118,12 @@ window.criarLayoutCard = function() {
 /**************************************************
  * Adicionar Massa
  **************************************************/
-window.addMassa = function(btn) {
+window.addMassa = function(btn,massaObj = null) {
+	var idMassa = "0";
+	if(massaObj != null)
+	{
+		idMassa = massaObj.id;
+	}
 
 	const layoutCard = btn.closest(".layout-card");
 	const container = layoutCard.querySelector(".massasContainer");
@@ -133,6 +141,8 @@ window.addMassa = function(btn) {
                 - Remover
             </button>
         </div>
+		
+		<input type="hidden" class="massaIdHidden" value="${idMassa}">
 
         <label>Arquivo da Massa</label>
         <input class="form-control fileMassa" type="file">
@@ -160,6 +170,8 @@ window.addMassa = function(btn) {
 
 	fileInput.addEventListener("change", () => {
 		if (fileInput.files.length > 0) {
+			/*card._arquivoAlterado = true;*/
+			massa._arquivoAlterado = true;
 			nomeSpan.textContent = `Novo arquivo: ${fileInput.files[0].name}`;
 			nomeSpan.classList.remove("text-primary");
 			nomeSpan.onclick = null;
@@ -210,7 +222,23 @@ window.carregarLayouts = function(layouts) {
 	layouts.forEach(layout => {
 
 		const layoutCard = window.criarLayoutCard();
+		
+		const idHidden = layoutCard.querySelector(".layoutIdHidden");
+		if (idHidden && layout.id) {
+		    idHidden.value = layout.id;
+		}
+		
+		if (layout.massasDados && layout.massasDados.length > 0) {
+			layout.massasDados.forEach(massa => {
+				
+				const idHiddenMassa = layoutCard.querySelector(".massaIdHidden");
+				if (idHiddenMassa && massa.id) {
+					idHiddenMassa.value = massa.id;
+				}
 
+			});
+		}
+	
 		 /*=================================================
 		 * NOME DO ARQUIVO — LINK SÓ NA EDIÇÃO
 		 * ================================================= */
@@ -249,7 +277,7 @@ window.carregarLayouts = function(layouts) {
 			layout.massasDados.forEach(massa => {
 
 				const fakeBtn = { closest: () => layoutCard };
-				const massaCard = window.addMassa(fakeBtn);
+				const massaCard = window.addMassa(fakeBtn,massa);
 
 				const nomeSpan = massaCard.querySelector(".nomeArquivoMassa");
 
@@ -311,62 +339,73 @@ window.limparTI = function() {
 	limparLayoutsTela();
 };
 
-/**************************************************
- * BUILD TI (JSON + arquivos para backend)
- **************************************************/
-window.buildTI = function() {
+/***************************************************
+ * BUILD TI (Layouts + Massas + Arquivos)
+ ***************************************************/
+window.buildTI = function () {
 
-	const hasLayout = document.getElementById("hasLayout");
-	const envioServico = document.getElementById("envioServico");
-	const envioTxt = document.getElementById("envioTxt");
+    const layouts = [];
+    const filesLayout = [];
+    const filesMassas = [];
 
-	const layouts = [];
-	const filesLayout = [];
-	const filesMassas = [];
+    const viaServico = document.getElementById("envioServico")?.checked || false;
+    const viaTxt = document.getElementById("envioTxt")?.checked || false;
 
-	document.querySelectorAll(".layout-card").forEach(layoutCard => {
+    document.querySelectorAll(".layout-card").forEach(layoutCard => {
 
-		const layoutFileInput = layoutCard.querySelector(".fileLayout");
-		if (layoutFileInput && layoutFileInput.files.length > 0) {
-			filesLayout.push(layoutFileInput.files[0]);
-		}
-
+		const idLayout = Number(layoutCard.querySelector(".layoutIdHidden")?.value) || 0;
+        const temArquivoLayout = layoutCard._arquivoAlterado === true;
+		
 		const obsLayout =
-			layoutCard.querySelector(".obsLayoutHidden")?.value || "";
+            layoutCard.querySelector(".obsLayoutHidden")?.value || "";
 
-		const massas = [];
+        const fileLayoutInput =
+            layoutCard.querySelector(".fileLayout");
 
-		layoutCard.querySelectorAll(".massa-card").forEach(massaCard => {
+        if (temArquivoLayout && fileLayoutInput?.files?.length > 0) {
+            filesLayout.push(fileLayoutInput.files[0]);
+        }
 
-			const massaFileInput = massaCard.querySelector(".fileMassa");
-			if (massaFileInput && massaFileInput.files.length > 0) {
-				filesMassas.push(massaFileInput.files[0]);
-			}
+        const massas = [];
 
-			const obsMassa =
-				massaCard.querySelector(".obsMassaHidden")?.value || "";
+        layoutCard.querySelectorAll(".massa-card").forEach(massaCard => {
+			
+			const idMassa = Number(massaCard.querySelector(".massaIdHidden")?.value) || 0;
+			
+            const temArquivoMassa = massaCard._arquivoAlterado === true;
+			
+            const obsMassa =
+                massaCard.querySelector(".obsMassaHidden")?.value || "";
 
-			massas.push({
-				observacao: obsMassa
-			});
-		});
+            const fileMassaInput =
+                massaCard.querySelector(".fileMassa");
 
-		layouts.push({
-			observacao: obsLayout,
-			massasDados: massas
-		});
-	});
+            if (temArquivoMassa && fileMassaInput?.files?.length > 0) {
+                filesMassas.push(fileMassaInput.files[0]);
+            }
 
-	return {
-		temLayout: hasLayout?.checked || false,
-		viaServico: envioServico?.checked || false,
-		viaTxt: envioTxt?.checked || false,
-		layouts: layouts,
+            massas.push({
+                id: idMassa,
+                observacao: obsMassa,
+                temArquivo: temArquivoMassa
+            });
+        });
 
-		// campos internos (removidos antes do envio)
-		_filesLayout: filesLayout,
-		_filesMassas: filesMassas
-	};
+        layouts.push({
+            id: idLayout,
+            observacao: obsLayout,
+            temArquivo: temArquivoLayout,
+            massasDados: massas
+        });
+    });
+
+    return {
+        viaServico,
+        viaTxt,
+        layouts,
+        _filesLayout: filesLayout,
+        _filesMassas: filesMassas
+    };
 };
 
 // Validação da aba TI (layouts)
@@ -394,9 +433,19 @@ window.validarTi = function() {
 
 		// arquivo do layout obrigatório
 		const fileLayout = card.querySelector(".fileLayout");
-		if (!fileLayout || fileLayout.files.length === 0) {
+		const nomeArquivoLayoutLink = card.querySelector(".nomeArquivoLayout");
+
+		const hasFile =
+			fileLayout?.files?.length > 0;
+
+		// Como agora é <a>, usamos textContent
+		const hasArquivoExistente =
+			(nomeArquivoLayoutLink?.textContent || "").trim() !== "";
+
+		if (!hasFile && !hasArquivoExistente) {
 			erros.push(`• Selecione o arquivo do Layout ${numLayout}.`);
 		}
+		
 
 		// massas dentro deste layout
 		const massaCards = card.querySelectorAll(".massa-card");
@@ -407,7 +456,7 @@ window.validarTi = function() {
 			const fileMassa = massaCard.querySelector(".fileMassa");
 			const numMassa = massaIndex + 1;
 
-			if (!fileMassa || fileMassa.files.length === 0) {
+			if (!hasArquivoExistente && fileMassa.files.length === 0) {
 				erros.push(
 					`• Massa ${numMassa} do Layout ${numLayout} está sem arquivo.`
 				);

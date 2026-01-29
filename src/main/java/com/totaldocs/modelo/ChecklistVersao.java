@@ -20,8 +20,7 @@ public class ChecklistVersao {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "IdChecklist", nullable = false)
     private Checklist checklist;
-
-    
+ 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IdUsuario", nullable = false)
     private Usuario usuario;
@@ -52,6 +51,7 @@ public class ChecklistVersao {
     
     
     // --- RELACIONAMENTOS ONE TO MANY ---
-    @OneToMany(mappedBy = "checklistVersao", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @OneToMany(mappedBy = "checklistVersao", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "checklistVersao")
     private List<Layout> layouts;
 }

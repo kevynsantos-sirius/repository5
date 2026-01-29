@@ -110,6 +110,4 @@ public class ModeloDocumento {
     @Lob
     @Column(name = "CamposBuscaSubEstipulante")
     private String camposBuscaSubEstipulante;
-
-    // getters e setters
 }

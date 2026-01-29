@@ -76,6 +76,7 @@ function cancelarCriacaoChecklist() {
 
     window.modoEdicao = false;
     window.currentChecklistId = null;
+	window.currentChecklistVersaoId = null;
 
     if (window.limparIdentificacao) {
         window.limparIdentificacao();
@@ -91,12 +92,20 @@ function cancelarCriacaoChecklist() {
     const btnNovo     = document.getElementById("btnNovo");
     const btnSalvar   = document.getElementById("btnSalvar");
     const btnCancelar = document.getElementById("btnCancelar");
-
+	/*const painel = document.getElementById("painel-versoes");*/
+	
     if (submenu) submenu.style.display = "none";
 
     if (btnNovo)     btnNovo.classList.remove("d-none");
     if (btnSalvar)   btnSalvar.classList.add("d-none");
     if (btnCancelar) btnCancelar.classList.add("d-none");
+	
+	/*if (painel) painel.style.display = "none";*/
+	/*const painelVersoes = document.getElementById("painel-versoes");
+	if (painelVersoes) painelVersoes.classList.add("collapse");*/
+	
+	const btnCarregarVersoes = document.getElementById("btnCarregarVersoes");
+	if (btnCarregarVersoes) btnCarregarVersoes.classList.add("collapse");
 }
 
 /***************************************************
@@ -187,7 +196,7 @@ function salvarChecklist() {
  ***************************************************/
 function salvarEdicaoChecklist() {
 
-    if (!window.currentChecklistId) {
+    if (!window.currentChecklistVersaoId) {
         alert("Checklist não identificado para edição.");
         return;
     }
@@ -202,37 +211,33 @@ function salvarEdicaoChecklist() {
         return;
     }
 
+    // 🔹 buildChecklist já chama buildTI()
     const dados = buildChecklist();
-
-    // 🔒 remove campos internos
-    const dadosParaEnviar = { ...dados };
-    delete dadosParaEnviar._filesLayout;
-    delete dadosParaEnviar._filesMassas;
 
     const formData = new FormData();
 
-    // ⚠️ NOME DO RequestPart = "dto"
+    // 🔹 DTO COMPLETO (inclui layouts + temArquivo)
     formData.append(
         "dto",
-        new Blob([JSON.stringify(dadosParaEnviar)], { type: "application/json" })
+        new Blob([JSON.stringify(dados)], { type: "application/json" })
     );
 
-    // Arquivos Layout
-    if (dados._filesLayout) {
-        dados._filesLayout.forEach(f =>
-            formData.append("filesLayout", f)
-        );
+    // 🔹 ARQUIVOS DE LAYOUT
+    // (somente os que realmente existem)
+    if (dados._filesLayout && dados._filesLayout.length > 0) {
+        dados._filesLayout.forEach(file => {
+            formData.append("filesLayout", file);
+        });
     }
 
-    // Arquivos Massas
-    if (dados._filesMassas) {
-        dados._filesMassas.forEach(f =>
-            formData.append("filesMassas", f)
-        );
+    // 🔹 ARQUIVOS DE MASSAS
+    if (dados._filesMassas && dados._filesMassas.length > 0) {
+        dados._filesMassas.forEach(file => {
+            formData.append("filesMassas", file);
+        });
     }
 
-    fetch(`${API}Checklists/${window.currentChecklistId}/editar`, {
-	
+    fetch(`${API}Checklists/${window.currentChecklistVersaoId}/editar`, {
         method: "POST",
         body: formData
     })
@@ -243,14 +248,13 @@ function salvarEdicaoChecklist() {
             }
             return res.json();
         })
-        .then(dto => {
-            console.log("✔ Nova versão criada:", dto);
-            alert("✔ Alterações salvas! Nova versão criada com sucesso.");
+        .then(() => {
+            alert("✔ Nova versão criada com sucesso!");
             window.location.href = "/";
         })
         .catch(err => {
             console.error("❌ Erro:", err);
-            alert("Erro ao salvar edição do checklist.");
+            alert("Erro ao salvar edição.");
         });
 }
 
@@ -261,14 +265,16 @@ window.abrirChecklist = function (id) {
 
     console.log("Abrindo checklist id =", id);
 	
-	window.currentChecklistId = id;
-    window.modoEdicao = true;
-
+	window.modoEdicao = true;
+	
+	const painel = document.getElementById("btnCarregarVersoes");
+	if (painel) painel.classList.remove("collapse");
+	
     mostrarAba("aba-identificacao");
 
-    const submenu     = document.getElementById("submenu");
-    const btnNovo     = document.getElementById("btnNovo");
-    const btnSalvar   = document.getElementById("btnSalvar");
+    const submenu = document.getElementById("submenu");
+    const Novo = document.getElementById("btnNovo");
+    const btnSalvar = document.getElementById("btnSalvar");
     const btnCancelar = document.getElementById("btnCancelar");
 
     if (submenu) submenu.style.display = "flex";
@@ -287,9 +293,10 @@ window.abrirChecklist = function (id) {
         .then(dto => {
 
             console.log("✔ Checklist carregado:", dto);
-
-            window.currentChecklistId = dto.idChecklistVersao;
-
+			
+			window.currentChecklistVersaoId = dto.idChecklistVersao;
+			window.currentChecklistId       = dto.idChecklist;
+            
             if (window.preencherIdentificacao) {
                 window.preencherIdentificacao(dto);
             }
@@ -305,12 +312,50 @@ window.abrirChecklist = function (id) {
             if (window.carregarLayouts) {
                 window.carregarLayouts(dto.layouts);
             }
+			
+			// 🆕 carregar versões na lateral
+			/*carregarVersoesChecklist(dto.idChecklist);*/
         })
         .catch(err => {
             console.error("❌ Erro:", err);
             alert("Erro ao abrir documento");
         });
 };
+
+function carregarVersoesChecklist(idChecklist) {
+
+    fetch(`${API}Checklists/${idChecklist}/versoes`)
+        .then(res => res.json())
+        .then(versoes => {
+
+            /*const painel = document.getElementById("btnCarregarVersoes");*/
+            const lista  = document.getElementById("listaVersoesLateral");
+
+            /*painel.style.display = "block";*/
+			
+			lista.innerHTML = "";
+
+            versoes.forEach(v => {
+
+                const li = document.createElement("li");
+
+                if (v.atual) {
+                    li.classList.add("atual");
+                    li.textContent = `${v.idDemanda}`;
+                } else {
+                    li.innerHTML = `
+					    <small>${v.idDemanda}</small>
+                        <small>Versão ${v.versao} - ${formatarData(v.dataCadastro)}</small>
+                    `;
+
+                    li.onclick = () => abrirVersaoChecklist(v.idChecklistVersao);
+                }
+
+                lista.appendChild(li);
+            });
+        });
+}
+
 
 /***************************************************
  * Controle inteligente do botão SALVAR
@@ -323,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnSalvar.onclick = () => {
 
-        if (window.modoEdicao === true && window.currentChecklistId) {
+        if (window.modoEdicao === true && window.currentChecklistVersaoId) {
             console.log("✏️ Salvando edição (nova versão)");
             salvarEdicaoChecklist();
         } else {
@@ -332,3 +377,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btnVersoes = document.getElementById("btnCarregarVersoes");
+
+    if (btnVersoes) {
+        btnVersoes.addEventListener("click", () => {
+	
+            if (!window.currentChecklistId) {
+                console.warn("Checklist ainda não carregado");
+                return;
+            }
+			
+			 
+			/*const painelVersoes = document.getElementById("painel-versoes");
+			if (painelVersoes) {
+				//(document.getElementsByClassName("btn-close")[0]).click();
+				painelVersoes.classList.add("show");
+			}*/
+
+            // 🆕 carregar versões na lateral
+            carregarVersoesChecklist(window.currentChecklistId);
+        });
+    }
+});
+
+
+function formatarData(dataIso) {
+    if (!dataIso) return "";
+    return new Date(dataIso).toLocaleDateString("pt-BR");
+}

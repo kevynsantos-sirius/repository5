@@ -20,8 +20,6 @@ public class ChecklistService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             LocalDateTime dataSistema = LocalDateTime.now();
-//            checklist.setDataAtualizacao(dataSistema);
-//            checklist.setDataCadastro(dataSistema);
             
             return restTemplate.postForObject(API_URL, checklist, Checklist.class);
         } catch (Exception e) {
