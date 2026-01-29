@@ -11,14 +11,27 @@ function buildChecklist() {
     };
 }
 
-function mostrarAba(abaId) {
+function mostrarAba(abaId, btn) {
 
+    // Esconde todas as abas
     document.querySelectorAll(".aba").forEach(aba => {
         aba.style.display = "none";
     });
 
+    // Mostra a aba clicada
     document.getElementById(abaId).style.display = "block";
+
+    // Remove o ativo de todos os itens do submenu
+    document.querySelectorAll(".submenu-item").forEach(item => {
+        item.classList.remove("active");
+    });
+
+    // Ativa o item clicado (move a barrinha)
+    if (btn) {
+        btn.classList.add("active");
+    }
 }
+
 
 
 /***************************************************
