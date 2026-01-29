@@ -265,3 +265,80 @@ textarea {
   font-size: 0.8rem;
   padding: 4px 12px;
 }
+
+/* ===== LISTA DE VERSÕES – SIDEBAR ===== */
+
+.lista-versoes {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+/* Cada versão */
+.lista-versoes li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  padding: 10px 14px;
+  margin-bottom: 8px;
+
+  border-radius: 8px;
+  cursor: pointer;
+
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Hover */
+.lista-versoes li:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+/* Texto principal */
+.lista-versoes li small:first-child {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+/* Texto secundário (versão/data) */
+.lista-versoes li small:last-child {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+/* ===== VERSÃO ATUAL ===== */
+
+.lista-versoes li.atual {
+  background-color: #ffffff;
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+/* Ajuste dos textos quando ativo */
+.lista-versoes li.atual small {
+  color: #0d6efd;
+  opacity: 1;
+}
+
+/* Indicador lateral */
+.lista-versoes li.atual::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #0d6efd;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Necessário pro ::before */
+.lista-versoes li {
+  position: relative;
+}
+
