@@ -329,18 +329,7 @@ h5 {
 } 
 
 /* Submenu no topo do conteúdo */
-.submenu-top {
-  display: flex;
-  gap: 32px;
-  align-items: center;
-}
-
-/* Estilo underline */
-.submenu-underline {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* Item */
+/* Item do submenu */
 .submenu-item {
   background: none;
   border: none;
@@ -348,18 +337,19 @@ h5 {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: #6b7280;
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
+
+  color: rgba(255, 255, 255, 0.75); /* branco suave */
 }
 
 /* Hover */
 .submenu-item:hover {
-  color: #2d43c0;
+  color: #ffffff;
 }
 
-/* Linha */
+/* Linha underline */
 .submenu-item::after {
   content: "";
   position: absolute;
@@ -367,19 +357,31 @@ h5 {
   bottom: -1px;
   width: 100%;
   height: 2px;
-  background-color: #2d43c0;
+  background-color: #ffffff;
   transform: scaleX(0);
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }
 
-/* Ativo */
+/* Item ativo */
 .submenu-item.active {
-  color: #2d43c0;
+  color: #ffffff;
 }
 
 .submenu-item.active::after {
   transform: scaleX(1);
 }
+
+.submenu-top {
+  display: flex;
+  align-items: center;
+  gap: 32px; /* <<< ESPAÇO ENTRE OS TEXTOS */
+}
+
+.submenu-item {
+  padding: 10px 4px; /* antes era só 0 */
+}
+
+
 /* Header do conteúdo (submenu + ações) */
 .content-header {
   display: flex;
