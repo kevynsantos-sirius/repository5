@@ -71,15 +71,6 @@ h5 {
   color: #2d43c0;
 }
 
-/* Submenu */
-.submenu {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  margin-top: 1.2rem;
-}
-
 .btn-submenu:hover {
   background-color: #edf0ff;
 }
@@ -134,7 +125,7 @@ h5 {
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  margin-top: 140px;	
+  padding-top: 32px;	
   margin-left: 0px;
 }
 
@@ -336,3 +327,73 @@ h5 {
   opacity: 0.8;
   margin-top: 2px;
 } 
+
+/* Submenu no topo do conteúdo */
+.submenu-top {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+/* Estilo underline */
+.submenu-underline {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Item */
+.submenu-item {
+  background: none;
+  border: none;
+  padding: 10px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Hover */
+.submenu-item:hover {
+  color: #2d43c0;
+}
+
+/* Linha */
+.submenu-item::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 2px;
+  background-color: #2d43c0;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+/* Ativo */
+.submenu-item.active {
+  color: #2d43c0;
+}
+
+.submenu-item.active::after {
+  transform: scaleX(1);
+}
+/* Header do conteúdo (submenu + ações) */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+/* Botão versões alinhado */
+.btn-versoes {
+  height: 34px;
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+

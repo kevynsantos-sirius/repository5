@@ -19,7 +19,7 @@
 </head>
 
 <body>
-<div class="main-wrapper">	
+<div class="main-wrapper">
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-header d-flex align-items-center mb-4">
@@ -30,13 +30,6 @@
 
         <!-- BOTÃO NOVO DOCUMENTO -->
         <button id="btnNovo" class="btn btn-novo active" onclick="NovoDocumento()">Novo documento</button>
-        
-        <!-- SUBMENU DAS ABAS -->
-        <div id="submenu" class="submenu mt-3" style="display: none;">
-            <button class="btn-submenu" onclick="mostrarAba('aba-identificacao')">Identificação do Documento</button>
-            <button class="btn-submenu" onclick="mostrarAba('aba-ti')">TI</button>
-            <button class="btn-submenu" onclick="mostrarAba('aba-modelo')">Modelo</button>
-        </div>
 	
 		<!-- Rodapé fixo com usuário + sair -->
 		<div class="sidebar-user-footer d-flex align-items-center gap-2">
@@ -66,15 +59,37 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="content-area container-fluid">
-		<div class="d-flex justify-content-end">
-			<button class="btn transparent text-white border border-white collapse"
-			        id="btnCarregarVersoes"
-			        type="button"
-			        data-bs-toggle="offcanvas"
-			        data-bs-target="#staticBackdrop"
-			        aria-controls="staticBackdrop">
-			  ☰ Versões
-			</button>
+    	<!-- SUBMENU DAS ABAS -->
+	    <!-- TOPO DO CONTEÚDO -->
+		<div class="content-header">
+		
+		    <!-- SUBMENU -->
+		    <div id="submenu" class="submenu-top submenu-underline">
+		        <button class="submenu-item active"
+		                onclick="mostrarAba('aba-identificacao', this)">
+		            IDENTIFICAÇÃO DO DOCUMENTO
+		        </button>
+		
+		        <button class="submenu-item"
+		                onclick="mostrarAba('aba-ti', this)">
+		            TI
+		        </button>
+		
+		        <button class="submenu-item"
+		                onclick="mostrarAba('aba-modelo', this)">
+		            MODELO
+		        </button>
+		    </div>
+		
+		    <!-- BOTÃO VERSÕES -->
+		    <button class="btn btn-outline-light btn-versoes"
+		            id="btnCarregarVersoes"
+		            type="button"
+		            data-bs-toggle="offcanvas"
+		            data-bs-target="#staticBackdrop">
+		        ☰ Versões
+		    </button>
+		
 		</div>
 
 	    
