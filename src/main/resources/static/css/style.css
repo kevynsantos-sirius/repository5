@@ -21,8 +21,7 @@
    =============================== */
 body {
   margin: 0;
-  font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 0.9rem;
   line-height: 1.5;
   background-color: var(--bg-pagina);
