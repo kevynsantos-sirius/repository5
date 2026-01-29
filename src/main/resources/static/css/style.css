@@ -1,355 +1,139 @@
-/* Estrutura geral */
- */ 
-/* ====== Estilo base GIMP ====== */
+/* ===============================
+   VARIÁVEIS DE TEMA
+   =============================== */
+:root {
+  --azul-principal: #2d43c0;
+
+  --bg-pagina: #ffffff;
+  --bg-conteudo: #f5f7fb;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+
+  --texto-primario: #2d43c0;
+  --texto-secundario: #5f6fa3;
+  --texto-neutro: #374151;
+
+  --borda-suave: #e5e7eb;
+}
+
+/* ===============================
+   BASE
+   =============================== */
 body {
-	margin: 0;
-	font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI",
-		Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-	font-size: 0.9rem;
-	font-weight: 400;
-	line-height: 1.5;
-	/* color: #4b5563; */
-	text-align: left;
-	background-color: #4f6fdc;
-	/* height: 100%;
-    margin: 0; */
+  margin: 0;
+  font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background-color: var(--bg-pagina);
+  color: var(--texto-neutro);
 }
 
- 
-h5 {
-	color: #FFFFFF
+h1, h2, h3, h4, h5 {
+  color: var(--texto-primario);
 }
 
-.offcanvas.offcanvas-end .offcanvas-header h5 {
-	color: black;
-}
-
-/* Layout principal */
+/* ===============================
+   LAYOUT PRINCIPAL
+   =============================== */
 .main-wrapper {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #4b6fd6;
+  background-color: var(--bg-pagina);
 }
 
-/* --- SIDEBAR --- */
+/* ===============================
+   SIDEBAR (AGORA CLARA)
+   =============================== */
 .sidebar {
   width: 240px;
-  color: #000000;
+  background-color: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
-  /* padding: 24px 16px; */
-  padding-top: 24px;
-  padding-bottom: 24px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding: 24px 16px;
   height: 100vh;
- }
+  border-right: 1px solid var(--borda-suave);
+}
 
 .sidebar-header {
-  display: flex;
-  align-items: center;
-  color: #fff;
+  color: var(--texto-primario);
 }
-
-/* Botão principal */
-.btn-novo {
-  width: 100%;
-  background-color: transparent;
-  color: #fff;
-  font-weight: 600;
-  border: 1.8px solid #fff;
-  border-radius: 8px;
-  padding: 10px 0;
-  transition: all 0.2s ease-in-out;
-}
-
-
-.btn-novo.active {
-  background-color: #fff;
-  color: #2d43c0;
-}
-
-.btn-submenu:hover {
-  background-color: #edf0ff;
-}
-
-.btn-submenu.active {
-  background-color: #2d43c0;
-  color: #fff;
-}
-
-/* Responsivo opcional */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-  }
-}
-
 
 /* Logo */
 .logo {
   font-weight: 700;
   margin-bottom: 20px;
-  align-self: flex-start;
   margin-left: 8px;
+  color: var(--texto-primario);
 }
 
-
-
-.btn-submenu {
-  background-color: #fff;
-  color: #2d43c0;
-  border: none;
+/* Botão novo documento */
+.btn-novo {
+  width: 100%;
+  background-color: transparent;
+  color: var(--azul-principal);
+  font-weight: 600;
+  border: 2px solid var(--azul-principal);
   border-radius: 8px;
-  font-weight: 500;
-  padding: 0.7rem 1rem;
-  text-align: left;
+  padding: 10px 0;
   transition: 0.2s;
 }
 
-.btn-submenu:hover {
-  background-color: #edf0ff;
-}
-
-/* Botão ativo */
-.btn-submenu.active {
-  background-color: #2d43c0;
-  color: #fff;
-}
-
-.content-area {
-  flex: 1;
-  padding: 32px;
-  overflow-y: auto;
-  padding-top: 32px;	
-  margin-left: 0px;
-}
-
-/* Cartões */
-.documentos-card {
-  background-color: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
- /* Rodapé fixo */
-.sidebar-user-footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 260px;              /* mesma largura da sidebar */
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Avatar redondo */
-.avatar-circle {
-  width: 32px;
-  height: 32px;
-  background-color: #ffffff; /* fundo branco */
-  color: #2d43c0;            /* azul do tema */
-  font-weight: 700;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-}
-
-/* Nome do usuário – mesma cara do sistema */
-.nome-usuario {
-  display: block;
+.btn-novo.active {
+  background-color: var(--azul-principal);
   color: #ffffff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-/* Botão sair: mais visível */
-.btn-logout {
-  background-color: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  color: #ffffff;
-  font-size: 0.8rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.btn-logout:hover {
-  background-color: #ffffff;
-  color: #2d43c0;
-  border-color: #ffffff;
-}
-
-/* Base comum dos botões de ação */
-.btn-acoes {
-    padding: 8px 18px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border-radius: 6px;
-    border: none;
-    transition: all .2s ease-in-out;
-}
-
-/* Salvar: azul */
-.btn-salvar {
-    background-color: #3D5CE5;
-    color: #fff;
-}
-.btn-salvar:hover:not(:disabled) {
-    background-color: #2f4acf;
-}
-
-/* Cancelar: cinza claro */
-.btn-cancelar {
-    background-color: #E4E7EE;
-    color: #2b2b2b;
-}
-.btn-cancelar:hover {
-    background-color: #d0d4df;
-    color: #000;
-}
-
-/* Estado desabilitado */
-.btn-acoes:disabled {
-    opacity: .6;
-    pointer-events: none;
-}
-
-/* Base comum dos botões de ação */
-.btn-acoes {
-    padding: 8px 18px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border-radius: 6px;
-    border: none;
-    transition: all .2s ease-in-out;
-}
-
-/* Salvar: azul */
-.btn-salvar {
-    background-color: #3D5CE5;
-    color: #fff;
-}
-.btn-salvar:hover:not(:disabled) {
-    background-color: #2f4acf;
-}
-
-/* Cancelar: cinza claro */
-.btn-cancelar {
-    background-color: #E4E7EE;
-    color: #2b2b2b;
-}
-.btn-cancelar:hover {
-    background-color: #d0d4df;
-    color: #000;
-}
-
-/* Estado desabilitado */
-.btn-acoes:disabled {
-    opacity: .6;
-    pointer-events: none;
 }
 
 /* ===============================
-   SIDEBAR DIREITA – VERSÕES
+   CONTEÚDO
    =============================== */
-#painel-versoes {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 320px;
-    height: 100vh;
-    background: #ffffff;
-    border-left: 1px solid #e0e0e0;
-    padding: 16px;
-    overflow-y: auto;
-    z-index: 1000;
-    /* display: none; JS controla */
+.content-area {
+  flex: 1;
+  background-color: var(--bg-conteudo);
+  padding: 32px;
+  overflow-y: auto;
 }
 
-/* Quando a sidebar de versões estiver aberta */
- body.versoes-aberto .content-area {
-  padding-right: 320px; /* 260px da barra + respiro */
-}
-/* Cabeçalho */
-.painel-header {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #2d43c0;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
+/* ===============================
+   CARDS / FORMULÁRIOS
+   =============================== */
+.card,
+.documentos-card,
+form {
+  background-color: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--borda-suave);
 }
 
-/* Lista de versões */
-.lista-versoes {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* ===============================
+   SUBMENU (TOPO)
+   =============================== */
+.submenu-top {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid var(--borda-suave);
+  margin-bottom: 16px;
 }
 
-/* Item */
-.lista-versoes li {
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  background-color: #f5f7fb; 
-  transition: background-color 0.2s ease; 
-}
-
-/* Hover */
-.lista-versoes li:hover {
-  background-color: #edf0ff;
-}
-
-/* Versão atual */
-.lista-versoes li.atual {
-  background-color: #2d43c0;
-  color: #ffffff;
-  font-weight: 600;
-  cursor: default;
-}
-
-/* Data */
-.lista-versoes li small {
-  display: block;
-  font-size: 0.7rem;
-  opacity: 0.8;
-  margin-top: 2px;
-} 
-
-/* Submenu no topo do conteúdo */
-/* Item do submenu */
 .submenu-item {
   background: none;
   border: none;
-  padding: 10px 0;
+  padding: 10px 4px;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
-
-  color: rgba(255, 255, 255, 0.75); /* branco suave */
+  color: var(--texto-secundario);
 }
 
-/* Hover */
 .submenu-item:hover {
-  color: #ffffff;
+  color: var(--azul-principal);
 }
 
-/* Linha underline */
 .submenu-item::after {
   content: "";
   position: absolute;
@@ -357,46 +141,108 @@ h5 {
   bottom: -1px;
   width: 100%;
   height: 2px;
-  background-color: #ffffff;
+  background-color: var(--azul-principal);
   transform: scaleX(0);
   transition: transform 0.25s ease;
 }
 
-/* Item ativo */
 .submenu-item.active {
-  color: #ffffff;
+  color: var(--azul-principal);
 }
 
 .submenu-item.active::after {
   transform: scaleX(1);
 }
 
-.submenu-top {
+/* ===============================
+   BOTÕES DE AÇÃO
+   =============================== */
+.btn-acoes {
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  transition: 0.2s;
+}
+
+/* Salvar */
+.btn-salvar {
+  background-color: var(--azul-principal);
+  color: #fff;
+}
+
+.btn-salvar:hover:not(:disabled) {
+  background-color: #2436a8;
+}
+
+/* Cancelar */
+.btn-cancelar {
+  background-color: #e4e7ee;
+  color: #2b2b2b;
+}
+
+.btn-cancelar:hover {
+  background-color: #d0d4df;
+}
+
+/* ===============================
+   INPUTS
+   =============================== */
+label {
+  font-weight: 600;
+  color: var(--azul-principal);
+}
+
+input,
+select,
+textarea {
+  background-color: #ffffff;
+  border: 1px solid var(--borda-suave);
+  border-radius: 6px;
+}
+
+/* ===============================
+   SIDEBAR – USUÁRIO
+   =============================== */
+.sidebar-user-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 240px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 32px; /* <<< ESPAÇO ENTRE OS TEXTOS */
+  gap: 8px;
 }
 
-.submenu-item {
-  padding: 10px 4px; /* antes era só 0 */
-}
-
-
-/* Header do conteúdo (submenu + ações) */
-.content-header {
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  background-color: var(--azul-principal);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 50%;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Botão versões alinhado */
-.btn-versoes {
-  height: 34px;
+.nome-usuario {
+  color: var(--texto-primario);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.btn-logout {
+  background-color: transparent;
+  border: 1px solid var(--azul-principal);
+  color: var(--azul-principal);
   font-size: 0.8rem;
-  padding: 4px 12px;
   border-radius: 6px;
-  color: white;
 }
 
-
+.btn-logout:hover {
+  background-color: var(--azul-principal);
+  color: #ffffff;
+}
