@@ -72,6 +72,15 @@ function NovoDocumento() {
     if (btnNovo)     btnNovo.classList.add("d-none");
     if (btnSalvar)   btnSalvar.classList.remove("d-none");
     if (btnCancelar) btnCancelar.classList.remove("d-none");
+	
+	selectIdentification();
+}
+
+function selectIdentification()
+{
+	// 🆕
+			/*Selecione identificação como default*/
+		document.querySelectorAll(".submenu-item")[0].click();
 }
 
 /***************************************************
@@ -285,9 +294,7 @@ window.abrirChecklist = function (id) {
 	
     mostrarAba("aba-identificacao");
 	
-	// 🆕
-	/*Selecione identificação como default*/
-	document.querySelectorAll(".submenu-item")[0].click();
+	selectIdentification();
 
     const submenu = document.getElementById("submenu");
     const Novo = document.getElementById("btnNovo");
