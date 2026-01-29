@@ -62,35 +62,36 @@
     	<!-- SUBMENU DAS ABAS -->
 	    <!-- TOPO DO CONTEÚDO -->
 		<div class="content-header">
-		
-		    <!-- SUBMENU -->
-		    <div id="submenu" class="submenu-top submenu-underline" style="display: none;">
-		        <button class="submenu-item active"
-		                onclick="mostrarAba('aba-identificacao', this)">
-		            IDENTIFICAÇÃO DO DOCUMENTO
-		        </button>
-		
-		        <button class="submenu-item"
-		                onclick="mostrarAba('aba-ti', this)">
-		            TI
-		        </button>
-		
-		        <button class="submenu-item"
-		                onclick="mostrarAba('aba-modelo', this)">
-		            MODELO
-		        </button>
-		    </div>
-		
-		    <!-- BOTÃO VERSÕES -->
-		    <button class="btn btn-outline-light btn-versoes collapse"
-		            id="btnCarregarVersoes"
-		            type="button"
-		            data-bs-toggle="offcanvas"
-		            data-bs-target="#staticBackdrop">
-		        ☰ Versões
+  
+		  <!-- Submenu -->
+		  <div id="submenu" class="submenu-top">
+		    <button class="submenu-item active"
+		            onclick="mostrarAba('aba-identificacao', this)">
+		      Identificação do Documento
 		    </button>
 		
+		    <button class="submenu-item"
+		            onclick="mostrarAba('aba-ti', this)">
+		      TI
+		    </button>
+		
+		    <button class="submenu-item"
+		            onclick="mostrarAba('aba-modelo', this)">
+		      Modelo
+		    </button>
+		  </div>
+		
+		  <!-- Botão versões -->
+		  <button class="btn btn-outline-primary btn-versoes"
+		          id="btnCarregarVersoes"
+		          type="button"
+		          data-bs-toggle="offcanvas"
+		          data-bs-target="#staticBackdrop">
+		    ☰ Versões
+		  </button>
+		
 		</div>
+
 
 	    
         <!-- ABA: HOME (padrão) -->

@@ -246,3 +246,23 @@ textarea {
   background-color: var(--azul-principal);
   color: #ffffff;
 }
+
+.content-header {
+  display: flex;
+  justify-content: space-between; /* <<< esquerda / direita */
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+/* Mantém o submenu à esquerda */
+.submenu-top {
+  display: flex;
+  gap: 32px;
+}
+
+/* Botão versões */
+.btn-versoes {
+  height: 34px;
+  font-size: 0.8rem;
+  padding: 4px 12px;
+}
