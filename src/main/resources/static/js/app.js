@@ -284,6 +284,10 @@ window.abrirChecklist = function (id) {
 	if (painel) painel.classList.remove("collapse");
 	
     mostrarAba("aba-identificacao");
+	
+	// 🆕
+	/*Selecione identificação como default*/
+	document.querySelectorAll(".submenu-item")[0].click();
 
     const submenu = document.getElementById("submenu");
     const Novo = document.getElementById("btnNovo");
@@ -325,9 +329,7 @@ window.abrirChecklist = function (id) {
             if (window.carregarLayouts) {
                 window.carregarLayouts(dto.layouts);
             }
-			
-			// 🆕 carregar versões na lateral
-			/*carregarVersoesChecklist(dto.idChecklist);*/
+
         })
         .catch(err => {
             console.error("❌ Erro:", err);
