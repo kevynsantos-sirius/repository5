@@ -189,6 +189,8 @@ function salvarChecklist() {
             formData.append("filesMassas", f)
         );
     }
+	
+	Notiflix.Loading.standard('Carregando, aguarde...');
 
     fetch(`${API}Checklists/salvar`, {
         method: "POST",
@@ -204,10 +206,12 @@ function salvarChecklist() {
             return res.json();
         })
         .then(() => {
+			Notiflix.Loading.remove();
             alert("✔ Documento salvo com sucesso!");
             window.location.href = "/";
         })
         .catch(err => {
+			Notiflix.Loading.remove();
             console.error("❌ Erro:", err);
             alert("Erro ao salvar o documento");
         });
@@ -258,6 +262,8 @@ function salvarEdicaoChecklist() {
             formData.append("filesMassas", file);
         });
     }
+	
+	Notiflix.Loading.standard('Carregando, aguarde...');
 
     fetch(`${API}Checklists/${window.currentChecklistVersaoId}/editar`, {
         method: "POST",
@@ -271,10 +277,12 @@ function salvarEdicaoChecklist() {
             return res.json();
         })
         .then(() => {
+			Notiflix.Loading.remove();
             alert("✔ Nova versão criada com sucesso!");
             window.location.href = "/";
         })
         .catch(err => {
+			Notiflix.Loading.remove();
             console.error("❌ Erro:", err);
             alert("Erro ao salvar edição.");
         });
@@ -284,6 +292,8 @@ function salvarEdicaoChecklist() {
  * ABRIR CHECKLIST (EDIÇÃO)
  ***************************************************/
 window.abrirChecklist = function (id) {
+	
+	Notiflix.Loading.standard('Carregando, aguarde...');
 
     console.log("Abrindo checklist id =", id);
 	
@@ -336,19 +346,26 @@ window.abrirChecklist = function (id) {
             if (window.carregarLayouts) {
                 window.carregarLayouts(dto.layouts);
             }
+			
+			Notiflix.Loading.remove();
 
         })
         .catch(err => {
+			Notiflix.Loading.remove();
             console.error("❌ Erro:", err);
             alert("Erro ao abrir documento");
         });
 };
 
 function carregarVersoesChecklist(idChecklist) {
+	
+	Notiflix.Loading.standard('Carregando, aguarde...');
 
     fetch(`${API}Checklists/${idChecklist}/versoes`)
         .then(res => res.json())
         .then(versoes => {
+			
+			Notiflix.Loading.remove();
 
             /*const painel = document.getElementById("btnCarregarVersoes");*/
             const lista  = document.getElementById("listaVersoesLateral");
@@ -375,7 +392,10 @@ function carregarVersoesChecklist(idChecklist) {
 
                 lista.appendChild(li);
             });
-        });
+        }).catch(err => {
+					Notiflix.Loading.remove();
+		            console.error("❌ Erro:", err);
+		        });
 }
 
 
