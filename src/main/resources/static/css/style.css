@@ -343,3 +343,9 @@ textarea {
   position: relative;
 }
 
+#listaVersoesLateral li:not(.atual) {
+  color: black;
+}
+
+
+

@@ -375,7 +375,7 @@ function carregarVersoesChecklist(idChecklist) {
 			lista.innerHTML = "";
 
             versoes.forEach(v => {
-
+				console.log(v);
                 const li = document.createElement("li");
 
                 if (v.atual) {
