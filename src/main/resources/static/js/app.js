@@ -374,10 +374,13 @@ function carregarVersoesChecklist(idChecklist) {
 			
 			lista.innerHTML = "";
 
-            versoes.forEach(v => {
-				console.log(v);
+            versoes.forEach((v,index) => {
+				
                 const li = document.createElement("li");
-
+				li.classList.add('list-group-item');
+				if(index % 2 == 0) {
+					li.classList.add('bg-light');
+				}
                 if (v.atual) {
                     li.classList.add("atual");
                     li.textContent = `${v.idDemanda}`;
