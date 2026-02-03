@@ -15,26 +15,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-						.requestMatchers("/login",
-								/* "/api/**", */ "/css/**", "/js/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            		)
-            .formLogin(form -> form
-            		
-            		
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
-                .failureUrl("/login?error")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-            );
+    	http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .anyRequest().authenticated()
+        )
+        .formLogin(form -> form
+            .loginPage("/login")
+            .defaultSuccessUrl("/", true)
+            .failureUrl("/login?error")
+            .permitAll()
+        )
+        .logout(logout -> logout
+            .logoutUrl("/logout")
+            .logoutSuccessUrl("/login?logout")
+        )
+        // 🔑 Aqui você configura a sessão
+        .sessionManagement(session -> session
+            .invalidSessionUrl("/login?expired") // URL para sessão inválida/expirada
+            .maximumSessions(1)                  // Máximo de sessões por usuário
+            .expiredUrl("/login?expired")        // Redireciona quando a sessão expira
+        );
+
 
         return http.build();
     }
