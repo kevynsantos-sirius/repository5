@@ -205,14 +205,13 @@ textarea {
    SIDEBAR – USUÁRIO
    =============================== */
 .sidebar-user-footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 240px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+	display: flex;
+	flex-direction: row;
+}
+
+.sidebar-user-internal
+{
+	width: 100px;
 }
 
 .avatar-circle {
