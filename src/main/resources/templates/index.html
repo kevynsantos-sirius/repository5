@@ -22,48 +22,53 @@
 </head>
 
 <body>
-<div class="main-wrapper">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-header d-flex align-items-center mb-4">
-    		<a th:href="@{/}" class="text-decoration-none">
-        		<img src="/images/PADD.png" height="100" width="170"/>
-    		</a>
-		</div>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"><i class="bi bi-card-checklist fs-2 text-primary"></i></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-items-center-logout" id="navbarNavDropdown">
+      <ul class="navbar-nav navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#" id="btnNovo" onclick="NovoDocumento()">Novo documento</a>
+        </li>
+        </ul>
+        <ul class="navbar-nav">
+		  <li class="nav-item dropdown d-flex align-items-center">
+		    
+		    <a
+		      class="nav-link dropdown-toggle d-flex align-items-center gap-1 p-0"
+		      href="#"
+		      role="button"
+		      data-bs-toggle="dropdown"
+		      aria-expanded="false"
+		    >
+		      <div class="avatar-circle">
+		        <span th:text="${#strings.substring(usuarioLogado.nome, 0, 1)}"></span>
+		      </div>
+		    </a>
+		
+		    <ul class="dropdown-menu dropdown-menu-end">
+		      <li>
+		        <span class="dropdown-item-text nome-usuario"
+		              th:text="${usuarioLogado.nome}">
+		          Usuário
+		        </span>
+		      </li>
+		      <li>
+		        <a class="dropdown-item" th:href="@{/logout}">Sair</a>
+		      </li>
+		    </ul>
+		
+		  </li>
+		</ul>
 
-        <!-- BOTÃO NOVO DOCUMENTO -->
-        <button id="btnNovo" class="btn btn-novo active" onclick="NovoDocumento()">Novo documento</button>
-    </aside>
-
-    <!-- CONTEÚDO PRINCIPAL -->
+    </div>
+  </div>
+</nav>
+<div class="px-2">
     <main class="content-area container-fluid">
-    
-    	 <!-- Rodapé fixo com usuário + sair -->
-			<div class="sidebar-user-footer d-flex align-items-center justify-content-end gap-2">
-				<div class="sidebar-user-internal">
-				    <!-- Avatar com inicial -->
-				    <div class="avatar-circle">
-				        <span th:text="${#strings.substring(usuarioLogado.nome, 0, 1)}"></span>
-				    </div>
-				
-				    <div class="flex-grow-1">
-				        <!-- Nome do usuário -->
-				        <span class="nome-usuario"
-				              th:text="${usuarioLogado.nome}">
-				            Usuário
-				        </span>
-				
-				        <!-- Botão sair -->
-				        <form th:action="@{/logout}" method="post" class="mt-1">
-				            <button class="btn btn-sm btn-logout w-100 text-start">
-				                Sair
-				            </button>
-				        </form>
-				    </div>
-				</div>
-			
-			</div>	
-    	<!-- SUBMENU DAS ABAS -->
 	    <!-- TOPO DO CONTEÚDO -->
 		<div class="content-header">
   
@@ -81,7 +86,7 @@
 		
 		    <button class="submenu-item"
 		            onclick="mostrarAba('aba-modelo', this)">
-		      Modelo
+		      Modelo do Documento
 		    </button>
 		  </div>
 		
