@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import com.totaldocs.security.Md5PasswordEncoder;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -38,39 +43,35 @@ public class SecurityConfig {
 	}
 
 	
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    	http
-    	  .csrf(csrf -> csrf.disable())
-    	  .formLogin(form -> form.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/login", "/css/**", "/js/**").permitAll()
-            .requestMatchers("/admin/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
-        )
-        .formLogin(form -> form
-            .loginPage("/login")
-            .defaultSuccessUrl("/", true)
-            .failureUrl("/login?error")
-            .permitAll().disable()
-        )
-        .logout(logout -> logout
-            .logoutUrl("/logout")
-            .logoutSuccessUrl("/login?logout")
-        )
-        // 🔑 Aqui você configura a sessão expirada
-        .sessionManagement(session -> session
-        	    .invalidSessionUrl("/login?expired")
-        	    .maximumSessions(1)
-        	    .expiredUrl("/login?expired")
-        	    .sessionRegistry(sessionRegistry()) // usa o SessionRegistry
-        	);
+	    http
+	        .csrf(csrf -> csrf.disable())
+	        .cors(Customizer.withDefaults())
 
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+	            .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+	            .anyRequest().authenticated()
+	        )
 
+	        .exceptionHandling(ex -> ex
+	            .authenticationEntryPoint((req, res, e) -> {
+	                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                res.setContentType("application/json");
+	                res.getWriter().write("{\"error\":\"unauthenticated\"}");
+	            })
+	        )
 
-        return http.build();
-    }
+	        .sessionManagement(session -> session
+	            .maximumSessions(1)
+	            .sessionRegistry(sessionRegistry())
+	        );
+
+	    return http.build();
+	}
+
     
     @Value("${aplication.frontend.base}")
     private String urlBaseFront;
