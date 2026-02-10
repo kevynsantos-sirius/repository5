@@ -7,7 +7,7 @@ import lombok.Data;
 public class ChecklistVersaoDTO {
 
     // -------- Identificação --------
-	private int idChecklistVersao;
+	private String idChecklistVersao;
 	private String idChecklist;
     private String nomeDocumento;
     private Integer idRamo;

@@ -7,9 +7,12 @@ import com.totaldocs.dto.ChecklistVersaoResumoDTO;
 import com.totaldocs.modelo.*;
 import com.totaldocs.service.ChecklistService;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
+import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import java.io.IOException;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -67,10 +70,14 @@ public class ChecklistVersaoControleAPI {
 	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
 		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
 	}
+	
+	@Autowired
+	private TemporalCryptoIdUtil temporalCryptoIdUtil;
 
 
-	@GetMapping("/{id}")
-	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable Integer id) {
+	@GetMapping("/{idStr}")
+	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable String idStr) {
+		Integer id = temporalCryptoIdUtil.extractId(idStr);
 		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
 	}
 	

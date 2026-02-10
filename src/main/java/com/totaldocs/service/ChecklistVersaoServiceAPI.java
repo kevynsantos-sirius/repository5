@@ -17,6 +17,7 @@ import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -152,6 +153,9 @@ public class ChecklistVersaoServiceAPI {
 
 		return dto;
 	}
+	
+	@Autowired
+	private TemporalCryptoIdUtil temporalCryptoIdUtil;
 
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(Integer idChecklistVersao, ChecklistVersaoDTO dto,
@@ -328,10 +332,10 @@ public class ChecklistVersaoServiceAPI {
 	public Page<ChecklistVersaoDTO> listarPaginadoDTO(Pageable pageable) {
 		return checklistVersaoRepository.findUltimasVersoes(pageable).map(c -> {
 			ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
-			
-			String uuidGenerateToken = TemporalCryptoIdUtil.getIntToGenerateToken(c.getChecklist().getId());
+			String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
+			String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
 			dto.setIdChecklist(uuidGenerateToken); // ID DO CHECKLIST
-			dto.setIdChecklistVersao(c.getIdChecklistVersao());
+			dto.setIdChecklistVersao(uuidGenerateTokenVersion);
 			dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
 			dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
 			dto.setNomeRamo(c.getChecklist().getRamo().getNomeRamo());
@@ -395,14 +399,15 @@ public class ChecklistVersaoServiceAPI {
 
 		// -------- Identificação --------
 		// Checklist
-		String uuidGenerateToken = TemporalCryptoIdUtil.getIntToGenerateToken(c.getChecklist().getId());
+		String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
+		String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
 		dto.setIdChecklist(uuidGenerateToken);
 		dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
 		dto.setCentroCusto(c.getChecklist().getCentroCusto());
 		dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
 
 		// ChecklistVersao
-		dto.setIdChecklistVersao(c.getIdChecklistVersao());
+		dto.setIdChecklistVersao(uuidGenerateTokenVersion);
 		dto.setStatus(c.getStatus());
 		dto.setIcatu(c.isIcatu());
 		dto.setCaixa(c.isCaixa());
