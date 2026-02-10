@@ -15,6 +15,8 @@ import com.totaldocs.repository.ChecklistRepository;
 import com.totaldocs.repository.ChecklistVersaoRepository;
 import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
+import com.totaldocs.utils.TemporalCryptoIdUtil;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -326,8 +328,9 @@ public class ChecklistVersaoServiceAPI {
 	public Page<ChecklistVersaoDTO> listarPaginadoDTO(Pageable pageable) {
 		return checklistVersaoRepository.findUltimasVersoes(pageable).map(c -> {
 			ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
-
-			dto.setIdChecklist(c.getChecklist().getId()); // ID DO CHECKLIST
+			
+			String uuidGenerateToken = TemporalCryptoIdUtil.getIntToGenerateToken(c.getChecklist().getId());
+			dto.setIdChecklist(uuidGenerateToken); // ID DO CHECKLIST
 			dto.setIdChecklistVersao(c.getIdChecklistVersao());
 			dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
 			dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
@@ -392,7 +395,8 @@ public class ChecklistVersaoServiceAPI {
 
 		// -------- Identificação --------
 		// Checklist
-		dto.setIdChecklist(c.getChecklist().getId());
+		String uuidGenerateToken = TemporalCryptoIdUtil.getIntToGenerateToken(c.getChecklist().getId());
+		dto.setIdChecklist(uuidGenerateToken);
 		dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
 		dto.setCentroCusto(c.getChecklist().getCentroCusto());
 		dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());

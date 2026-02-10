@@ -8,7 +8,7 @@ public class ChecklistVersaoDTO {
 
     // -------- Identificação --------
 	private int idChecklistVersao;
-	private int idChecklist;
+	private String idChecklist;
     private String nomeDocumento;
     private Integer idRamo;
     private String nomeRamo;
