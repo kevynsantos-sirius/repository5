@@ -307,7 +307,7 @@ public class ChecklistVersaoServiceAPI {
 						}
 						// ---- MASSA NOVA ----
 						else {
-							if (exitsRegistry) {
+							if (!exitsRegistry) {
 								dtoMassa.setTemArquivo(true);
 							}
 							if (!dtoMassa.isTemArquivo()) {
