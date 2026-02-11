@@ -30,7 +30,7 @@ public class TemporalCryptoIdUtil {
         return new SecretKeySpec(keyBytes, ALGORITHM);
     }
     
-    private boolean isUUID(String value) {
+    public boolean isUUID(String value) {
         try {
             UUID.fromString(value);
             return true;

@@ -102,51 +102,60 @@ public class ChecklistVersaoServiceAPI {
 
 			for (LayoutDTO layoutDTO : dto.getLayouts()) {
 
-				Layout layout = new Layout();
-				layout.setChecklistVersao(checklistVersao);
-				layout.setObservacao(layoutDTO.getObservacao());
-				layout.setDataAtualizacao(LocalDateTime.now());
-				layout.setViaServico(dto.isViaServico());
-				layout.setViaTxt(dto.isViaTxt());
-
-				// arquivo do layout
-				if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
-					MultipartFile fl = filesLayout.get(fileLayoutIndex++);
-
-					layout.setTipoMIME(fl.getContentType());
-					layout.setConteudoLayout(fl.getBytes());
-					layout.setNomeLayout(fl.getOriginalFilename());
-				}
-
-				layout = layoutRepository.save(layout);
-
-				// ===============================
-				// MASSAS DO LAYOUT
-				// ===============================
-				List<MassaDados> listaMassas = new ArrayList<>();
-
-				if (layoutDTO.getMassasDados() != null) {
-					for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
-
-						MassaDados massa = new MassaDados();
-						massa.setLayout(layout);
-						massa.setObservacao(massaDTO.getObservacao());
-						massa.setDataAtualizacao(LocalDateTime.now());
-
-						if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
-							MultipartFile fm = filesMassas.get(fileMassaIndex++);
-							massa.setNomeMassaDados(fm.getOriginalFilename());
-							massa.setTipoMIME(fm.getContentType());
-							massa.setConteudoMassaDados(fm.getBytes());
-						}
-
-						massa = arquivoRepository.save(massa);
-						listaMassas.add(massa);
+				boolean novoLayout = temporalCryptoIdUtil.isUUID(layoutDTO.getId());
+				if(novoLayout)
+				{
+					Layout layout = new Layout();
+					layout.setChecklistVersao(checklistVersao);
+					layout.setObservacao(layoutDTO.getObservacao());
+					layout.setDataAtualizacao(LocalDateTime.now());
+					layout.setViaServico(dto.isViaServico());
+					layout.setViaTxt(dto.isViaTxt());
+	
+					// arquivo do layout
+					if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
+						MultipartFile fl = filesLayout.get(fileLayoutIndex++);
+	
+						layout.setTipoMIME(fl.getContentType());
+						layout.setConteudoLayout(fl.getBytes());
+						layout.setNomeLayout(fl.getOriginalFilename());
 					}
+	
+					layout = layoutRepository.save(layout);
+					
+					// ===============================
+					// MASSAS DO LAYOUT
+					// ===============================
+					List<MassaDados> listaMassas = new ArrayList<>();
+
+					if (layoutDTO.getMassasDados() != null) {
+						for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
+
+							boolean novaMassa = temporalCryptoIdUtil.isUUID(massaDTO.getId());
+							MassaDados massa = null;
+							if(novaMassa)
+								massa = new MassaDados();
+								massa.setLayout(layout);
+								massa.setObservacao(massaDTO.getObservacao());
+								massa.setDataAtualizacao(LocalDateTime.now());
+		
+								if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
+									MultipartFile fm = filesMassas.get(fileMassaIndex++);
+									massa.setNomeMassaDados(fm.getOriginalFilename());
+									massa.setTipoMIME(fm.getContentType());
+									massa.setConteudoMassaDados(fm.getBytes());
+								}
+		
+								massa = arquivoRepository.save(massa);
+								listaMassas.add(massa);
+						}
+					}
+
+					layout.setMassasDados(listaMassas);
+					listaLayouts.add(layout);
 				}
 
-				layout.setMassasDados(listaMassas);
-				listaLayouts.add(layout);
+				
 			}
 		}
 
@@ -274,10 +283,10 @@ public class ChecklistVersaoServiceAPI {
 						MassaDados massa;
 
 						// ---- MASSA EXISTENTE ----
-						boolean exitsRegistry = dtoMassa.getId() > 0;
+						boolean exitsRegistry = !temporalCryptoIdUtil.isUUID(dtoMassa.getId());
 						if (exitsRegistry) {
-
-							massa = arquivoRepository.findById(dtoMassa.getId())
+							Integer massaId = temporalCryptoIdUtil.extractId(dtoMassa.getId());
+							massa = arquivoRepository.findById(massaId)
 									.orElseThrow(() -> new IllegalStateException("Massa não encontrada"));
 
 							massa.setLayout(layoutNovo);
@@ -454,7 +463,8 @@ public class ChecklistVersaoServiceAPI {
 				if (layout.getMassasDados() != null) {
 					for (MassaDados massa : layout.getMassasDados()) {
 						MassaDTO massaDTO = new MassaDTO();
-						massaDTO.setId(massa.getId());
+						String tokenMassa = temporalCryptoIdUtil.generateToken(massa.getId());
+						massaDTO.setId(tokenMassa);
 						massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
 						massaDTO.setObservacao(massa.getObservacao());
 						massaDtos.add(massaDTO);
