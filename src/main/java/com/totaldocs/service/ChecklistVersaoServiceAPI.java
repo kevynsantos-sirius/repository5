@@ -17,6 +17,7 @@ import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -158,13 +159,14 @@ public class ChecklistVersaoServiceAPI {
 	private TemporalCryptoIdUtil temporalCryptoIdUtil;
 
 	@Transactional(rollbackFor = Exception.class)
-	public ChecklistVersaoDTO salvarVersao(Integer idChecklistVersao, ChecklistVersaoDTO dto,
+	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
 			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws IOException {
 
 		// =========================
 		// VERSÃO ATUAL
 		// =========================
-		ChecklistVersao versaoAtual = checklistVersaoRepository.findById(idChecklistVersao)
+		Integer idCheckList = temporalCryptoIdUtil.extractId(idChecklistVersao);
+		ChecklistVersao versaoAtual = checklistVersaoRepository.findById(idCheckList)
 				.orElseThrow(() -> new IllegalStateException("Versão não encontrada"));
 
 		// =========================
@@ -206,9 +208,12 @@ public class ChecklistVersaoServiceAPI {
 				layoutNovo = new Layout();
 
 				// -------- LAYOUT EXISTENTE --------
-				if (dtoLayout.getId() > 0) {
+				String token = dtoLayout.getId();
+				if (!Strings.isBlank(token)) {
+					
+					Integer layoutId = temporalCryptoIdUtil.extractId(token);
 
-					Layout layoutOrigem = layoutRepository.findById(dtoLayout.getId())
+					Layout layoutOrigem = layoutRepository.findById(layoutId)
 							.orElseThrow(() -> new IllegalStateException("Layout não encontrado"));
 
 //	                
@@ -440,7 +445,8 @@ public class ChecklistVersaoServiceAPI {
 				}
 
 				LayoutDTO layoutDTO = new LayoutDTO();
-				layoutDTO.setId(layout.getId());
+				String token = temporalCryptoIdUtil.generateToken(layout.getId());
+				layoutDTO.setId(token);
 				layoutDTO.setNomeLayout(layout.getNomeLayout());
 				layoutDTO.setObservacao(layout.getObservacao());
 

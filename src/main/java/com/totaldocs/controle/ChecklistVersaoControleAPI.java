@@ -59,7 +59,7 @@ public class ChecklistVersaoControleAPI {
 	}
 	
 	@PostMapping("/{idChecklist}/editar")
-	public ChecklistVersaoDTO editar(@PathVariable Integer idChecklist,
+	public ChecklistVersaoDTO editar(@PathVariable String idChecklist,
 								     @RequestPart("dto") ChecklistVersaoDTO dto,
 								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
 								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws IOException {

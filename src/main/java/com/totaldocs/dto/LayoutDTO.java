@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class LayoutDTO {
-	private int id;
+	private String id;
     private String nomeLayout;
     private String observacao;
     private boolean temArquivo;

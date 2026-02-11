@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ChecklistDTO {
-    private int id;
+    private String id;
     private String nomeDocumento;
     private String nomeRamo;
     private String centroCusto;
