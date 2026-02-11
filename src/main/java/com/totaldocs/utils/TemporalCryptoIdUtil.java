@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.UUID;
 
 @Component
 public class TemporalCryptoIdUtil {
@@ -28,6 +29,15 @@ public class TemporalCryptoIdUtil {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return new SecretKeySpec(keyBytes, ALGORITHM);
     }
+    
+    private boolean isUUID(String value) {
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
     public String generateToken(Integer recordId) {
         long expiresAt = Instant.now()
@@ -39,6 +49,11 @@ public class TemporalCryptoIdUtil {
     }
 
     public Integer extractId(String token) {
+    	
+    	if(isUUID(token))
+    	{
+    		return null;
+    	}
         String decrypted = decrypt(token);
 
         String[] parts = decrypted.split("\\|");

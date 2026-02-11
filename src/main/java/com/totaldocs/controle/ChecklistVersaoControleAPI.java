@@ -9,6 +9,8 @@ import com.totaldocs.service.ChecklistService;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -23,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/Checklists")
-public class ChecklistVersaoControleAPI {
+public class ChecklistVersaoControleAPI extends AbstractController {
 
 	private final ChecklistVersaoServiceAPI checklistVersaoServiceAPI;
 //	private final ChecklistVersaoServiceAPI checklistService;              
@@ -36,8 +38,8 @@ public class ChecklistVersaoControleAPI {
 	public ResponseEntity<?> criar(
 	        @RequestPart("dados") String dadosJson,
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
-	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas) {
-
+	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas, HttpSession session) {
+		getUserFromSession(session);
 	    try {
 	    	ObjectMapper mapper = new ObjectMapper();
 
