@@ -83,8 +83,9 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
 	}
 	
-	@GetMapping("/{idChecklist}/versoes")
-	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable Integer idChecklist) {
+	@GetMapping("/{idChecklistStr}/versoes")
+	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable String idChecklistStr) {
+		Integer idChecklist = temporalCryptoIdUtil.extractId(idChecklistStr);
 	    return checklistVersaoServiceAPI.listarVersoesChecklist(idChecklist);
 	}
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ChecklistVersaoResumoDTO {
-	private Integer idChecklistVersao;
+	private String idChecklistVersao;
 	private String idDemanda;
     private Integer versao;
     private LocalDateTime dataCadastro;

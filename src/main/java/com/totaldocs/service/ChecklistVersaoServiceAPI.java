@@ -382,7 +382,7 @@ public class ChecklistVersaoServiceAPI {
 		return versoes.stream().map(v -> {
 
 			ChecklistVersaoResumoDTO dto = new ChecklistVersaoResumoDTO();
-			dto.setIdChecklistVersao(v.getIdChecklistVersao());
+			dto.setIdChecklistVersao(temporalCryptoIdUtil.generateToken(v.getIdChecklistVersao()));
 			dto.setIdDemanda(v.getIdDemanda());
 			dto.setVersao(v.getVersao());
 			dto.setDataCadastro(v.getDataCadastro());
