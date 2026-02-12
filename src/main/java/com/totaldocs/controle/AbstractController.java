@@ -2,7 +2,10 @@ package com.totaldocs.controle;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+
+import com.totaldocs.dto.UsuarioLogado;
 
 public abstract class AbstractController {
 
@@ -12,7 +15,7 @@ public abstract class AbstractController {
      *
      * @param session HttpSession do request
      */
-    protected void getUserFromSession(HttpSession session) {
+    protected void checkExistsSession(HttpSession session) {
         if (session == null) {
             throw new RuntimeException("Sessão expirada");
         }
@@ -38,4 +41,18 @@ public abstract class AbstractController {
         Object principal = auth.getPrincipal();
         return principal == null || principal.equals("anonymousUser");
     }
+    
+    protected String getUsernameUserLogged(HttpSession session) {
+
+        checkExistsSession(session);
+
+        SecurityContext context = (SecurityContext) session.getAttribute(
+            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+        );
+
+        Authentication auth = context.getAuthentication();
+
+        return auth.getName();
+    }
+
 }

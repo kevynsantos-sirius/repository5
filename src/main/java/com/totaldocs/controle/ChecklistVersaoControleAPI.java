@@ -39,7 +39,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        @RequestPart("dados") String dadosJson,
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
 	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas, HttpSession session) {
-		getUserFromSession(session);
+		checkExistsSession(session);
 	    try {
 	    	ObjectMapper mapper = new ObjectMapper();
 

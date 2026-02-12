@@ -15,9 +15,11 @@ import com.totaldocs.dto.ChecklistPaginadoResponse;
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/api/checklists")
-public class ChecklistController {
+public class ChecklistController extends AbstractController {
 
     @Autowired
     private ChecklistVersaoServiceAPI checkVersaoServiceAPI;
@@ -38,5 +40,11 @@ public class ChecklistController {
                 pagina.getTotalPages(),
                 pagina.getTotalElements()
         );
+    }
+    
+    @GetMapping("/user/name")
+    public String userName(HttpSession session)
+    {
+    	return getUsernameUserLogged(session);
     }
 }
