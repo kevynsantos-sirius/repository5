@@ -1,11 +1,18 @@
 package com.totaldocs.controle;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.totaldocs.dto.UsuarioDTO;
 import com.totaldocs.dto.UsuarioLogado;
+import com.totaldocs.modelo.Usuario;
 
 public abstract class AbstractController {
 
@@ -15,6 +22,19 @@ public abstract class AbstractController {
      *
      * @param session HttpSession do request
      */
+	public static String USER_ID = "USER_ID";
+	
+	protected void setUserIdSession(Usuario usuario, HttpSession session)
+	{
+		session.setAttribute(USER_ID, usuario.getId());
+	}
+	
+	protected Integer getUserIdSession(HttpSession session)
+	{
+		Object obj = session.getAttribute(USER_ID);
+		return (Integer) obj;
+	}
+	
     protected void checkExistsSession(HttpSession session) {
         if (session == null) {
             throw new RuntimeException("Sessão expirada");
@@ -54,5 +74,18 @@ public abstract class AbstractController {
 
         return auth.getName();
     }
+    
+    protected ResponseEntity<UsuarioDTO> getUserLogged(HttpSession session)
+    {
+        Integer userId = getUserIdSession(session);
+        String userName = getUsernameUserLogged(session);
+
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setId(userId);
+        dto.setNomeUsuario(userName);
+
+        return ResponseEntity.ok(dto);
+    }
+
 
 }

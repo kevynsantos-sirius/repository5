@@ -1,5 +1,8 @@
 package com.totaldocs.controle;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,15 +16,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.totaldocs.dto.LoginRequest;
+import com.totaldocs.modelo.Usuario;
+import com.totaldocs.service.UsuarioService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController extends AbstractController {
 
 	private final AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private UsuarioService usuarioService; 
 
     public AuthController(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -43,12 +51,20 @@ public class AuthController {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
+        
+        Optional<Usuario> user = usuarioService.getUsuario(request.getUsername());
 
-        httpRequest.getSession(true)
+        HttpSession session = httpRequest.getSession(true);
+		session
             .setAttribute(
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 context
             );
+		if(user.isPresent())
+		{
+			Usuario u = user.get();
+			setUserIdSession(u,session);
+		}
 
         return ResponseEntity.ok().build();
     }
