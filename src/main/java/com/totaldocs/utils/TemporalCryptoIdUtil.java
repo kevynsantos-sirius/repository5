@@ -23,7 +23,7 @@ public class TemporalCryptoIdUtil {
     }
 
     private static final String ALGORITHM = "AES";
-    private static final long DEFAULT_EXPIRATION_SECONDS = 600;
+    private static final long DEFAULT_EXPIRATION_SECONDS = 1800;
 
     private SecretKeySpec getKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
