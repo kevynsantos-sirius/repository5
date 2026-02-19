@@ -418,7 +418,9 @@ public class ChecklistVersaoServiceAPI {
 		dto.setIdChecklist(uuidGenerateToken);
 		dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
 		dto.setCentroCusto(c.getChecklist().getCentroCusto());
-		dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
+		Ramo ramo = c.getChecklist().getRamo();
+		dto.setIdRamo(ramo.getIdRamo());
+		dto.setNomeRamo(ramo.getNomeRamo());
 
 		// ChecklistVersao
 		dto.setIdChecklistVersao(uuidGenerateTokenVersion);
