@@ -16,14 +16,18 @@ public class TemporalCryptoIdUtil {
 
     private final String secretKey;
 
+    private final long expirationSeconds;
+
     public TemporalCryptoIdUtil(
-        @Value("${secret.key.identifier.model}") String secretKey
+        @Value("${secret.key.identifier.model}") String secretKey,
+        @Value("${token.expiration.seconds}") long expirationSeconds
     ) {
         this.secretKey = secretKey;
+        this.expirationSeconds = expirationSeconds;
     }
 
+
     private static final String ALGORITHM = "AES";
-    private static final long DEFAULT_EXPIRATION_SECONDS = 1800;
 
     private SecretKeySpec getKey() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
@@ -41,7 +45,7 @@ public class TemporalCryptoIdUtil {
 
     public String generateToken(Integer recordId) {
         long expiresAt = Instant.now()
-                .plusSeconds(DEFAULT_EXPIRATION_SECONDS)
+                .plusSeconds(expirationSeconds)
                 .toEpochMilli();
 
         String payload = recordId + "|" + expiresAt;
