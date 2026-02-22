@@ -196,7 +196,7 @@ public class ChecklistVersaoServiceAPI {
 		usuario.setId(dto.getIdUsuario());
 		checklistVersaoNova.setUsuario(usuario);
 
-		checklistVersaoNova = checklistVersaoRepository.save(checklistVersaoNova);
+		checklistVersaoNova = checklistVersaoRepository.saveAndFlush(checklistVersaoNova);
 
 		// =========================
 		// ITERATORS DE ARQUIVOS
@@ -218,37 +218,44 @@ public class ChecklistVersaoServiceAPI {
 
 				// -------- LAYOUT EXISTENTE --------
 				String token = dtoLayout.getId();
-				if (!Strings.isBlank(token)) {
+				if (!Strings.isBlank(token) && temporalCryptoIdUtil.extractId(token) != null) {
 					
 					Integer layoutId = temporalCryptoIdUtil.extractId(token);
+					
+					if(layoutId != null) {
 
-					Layout layoutOrigem = layoutRepository.findById(layoutId)
-							.orElseThrow(() -> new IllegalStateException("Layout não encontrado"));
-
-//	                
-
-					layoutNovo.setChecklistVersao(checklistVersaoNova);
-					layoutNovo.setNomeLayout(layoutOrigem.getNomeLayout());
-					layoutNovo.setTipoMIME(layoutOrigem.getTipoMIME());
-					layoutNovo.setObservacao(dtoLayout.getObservacao());
-					layoutNovo.setConteudoLayout(layoutOrigem.getConteudoLayout());
-					layoutNovo.setDataAtualizacao(LocalDateTime.now());
-
-					if (dtoLayout.isTemArquivo()) {
-						if (!itLayouts.hasNext()) {
-							throw new IllegalStateException("Arquivo de layout esperado e não enviado");
-						}
-
-						MultipartFile fl = itLayouts.next();
-						layoutNovo.setNomeLayout(fl.getOriginalFilename());
-						layoutNovo.setTipoMIME(fl.getContentType());
-						layoutNovo.setConteudoLayout(fl.getBytes());
+							Layout layoutOrigem = layoutRepository.findById(layoutId)
+									.orElseThrow(() -> new IllegalStateException("Layout não encontrado"));
+		
+		//	                
+		
+							layoutNovo.setChecklistVersao(checklistVersaoNova);
+							layoutNovo.setNomeLayout(layoutOrigem.getNomeLayout());
+							layoutNovo.setTipoMIME(layoutOrigem.getTipoMIME());
+							layoutNovo.setObservacao(dtoLayout.getObservacao());
+							layoutNovo.setConteudoLayout(layoutOrigem.getConteudoLayout());
+							layoutNovo.setDataAtualizacao(LocalDateTime.now());
+		
+							if (dtoLayout.isTemArquivo()) {
+								if (!itLayouts.hasNext()) {
+									throw new IllegalStateException("Arquivo de layout esperado e não enviado");
+								}
+		
+								MultipartFile fl = itLayouts.next();
+								layoutNovo.setNomeLayout(fl.getOriginalFilename());
+								layoutNovo.setTipoMIME(fl.getContentType());
+								layoutNovo.setConteudoLayout(fl.getBytes());
+							}
+							
 					}
 
 				}
 				// -------- LAYOUT NOVO --------
 				else {
-
+					boolean exitsRegistry = !temporalCryptoIdUtil.isUUID(dtoLayout.getId());
+					if (!exitsRegistry) {
+						dtoLayout.setTemArquivo(true);
+					}
 					if (!dtoLayout.isTemArquivo()) {
 						throw new IllegalStateException("Layout novo exige arquivo");
 					}
