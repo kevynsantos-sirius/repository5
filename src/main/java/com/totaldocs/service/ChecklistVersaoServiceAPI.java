@@ -182,7 +182,9 @@ public class ChecklistVersaoServiceAPI {
 		// NOVA VERSÃO
 		// =========================
 		ChecklistVersao checklistVersaoNova = new ChecklistVersao();
-		checklistVersaoNova.setChecklist(versaoAtual.getChecklist());
+		Checklist checklist = versaoAtual.getChecklist();
+		checklist.setCentroCusto(dto.getCentroCusto());
+		checklistVersaoNova.setChecklist(checklist);
 		checklistVersaoNova.setStatus(dto.getStatus());
 		checklistVersaoNova.setIcatu(dto.isIcatu());
 		checklistVersaoNova.setCaixa(dto.isCaixa());
