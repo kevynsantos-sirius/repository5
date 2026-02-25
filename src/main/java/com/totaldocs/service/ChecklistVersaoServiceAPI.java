@@ -21,6 +21,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +49,99 @@ public class ChecklistVersaoServiceAPI {
 		this.layoutRepository = layoutRepository;
 		this.arquivoRepository = arquivoRepository;
 		this.usuarioService = usuarioService;
+	}
+	
+	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
+			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws IllegalStateException
+	{
+		Integer idCheckList = temporalCryptoIdUtil.extractId(idChecklistVersao);
+		ChecklistVersao versaoAtual = checklistVersaoRepository.findById(idCheckList)
+				.orElseThrow(() -> new IllegalStateException("Versão não encontrada"));
+		
+		Checklist checklist = versaoAtual.getChecklist();
+		
+		//IDENTIFICAÇÃO
+		
+		boolean centroCustoIsEqual = checklist.getCentroCusto().equals(dto.getCentroCusto());
+		boolean icatuIsEqual = versaoAtual.isIcatu() == dto.isIcatu();
+		boolean caixaIsEqual = versaoAtual.isCaixa() == dto.isCaixa();
+		boolean rioGrandeIsEqual = versaoAtual.isRioGrande() == dto.isRioGrande();
+		boolean idDemandaIsEqual = versaoAtual.getIdDemanda().equals(dto.getIdDemanda());
+		boolean statusIsEqual = versaoAtual.getStatus().equals(dto.getStatus());
+		
+		boolean identificationIsEqual = centroCustoIsEqual && icatuIsEqual 
+				&& caixaIsEqual && rioGrandeIsEqual && idDemandaIsEqual && statusIsEqual;
+		
+		if(!identificationIsEqual)
+		{
+			return;
+		}
+		
+		//LAYOUT E FORMA DE ENVIO - TI
+		
+		ChecklistVersao lastVersion = versaoAtual;
+		
+		
+		boolean qtdMassasIsDifference = false;
+		
+		for (LayoutDTO dtoLayout : dto.getLayouts()) {
+			String token = dtoLayout.getId();
+			boolean nameLayoutIsEqual = false;
+			boolean observationLayoutIsEqual = false;
+			if (!Strings.isBlank(token) && temporalCryptoIdUtil.extractId(token) != null) {
+				
+				Integer layoutId = temporalCryptoIdUtil.extractId(token);
+				
+				if(layoutId != null) {
+					
+					Layout layoutOrigem = layoutRepository.findById(layoutId)
+							.orElseThrow(() -> new IllegalStateException("Layout não encontrado"));
+					
+					nameLayoutIsEqual = layoutOrigem.getNomeLayout().equals(dtoLayout.getNomeLayout());
+					
+					observationLayoutIsEqual = layoutOrigem.getObservacao().equals(dtoLayout.getObservacao());
+					
+					qtdMassasIsDifference = layoutOrigem.getMassasDados().size() != dtoLayout.getMassasDados().size();
+					
+					if((!nameLayoutIsEqual || !observationLayoutIsEqual) || qtdMassasIsDifference)
+					{
+						return;
+					}
+					
+					
+				}
+				
+			}
+			
+			for (MassaDTO dtoMassa : dtoLayout.getMassasDados()) {
+				boolean nameMassaIsEqual = false;
+				boolean observationMassaIsEqual = false;
+				boolean exitsRegistry = !temporalCryptoIdUtil.isUUID(dtoMassa.getId());
+				if (exitsRegistry) {
+					Integer massaId = temporalCryptoIdUtil.extractId(dtoMassa.getId());
+					MassaDados massa = arquivoRepository.findById(massaId)
+							.orElseThrow(() -> new IllegalStateException("Massa não encontrada"));
+					
+					nameMassaIsEqual = massa.getNomeMassaDados().equals(dtoMassa.getNomeMassaDados());
+					observationMassaIsEqual = massa.getObservacao().equals(dtoMassa.getObservacao());
+					
+					if(!nameMassaIsEqual || !observationMassaIsEqual)
+					{
+						return;
+					}
+				}
+			}
+		}
+		
+		boolean qtdLayoutsIsDifference = lastVersion.getLayouts().size() != dto.getLayouts().size();
+		
+		if(qtdLayoutsIsDifference)
+		{
+			return;
+		}
+		
+		throw new IllegalStateException("Formulário sem nenhuma alteração");
+		
 	}
 
 	@Transactional(rollbackFor = Exception.class)
@@ -169,7 +263,10 @@ public class ChecklistVersaoServiceAPI {
 
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
-			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws IOException {
+			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws Exception {
+		
+		hasChangesForm(idChecklistVersao,dto,
+				filesLayout,filesMassas);
 
 		// =========================
 		// VERSÃO ATUAL

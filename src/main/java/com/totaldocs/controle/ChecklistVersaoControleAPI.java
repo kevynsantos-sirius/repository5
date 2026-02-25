@@ -11,7 +11,6 @@ import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +63,8 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	public ChecklistVersaoDTO editar(@PathVariable String idChecklist,
 								     @RequestPart("dto") ChecklistVersaoDTO dto,
 								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
-								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws IOException {
-	    return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas);
+								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws Exception {
+	    	return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas);
 	}
 		
 	@GetMapping("/page")
