@@ -181,6 +181,12 @@ public class ChecklistVersaoServiceAPI {
 		// =========================
 		// NOVA VERSÃO
 		// =========================
+		
+		if(!dto.isIcatu() && !dto.isCaixa() && !dto.isRioGrande())
+		{
+			throw new IllegalStateException("Selecione um tipo de documento");
+		}
+		
 		ChecklistVersao checklistVersaoNova = new ChecklistVersao();
 		Checklist checklist = versaoAtual.getChecklist();
 		checklist.setCentroCusto(dto.getCentroCusto());
