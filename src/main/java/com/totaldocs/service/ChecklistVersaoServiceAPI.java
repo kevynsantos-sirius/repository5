@@ -283,7 +283,6 @@ public class ChecklistVersaoServiceAPI {
 		
 		ChecklistVersao checklistVersaoNova = new ChecklistVersao();
 		Checklist checklist = versaoAtual.getChecklist();
-		checklist.setCentroCusto(dto.getCentroCusto());
 		checklistVersaoNova.setChecklist(checklist);
 		checklistVersaoNova.setStatus(dto.getStatus());
 		checklistVersaoNova.setIcatu(dto.isIcatu());
