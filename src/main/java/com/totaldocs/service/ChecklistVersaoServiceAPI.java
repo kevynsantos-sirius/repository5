@@ -264,9 +264,6 @@ public class ChecklistVersaoServiceAPI {
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
 			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws Exception {
-		
-		hasChangesForm(idChecklistVersao,dto,
-				filesLayout,filesMassas);
 
 		// =========================
 		// VERSÃO ATUAL
