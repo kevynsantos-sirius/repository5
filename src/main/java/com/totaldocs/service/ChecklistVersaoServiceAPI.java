@@ -494,6 +494,7 @@ public class ChecklistVersaoServiceAPI {
 			dto.setIdDemanda(v.getIdDemanda());
 			dto.setVersao(v.getVersao());
 			dto.setDataCadastro(v.getDataCadastro());
+			dto.setDataAtualizacao(v.getDataAtualizacao());
 			dto.setNomeUsuario(v.getUsuario().getNome());
 			dto.setStatus(v.getStatus());
 			dto.setAtual(v.getVersao() == versaoAtual);

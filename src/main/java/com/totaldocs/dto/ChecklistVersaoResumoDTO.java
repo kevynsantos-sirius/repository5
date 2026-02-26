@@ -10,6 +10,7 @@ public class ChecklistVersaoResumoDTO {
 	private String idDemanda;
     private Integer versao;
     private LocalDateTime dataCadastro;
+    private LocalDateTime dataAtualizacao;
     private String nomeUsuario;
     private Integer status;
     private boolean atual;
