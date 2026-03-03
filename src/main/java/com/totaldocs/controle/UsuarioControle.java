@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.modelo.Usuario;
 import com.totaldocs.service.UsuarioService;
 
@@ -27,6 +28,7 @@ public class UsuarioControle {
 	
 	
 	@GetMapping("/usuarios")
+	@CheckSession
 	public List<Usuario>listarTodos(){
 		return usuarioService.ListarTodos();
 	}

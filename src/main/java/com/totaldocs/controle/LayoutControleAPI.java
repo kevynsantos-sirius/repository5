@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.modelo.Layout;
 import com.totaldocs.repository.LayoutRepository;
 
@@ -20,6 +21,7 @@ public class LayoutControleAPI {
     private LayoutRepository layoutRepository;
 
     @GetMapping("/{id}/download")
+    @CheckSession
     public ResponseEntity<byte[]> downloadLayout(@PathVariable Integer id) {
 
         Layout layout = layoutRepository.findById(id)

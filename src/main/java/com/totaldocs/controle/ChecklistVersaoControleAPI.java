@@ -1,6 +1,7 @@
 package com.totaldocs.controle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.dto.ChecklistDTO;
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.dto.ChecklistVersaoResumoDTO;
@@ -34,11 +35,12 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	}
 
 	@PostMapping(value = "/salvar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@CheckSession
 	public ResponseEntity<?> criar(
 	        @RequestPart("dados") String dadosJson,
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
 	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas, HttpSession session) {
-		checkExistsSession(session);
+		
 	    try {
 	    	ObjectMapper mapper = new ObjectMapper();
 
@@ -60,6 +62,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	}
 	
 	@PostMapping("/{idChecklist}/editar")
+	@CheckSession
 	public ChecklistVersaoDTO editar(@PathVariable String idChecklist,
 								     @RequestPart("dto") ChecklistVersaoDTO dto,
 								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
@@ -68,6 +71,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	}
 		
 	@GetMapping("/page")
+	@CheckSession
 	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
 		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
 	}
@@ -77,12 +81,14 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 
 
 	@GetMapping("/{idStr}")
+	@CheckSession
 	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable String idStr) {
 		Integer id = temporalCryptoIdUtil.extractId(idStr);
 		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
 	}
 	
 	@GetMapping("/{idChecklistStr}/versoes")
+	@CheckSession
 	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable String idChecklistStr) {
 		Integer idChecklist = temporalCryptoIdUtil.extractId(idChecklistStr);
 	    return checklistVersaoServiceAPI.listarVersoesChecklist(idChecklist);

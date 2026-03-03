@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.modelo.Ramo;
 import com.totaldocs.service.RamoService;
 
@@ -19,6 +20,7 @@ public class RamoControle {
     }
 
     @GetMapping
+    @CheckSession
     public List<Ramo> listarTodos() {
         return ramoService.ListarTodos();
     }

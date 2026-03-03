@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.modelo.MassaDados;
 import com.totaldocs.repository.MassaDadoRepository;
 
@@ -19,6 +20,7 @@ public class MassaDadosController {
     private MassaDadoRepository massaDadoRepository;
 	
 	@GetMapping("/{id}/download")
+	@CheckSession
 	public ResponseEntity<byte[]> downloadMassa(@PathVariable Integer id) {
 	
 	        MassaDados massaDados = massaDadoRepository.findById(id)

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.totaldocs.annotation.CheckSession;
 import com.totaldocs.dto.ChecklistPaginadoResponse;
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.service.ChecklistVersaoService;
@@ -38,12 +39,12 @@ public class ChecklistController extends AbstractController {
 	private TemporalCryptoIdUtil temporalCryptoIdUtil;
 
     @GetMapping("/list")
+    @CheckSession
     public ChecklistPaginadoResponse listar(
     		HttpSession session,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-    	getUserLogged(session);
         Pageable pageable = PageRequest.of(page, size);
         Page<ChecklistVersaoDTO> pagina =
                 checkVersaoServiceAPI.listarPaginadoDTO(pageable);
@@ -57,19 +58,21 @@ public class ChecklistController extends AbstractController {
     }
     
     @GetMapping("/user/")
+    @CheckSession
     public ResponseEntity<?> getUser(HttpSession session)
     {
     	return getUserLogged(session);
     }
     
     @GetMapping("/{idChecklistVersaoStr}/export")
+    @CheckSession
     public ResponseEntity<byte[]> exportChecklist(
             HttpSession session,
             @PathVariable String idChecklistVersaoStr,
             @RequestParam(defaultValue = "zip") String format
     ) throws IOException {
 
-        getUserLogged(session);
+       
 
         Integer idChecklistVersao = temporalCryptoIdUtil.extractId(idChecklistVersaoStr);
         ChecklistVersaoDTO checklist =
