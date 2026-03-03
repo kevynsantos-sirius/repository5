@@ -103,9 +103,15 @@ public class ChecklistVersaoService {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {
 
-            String rootFolder = "checklist-" + checklist.getIdChecklistVersao() + "/";
+            String rootFolder = "checklist-" 
+                    + sanitize(checklist.getNomeDocumento()) 
+                    + "-" 
+                    + checklist.getIdChecklistVersao() 
+                    + "/";
+
             String layoutsRoot = rootFolder + "layouts/";
 
+            // Cria pasta layouts/
             zos.putNextEntry(new ZipEntry(layoutsRoot));
             zos.closeEntry();
 
@@ -118,19 +124,25 @@ public class ChecklistVersaoService {
 
                     String layoutNome = sanitize(layout.getNomeLayout());
 
-                    // 🔹 Se NÃO tiver massas → arquivo direto em layouts/
-                    if (!temMassas && !Strings.isBlank(layout.getNomeLayout())) {
+                    Layout layoutEntity = buscarArquivoLayout(layout.getId());
+                    byte[] conteudoLayout = layoutEntity.getConteudoLayout();
 
-                        Layout layoutEntity = buscarArquivoLayout(layout.getId());
+                    // 🔹 Layout SEM massas → arquivo direto em layouts/
+                    if (!temMassas) {
 
-                        byte[] conteudo = layoutEntity.getConteudoLayout();
+                        if (conteudoLayout != null && conteudoLayout.length > 0) {
 
-                        String nomeArquivo = sanitize(layoutEntity.getNomeLayout());
+                            String nomeArquivo = sanitize(layoutEntity.getNomeLayout());
 
-                        addBytesToZip(zos, conteudo, layoutsRoot + nomeArquivo);
+                            addBytesToZip(
+                                    zos,
+                                    conteudoLayout,
+                                    layoutsRoot + nomeArquivo
+                            );
+                        }
                     }
 
-                    // 🔹 Se tiver massas → vira pasta
+                    // 🔹 Layout COM massas → vira pasta
                     if (temMassas) {
 
                         String layoutFolder = layoutsRoot + layoutNome + "/";
@@ -138,37 +150,37 @@ public class ChecklistVersaoService {
                         zos.closeEntry();
 
                         // Arquivo do layout dentro da pasta
-                        if (!Strings.isBlank(layout.getNomeLayout())) {
-
-                            Layout layoutEntity = buscarArquivoLayout(layout.getId());
-
-                            byte[] conteudo = layoutEntity.getConteudoLayout();
+                        if (conteudoLayout != null && conteudoLayout.length > 0) {
 
                             String nomeArquivo = sanitize(layoutEntity.getNomeLayout());
 
-                            addBytesToZip(zos, conteudo, layoutFolder + nomeArquivo);
+                            addBytesToZip(
+                                    zos,
+                                    conteudoLayout,
+                                    layoutFolder + nomeArquivo
+                            );
                         }
 
-                        // Massas
+                        // Pasta massas/
                         String massasFolder = layoutFolder + "massas/";
                         zos.putNextEntry(new ZipEntry(massasFolder));
                         zos.closeEntry();
 
+                        // Arquivos das massas (SEM criar pasta com nome do arquivo)
                         for (MassaDTO massa : layout.getMassasDados()) {
 
-                            String massaFolder = massasFolder + sanitize(massa.getNomeMassaDados()) + "/";
-                            zos.putNextEntry(new ZipEntry(massaFolder));
-                            zos.closeEntry();
+                            MassaDados massaEntity = buscarArquivoMassa(massa.getId());
+                            byte[] conteudoMassa = massaEntity.getConteudoMassaDados();
 
-                            if (!Strings.isBlank(massa.getNomeMassaDados())) {
-
-                                MassaDados massaEntity = buscarArquivoMassa(massa.getId());
-
-                                byte[] conteudo = massaEntity.getConteudoMassaDados();
+                            if (conteudoMassa != null && conteudoMassa.length > 0) {
 
                                 String nomeArquivo = sanitize(massaEntity.getNomeMassaDados());
 
-                                addBytesToZip(zos, conteudo, massaFolder + nomeArquivo);
+                                addBytesToZip(
+                                        zos,
+                                        conteudoMassa,
+                                        massasFolder + nomeArquivo
+                                );
                             }
                         }
                     }
