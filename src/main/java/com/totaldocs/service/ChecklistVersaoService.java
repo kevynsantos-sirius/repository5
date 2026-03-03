@@ -96,35 +96,6 @@ public class ChecklistVersaoService {
         if (nome == null) return "sem-nome";
         return nome.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
     }
-    
-    private String getExtensaoPorMime(String mime) {
-
-        if (mime == null || mime.isBlank()) {
-            return ".dat";
-        }
-
-        switch (mime.toLowerCase()) {
-            case "application/pdf":
-                return ".pdf";
-            case "text/plain":
-                return ".txt";
-            case "application/json":
-                return ".json";
-            case "text/csv":
-                return ".csv";
-            case "application/xml":
-            case "text/xml":
-                return ".xml";
-            case "application/vnd.ms-excel":
-                return ".xls";
-            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                return ".xlsx";
-            case "application/zip":
-                return ".zip";
-            default:
-                return ".dat";
-        }
-    }
 
 
     public byte[] generateZipFromCheckList(ChecklistVersaoDTO checklist) throws IOException {
@@ -154,12 +125,7 @@ public class ChecklistVersaoService {
 
                         byte[] conteudo = layoutEntity.getConteudoLayout();
 
-                        String nomeBase = sanitize(layoutEntity.getNomeLayout());
-                        String extensao = getExtensaoPorMime(layoutEntity.getTipoMIME());
-
-                        String nomeArquivo = nomeBase.endsWith(extensao)
-                                ? nomeBase
-                                : nomeBase + extensao;
+                        String nomeArquivo = sanitize(layoutEntity.getNomeLayout());
 
                         addBytesToZip(zos, conteudo, layoutsRoot + nomeArquivo);
                     }
@@ -178,12 +144,7 @@ public class ChecklistVersaoService {
 
                             byte[] conteudo = layoutEntity.getConteudoLayout();
 
-                            String nomeBase = sanitize(layoutEntity.getNomeLayout());
-                            String extensao = getExtensaoPorMime(layoutEntity.getTipoMIME());
-
-                            String nomeArquivo = nomeBase.endsWith(extensao)
-                                    ? nomeBase
-                                    : nomeBase + extensao;
+                            String nomeArquivo = sanitize(layoutEntity.getNomeLayout());
 
                             addBytesToZip(zos, conteudo, layoutFolder + nomeArquivo);
                         }
@@ -205,12 +166,7 @@ public class ChecklistVersaoService {
 
                                 byte[] conteudo = massaEntity.getConteudoMassaDados();
 
-                                String nomeBase = sanitize(massaEntity.getNomeMassaDados());
-                                String extensao = getExtensaoPorMime(massaEntity.getTipoMIME());
-
-                                String nomeArquivo = nomeBase.endsWith(extensao)
-                                        ? nomeBase
-                                        : nomeBase + extensao;
+                                String nomeArquivo = sanitize(massaEntity.getNomeMassaDados());
 
                                 addBytesToZip(zos, conteudo, massaFolder + nomeArquivo);
                             }
