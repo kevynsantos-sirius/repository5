@@ -4,7 +4,9 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -62,14 +64,14 @@ public class TemporalCryptoIdUtil {
 
         String[] parts = decrypted.split("\\|");
         if (parts.length != 2) {
-            throw new RuntimeException("Token inválido");
+        	throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido");
         }
 
         Integer recordId = Integer.parseInt(parts[0]);
         Long expiresAt = Long.parseLong(parts[1]);
 
         if (Instant.now().toEpochMilli() > expiresAt) {
-            throw new RuntimeException("Token expirado");
+        	throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token expirado");
         }
 
         return recordId;
