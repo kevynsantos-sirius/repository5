@@ -83,10 +83,12 @@ public class ChecklistController extends AbstractController {
         }
 
         byte[] zipBytes = checklistVersaoService.generateZipFromCheckList(checklist);
+        
+        String zipName = checklistVersaoService.nameFolderOrZip(checklist,true);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=checklist-" + idChecklistVersaoStr + ".zip")
+                        "attachment; filename=" + zipName + ".zip")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .contentLength(zipBytes.length)
                 .body(zipBytes);

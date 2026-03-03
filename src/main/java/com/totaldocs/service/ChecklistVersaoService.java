@@ -16,6 +16,7 @@ import com.totaldocs.utils.TemporalCryptoIdUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -103,11 +104,7 @@ public class ChecklistVersaoService {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {
 
-            String rootFolder = "checklist-" 
-                    + sanitize(checklist.getNomeDocumento()) 
-                    + "-" 
-                    + checklist.getIdChecklistVersao() 
-                    + "/";
+        	String rootFolder = nameFolderOrZip(checklist,false);
 
             String layoutsRoot = rootFolder + "layouts/";
 
@@ -191,6 +188,25 @@ public class ChecklistVersaoService {
             return baos.toByteArray();
         }
     }
+
+
+	public String nameFolderOrZip(ChecklistVersaoDTO checklist, boolean isZip) {
+		LocalDateTime agora = LocalDateTime.now();
+
+		// Formato: ano-mes-dia_hora-minuto-segundo
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
+		String dataHoraFormatada = agora.format(formatter);
+		
+		String folderOrNot = isZip ? "" : "/";
+
+		String rootFolder = "checklist-"
+		        + sanitize(checklist.getNomeDocumento())
+		        + "-"
+		        + dataHoraFormatada
+		        + folderOrNot;
+		return rootFolder;
+	}
     
     private void addBytesToZip(ZipOutputStream zos, byte[] fileBytes, String zipPath)
             throws IOException {
