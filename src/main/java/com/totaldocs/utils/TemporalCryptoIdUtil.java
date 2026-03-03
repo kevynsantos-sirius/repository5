@@ -64,7 +64,7 @@ public class TemporalCryptoIdUtil {
 
         String[] parts = decrypted.split("\\|");
         if (parts.length != 2) {
-        	throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token inválido");
+        	throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token inválido");
         }
 
         Integer recordId = Integer.parseInt(parts[0]);
