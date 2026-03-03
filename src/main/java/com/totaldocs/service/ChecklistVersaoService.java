@@ -11,6 +11,7 @@ import com.totaldocs.modelo.Layout;
 import com.totaldocs.modelo.MassaDados;
 import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
+import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,6 +38,9 @@ public class ChecklistVersaoService {
 	
 	@Autowired
 	private MassaDadoRepository massaDadoRepository;
+	
+	@Autowired
+	private TemporalCryptoIdUtil temporalCryptoIdUtil;
     
     public Checklist salvarChecklist(ChecklistVersao checklistVersao) {
         try {
@@ -69,16 +74,18 @@ public class ChecklistVersaoService {
         return response.getBody();
     }
     
-    private Layout buscarArquivoLayout(String layoutId) {
+    private Layout buscarArquivoLayout(String layoutIdStr) {
 
+    	Integer layoutId = temporalCryptoIdUtil.extractId(layoutIdStr);
         return layoutRepository.findById(Integer.valueOf(layoutId))
                 .orElseThrow(() ->
                         new RuntimeException("Layout não encontrado id " + layoutId)
                 );
     }
 
-    private MassaDados buscarArquivoMassa(String massaId) {
-
+    private MassaDados buscarArquivoMassa(String massaIdStr) {
+    	
+    	Integer massaId = temporalCryptoIdUtil.extractId(massaIdStr);
         return massaDadoRepository.findById(Integer.valueOf(massaId))
                 .orElseThrow(() ->
                         new RuntimeException("Massa não encontrada id " + massaId)
@@ -135,12 +142,13 @@ public class ChecklistVersaoService {
 
                 for (LayoutDTO layout : checklist.getLayouts()) {
 
-                    String layoutFolder = layoutsRoot + sanitize(layout.getNomeLayout()) + "/";
-                    zos.putNextEntry(new ZipEntry(layoutFolder));
-                    zos.closeEntry();
+                    boolean temMassas = layout.getMassasDados() != null
+                            && !layout.getMassasDados().isEmpty();
 
-                    // ---------------- ARQUIVO REAL LAYOUT ----------------
-                    if (layout.isTemArquivo()) {
+                    String layoutNome = sanitize(layout.getNomeLayout());
+
+                    // 🔹 Se NÃO tiver massas → arquivo direto em layouts/
+                    if (!temMassas && !Strings.isBlank(layout.getNomeLayout())) {
 
                         Layout layoutEntity = buscarArquivoLayout(layout.getId());
 
@@ -153,12 +161,34 @@ public class ChecklistVersaoService {
                                 ? nomeBase
                                 : nomeBase + extensao;
 
-                        addBytesToZip(zos, conteudo, layoutFolder + nomeArquivo);
+                        addBytesToZip(zos, conteudo, layoutsRoot + nomeArquivo);
                     }
 
-                    // ---------------- MASSAS ----------------
-                    if (layout.getMassasDados() != null && !layout.getMassasDados().isEmpty()) {
+                    // 🔹 Se tiver massas → vira pasta
+                    if (temMassas) {
 
+                        String layoutFolder = layoutsRoot + layoutNome + "/";
+                        zos.putNextEntry(new ZipEntry(layoutFolder));
+                        zos.closeEntry();
+
+                        // Arquivo do layout dentro da pasta
+                        if (!Strings.isBlank(layout.getNomeLayout())) {
+
+                            Layout layoutEntity = buscarArquivoLayout(layout.getId());
+
+                            byte[] conteudo = layoutEntity.getConteudoLayout();
+
+                            String nomeBase = sanitize(layoutEntity.getNomeLayout());
+                            String extensao = getExtensaoPorMime(layoutEntity.getTipoMIME());
+
+                            String nomeArquivo = nomeBase.endsWith(extensao)
+                                    ? nomeBase
+                                    : nomeBase + extensao;
+
+                            addBytesToZip(zos, conteudo, layoutFolder + nomeArquivo);
+                        }
+
+                        // Massas
                         String massasFolder = layoutFolder + "massas/";
                         zos.putNextEntry(new ZipEntry(massasFolder));
                         zos.closeEntry();
@@ -169,7 +199,7 @@ public class ChecklistVersaoService {
                             zos.putNextEntry(new ZipEntry(massaFolder));
                             zos.closeEntry();
 
-                            if (massa.isTemArquivo()) {
+                            if (!Strings.isBlank(massa.getNomeMassaDados())) {
 
                                 MassaDados massaEntity = buscarArquivoMassa(massa.getId());
 
