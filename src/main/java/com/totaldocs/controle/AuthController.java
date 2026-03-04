@@ -63,7 +63,7 @@ public class AuthController extends AbstractController {
 		if(user.isPresent())
 		{
 			Usuario u = user.get();
-			setUserIdSession(u,session);
+			setUserIdAndIsAdminSession(u,session);
 		}
 
         return ResponseEntity.ok().build();

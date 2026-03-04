@@ -6,4 +6,5 @@ import lombok.Data;
 public class UsuarioDTO {
 	private Integer id;
 	private String nomeUsuario;
+	private boolean isAdmin;
 }

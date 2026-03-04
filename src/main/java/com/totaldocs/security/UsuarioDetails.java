@@ -60,6 +60,6 @@ public class UsuarioDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return usuario.isAtivo();
+        return !usuario.isBloqueado();
     }
 }

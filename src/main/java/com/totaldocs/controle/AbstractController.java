@@ -23,16 +23,24 @@ public abstract class AbstractController {
      * @param session HttpSession do request
      */
 	public static String USER_ID = "USER_ID";
+	public static String USER_IS_ADMIN = "USER_IS_ADMIN";
 	
-	protected void setUserIdSession(Usuario usuario, HttpSession session)
+	protected void setUserIdAndIsAdminSession(Usuario usuario, HttpSession session)
 	{
 		session.setAttribute(USER_ID, usuario.getId());
+		session.setAttribute(USER_IS_ADMIN, "S".equals(usuario.getEhAdmin()));
 	}
 	
 	protected Integer getUserIdSession(HttpSession session)
 	{
 		Object obj = session.getAttribute(USER_ID);
 		return (Integer) obj;
+	}
+	
+	protected Boolean getIsAdminSession(HttpSession session)
+	{
+		Object obj = session.getAttribute(USER_IS_ADMIN);
+		return (Boolean) obj;
 	}
 	
     protected void checkExistsSession(HttpSession session) {
@@ -79,10 +87,12 @@ public abstract class AbstractController {
     {
         Integer userId = getUserIdSession(session);
         String userName = getUsernameUserLogged(session);
+        Boolean isAdmin = getIsAdminSession(session);
 
         UsuarioDTO dto = new UsuarioDTO();
         dto.setId(userId);
         dto.setNomeUsuario(userName);
+        dto.setAdmin(isAdmin);
 
         return ResponseEntity.ok(dto);
     }
