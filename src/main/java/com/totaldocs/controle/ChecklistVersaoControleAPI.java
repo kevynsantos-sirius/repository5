@@ -72,8 +72,10 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 		
 	@GetMapping("/page")
 	@CheckSession
-	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable) {
-		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable);
+	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable, HttpSession session) {
+		boolean isAdmin = getIsAdminSession(session);
+        Integer idUser = getUserIdSession(session);
+		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser);
 	}
 	
 	@Autowired

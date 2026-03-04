@@ -20,6 +20,7 @@ import com.totaldocs.utils.TemporalCryptoIdUtil;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -450,35 +451,54 @@ public class ChecklistVersaoServiceAPI {
 		checklistVersaoNova.setLayouts(layoutsNovos);
 		return dto;
 	}
+	
+	private ChecklistVersaoDTO converterParaDTO(ChecklistVersao c) {
 
-	public Page<ChecklistVersaoDTO> listarPaginadoDTO(Pageable pageable) {
-		return checklistVersaoRepository.findUltimasVersoes(pageable).map(c -> {
-			ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
-			String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
-			String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
-			dto.setIdChecklist(uuidGenerateToken); // ID DO CHECKLIST
-			dto.setIdChecklistVersao(uuidGenerateTokenVersion);
-			dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
-			dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
-			dto.setNomeRamo(c.getChecklist().getRamo().getNomeRamo());
-			dto.setCentroCusto(c.getChecklist().getCentroCusto());
-			dto.setStatus(c.getStatus());
-			dto.setIdDemanda(c.getIdDemanda());
+	    ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
 
-			UsuarioDTO usuarioDTO = new UsuarioDTO();
-			Usuario user = c.getUsuario();
-			usuarioDTO.setId(user.getId());
-			usuarioDTO.setNomeUsuario(user.getNome());
+	    String uuidGenerateTokenVersion =
+	            temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
 
-			dto.setUsuario(usuarioDTO);
+	    String uuidGenerateToken =
+	            temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
 
-			// Flags
-			dto.setIcatu(c.isIcatu());
-			dto.setCaixa(c.isCaixa());
-			dto.setRioGrande(c.isRioGrande());
+	    dto.setIdChecklist(uuidGenerateToken);
+	    dto.setIdChecklistVersao(uuidGenerateTokenVersion);
+	    dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
+	    dto.setIdRamo(c.getChecklist().getRamo().getIdRamo());
+	    dto.setNomeRamo(c.getChecklist().getRamo().getNomeRamo());
+	    dto.setCentroCusto(c.getChecklist().getCentroCusto());
+	    dto.setStatus(c.getStatus());
+	    dto.setIdDemanda(c.getIdDemanda());
 
-			return dto;
-		});
+	    Usuario user = c.getUsuario();
+	    UsuarioDTO usuarioDTO = new UsuarioDTO();
+	    usuarioDTO.setId(user.getId());
+	    usuarioDTO.setNomeUsuario(user.getNome());
+
+	    dto.setUsuario(usuarioDTO);
+
+	    dto.setIcatu(c.isIcatu());
+	    dto.setCaixa(c.isCaixa());
+	    dto.setRioGrande(c.isRioGrande());
+
+	    return dto;
+	}
+
+	public Page<ChecklistVersaoDTO> listarPaginadoDTO(
+			org.springframework.data.domain.Pageable pageable,
+	        boolean isAdmin,
+	        Integer idUser) {
+
+	    if (isAdmin) {
+	        return checklistVersaoRepository
+	                .findUltimasVersoes(pageable)
+	                .map(this::converterParaDTO);
+	    }
+
+	    return checklistVersaoRepository
+	            .findByUsuarioId(idUser, pageable)
+	            .map(this::converterParaDTO);
 	}
 
 	public List<ChecklistVersaoResumoDTO> listarVersoesChecklist(Integer idChecklist) {

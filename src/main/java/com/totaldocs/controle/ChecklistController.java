@@ -46,8 +46,10 @@ public class ChecklistController extends AbstractController {
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
+        boolean isAdmin = getIsAdminSession(session);
+        Integer idUser = getUserIdSession(session);
         Page<ChecklistVersaoDTO> pagina =
-                checkVersaoServiceAPI.listarPaginadoDTO(pageable);
+                checkVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser);
 
         return new ChecklistPaginadoResponse(
                 pagina.getContent(),
