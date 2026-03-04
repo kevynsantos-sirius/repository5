@@ -36,57 +36,56 @@ public class UsuarioControle extends AbstractController {
     @GetMapping
     public List<Usuario> listarUsuarios(HttpSession session) {
         verificarAdmin(session);
-        Integer idUserAdmin = getUserIdSession(session);
-        return usuarioService.listarTodos(idUserAdmin);
+        return usuarioService.listarTodos();
     }
 
-    // ✅ CRIAR
-    @PostMapping
-    public ResponseEntity<?> criarUsuario(@RequestBody Usuario usuario, HttpSession session) {
-        verificarAdmin(session);
-        try
-        {
-        	Usuario u = usuarioService.criarUsuario(usuario);
-        	return ResponseEntity.ok(u);
-        }
-        catch(Exception e)
-        {
-        	return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage()); // 400
-        }
-    }
-
-    // ✅ ATUALIZAR
-    @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarUsuario(
-            @PathVariable String id,
-            @RequestBody Usuario usuario, HttpSession session) throws UserNotExists {
-
-        verificarAdmin(session);
-        try
-        {
-        	Usuario u = usuarioService.atualizarUsuario(id, usuario);
-        	return ResponseEntity.ok(u);
-        }
-        catch(UserNotExists e)
-        {
-        	return ResponseEntity.notFound().build(); // 404
-        }
-    }
-
-    // ✅ DELETAR
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable String id, HttpSession session) {
-        verificarAdmin(session);
-        try
-        {
-        	usuarioService.deletarUsuario(id);
-        	return ResponseEntity.noContent().build(); // 204
-        }
-        catch(UserNotExists e)
-        {
-        	return ResponseEntity.notFound().build(); // 404
-        }
-    }
+//    // ✅ CRIAR
+//    @PostMapping
+//    public ResponseEntity<?> criarUsuario(@RequestBody Usuario usuario, HttpSession session) {
+//        verificarAdmin(session);
+//        try
+//        {
+//        	Usuario u = usuarioService.criarUsuario(usuario);
+//        	return ResponseEntity.ok(u);
+//        }
+//        catch(Exception e)
+//        {
+//        	return ResponseEntity
+//                    .badRequest()
+//                    .body(e.getMessage()); // 400
+//        }
+//    }
+//
+//    // ✅ ATUALIZAR
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> atualizarUsuario(
+//            @PathVariable String id,
+//            @RequestBody Usuario usuario, HttpSession session) throws UserNotExists {
+//
+//        verificarAdmin(session);
+//        try
+//        {
+//        	Usuario u = usuarioService.atualizarUsuario(id, usuario);
+//        	return ResponseEntity.ok(u);
+//        }
+//        catch(UserNotExists e)
+//        {
+//        	return ResponseEntity.notFound().build(); // 404
+//        }
+//    }
+//
+//    // ✅ DELETAR
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deletarUsuario(@PathVariable String id, HttpSession session) {
+//        verificarAdmin(session);
+//        try
+//        {
+//        	usuarioService.deletarUsuario(id);
+//        	return ResponseEntity.noContent().build(); // 204
+//        }
+//        catch(UserNotExists e)
+//        {
+//        	return ResponseEntity.notFound().build(); // 404
+//        }
+//    }
 }

@@ -32,7 +32,7 @@ public class UsuarioService {
 		return usuarioRepository.findByLogin(login);
 	}
 
-	public List<com.totaldocs.dto.Usuario> listarTodos(Integer idUserAdmin) {
+	public List<com.totaldocs.dto.Usuario> listarTodos() {
 
 	    return usuarioRepository.findAll()
 	            .stream()
@@ -42,7 +42,8 @@ public class UsuarioService {
 	                dto.setLogin(usuario.getLogin());
 	                dto.setNome(usuario.getNome());
 	                dto.setBloqueado(usuario.isFlgBloqueado());
-	                dto.setPerfis(usuario.getId().equals(idUserAdmin) ? List.of("ADMIN") : List.of("USER"));
+	                dto.setPerfis("S".equals(usuario.getEhAdmin()) ? List.of("ADMIN") : List.of("USER"));
+	                dto.setEmail(usuario.getEmail());
 	                return dto;
 	            })
 	            .toList();
