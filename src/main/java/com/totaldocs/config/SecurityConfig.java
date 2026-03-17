@@ -51,8 +51,24 @@ public class SecurityConfig {
 	        .cors(Customizer.withDefaults())
 
 	        .authorizeHttpRequests(auth -> auth
+
+	            // 🔥 LIBERA ARQUIVOS DO REACT
+	            .requestMatchers(
+	                "/",
+	                "/index.html",
+	                "/favicon.ico",
+	                "/assets/**",
+	                "/*.js",
+	                "/*.css",
+	                "/**/*.js",
+	                "/**/*.css"
+	            ).permitAll()
+
+	            // 🔥 LIBERA LOGIN
 	            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 	            .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+
+	            // 🔒 RESTO PROTEGIDO
 	            .anyRequest().authenticated()
 	        )
 
