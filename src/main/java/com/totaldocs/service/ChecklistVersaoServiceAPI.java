@@ -497,7 +497,7 @@ public class ChecklistVersaoServiceAPI {
 	    }
 
 	    return checklistVersaoRepository
-	            .findByUsuarioId(idUser, pageable)
+	            .findByUsuarioIdOrderByDataAtualizacaoDesc(idUser, pageable)
 	            .map(this::converterParaDTO);
 	}
 
