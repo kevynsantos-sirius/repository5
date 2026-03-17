@@ -36,7 +36,7 @@ public interface ChecklistVersaoRepository extends JpaRepository<ChecklistVersao
 	
 	List<ChecklistVersao> findByChecklistIdOrderByVersaoDesc(Integer idChecklist);
 	
-	Page<ChecklistVersao> findByUsuarioId(
+	Page<ChecklistVersao> findByUsuarioIdOrderByDataAtualizacaoDesc(
 	        Integer idUser,
 	        org.springframework.data.domain.Pageable pageable
 	);
