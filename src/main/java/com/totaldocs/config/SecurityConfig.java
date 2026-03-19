@@ -69,7 +69,8 @@ public class SecurityConfig {
 	            .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
 
 	            // 🔒 RESTO PROTEGIDO
-	            .anyRequest().authenticated()
+	            .requestMatchers("/api/**").authenticated()
+	            .anyRequest().permitAll()
 	        )
 
 	        .exceptionHandling(ex -> ex

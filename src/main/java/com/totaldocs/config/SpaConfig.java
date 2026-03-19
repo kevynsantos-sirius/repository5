@@ -9,7 +9,16 @@ public class SpaConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/{spring:[^.]*}")
+
+        // 1 nível
+        registry.addViewController("/{path:[^\\.]*}")
+                .setViewName("forward:/index.html");
+
+        // múltiplos níveis (ESSENCIAL)
+        registry.addViewController("/**/{path:[^\\.]*}")
+                .setViewName("forward:/index.html");
+
+        registry.addViewController("/")
                 .setViewName("forward:/index.html");
     }
 }
