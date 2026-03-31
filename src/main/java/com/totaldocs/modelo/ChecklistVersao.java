@@ -54,4 +54,7 @@ public class ChecklistVersao {
 //    @OneToMany(mappedBy = "checklistVersao", cascade = CascadeType.ALL, orphanRemoval = true)
     @OneToMany(mappedBy = "checklistVersao")
     private List<Layout> layouts;
+    
+    @OneToMany(mappedBy = "checklist")
+    private List<ModeloDocumento> modelosDocumento;
 }

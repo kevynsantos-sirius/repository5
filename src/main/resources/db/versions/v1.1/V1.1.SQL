@@ -184,3 +184,9 @@ CREATE TABLE CL_Logomodelo (
         FOREIGN KEY (idModelo)
         REFERENCES CL_ModeloDocumento(Id)
 );
+
+ALTER TABLE CL_Logomodelo
+ADD arquivo VARBINARY(MAX) NULL;
+
+ALTER TABLE CL_Logomodelo
+ADD tipoMIME VARCHAR(200) NULL;

@@ -13,6 +13,7 @@ import com.totaldocs.utils.TemporalCryptoIdUtil;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,22 +40,23 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	public ResponseEntity<?> criar(
 	        @RequestPart("dados") String dadosJson,
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
-	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas, HttpSession session) {
-		
-	    try {
-	    	ObjectMapper mapper = new ObjectMapper();
+	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas,
+	        @RequestPart(value = "filesModelos", required = false) Map<String, MultipartFile> arquivosModelos, // ⚡ map now
+	        HttpSession session) {
 
-	        // Agora convertemos JSON corretamente → ChecklistDTO
+	    try {
+	        ObjectMapper mapper = new ObjectMapper();
+
 	        ChecklistVersaoDTO dto = mapper.readValue(dadosJson, ChecklistVersaoDTO.class);
-	        
-	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas);
+
+	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelos);
 
 	        return ResponseEntity
 	                .status(HttpStatus.CREATED)
 	                .body(salvo);
 
 	    } catch (Exception e) {
-	        e.printStackTrace(); // log no servidor
+	        e.printStackTrace();
 	        return ResponseEntity
 	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                .body(new ErrorResponse("Erro ao salvar checklist", e.getMessage(), 0));
@@ -66,8 +68,9 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	public ChecklistVersaoDTO editar(@PathVariable String idChecklist,
 								     @RequestPart("dto") ChecklistVersaoDTO dto,
 								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
-								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas) throws Exception {
-	    	return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas);
+								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas,
+								     @RequestPart(value = "filesModelos", required = false) Map<String, MultipartFile> arquivosModelos) throws Exception {
+	    	return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelos);
 	}
 		
 	@GetMapping("/page")

@@ -4,17 +4,26 @@ import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.dto.ChecklistVersaoResumoDTO;
 import com.totaldocs.dto.LayoutDTO;
 import com.totaldocs.dto.MassaDTO;
+import com.totaldocs.dto.ModeloDTO;
 import com.totaldocs.dto.UsuarioDTO;
+import com.totaldocs.enums.LogomodeloTipoCodigo;
 import com.totaldocs.modelo.Checklist;
 import com.totaldocs.modelo.ChecklistVersao;
 import com.totaldocs.modelo.Layout;
+import com.totaldocs.modelo.Logomodelo;
+import com.totaldocs.modelo.LogomodeloTipo;
 import com.totaldocs.modelo.MassaDados;
+import com.totaldocs.modelo.ModeloDocumento;
 import com.totaldocs.modelo.Ramo;
 import com.totaldocs.modelo.Usuario;
 import com.totaldocs.repository.ChecklistRepository;
 import com.totaldocs.repository.ChecklistVersaoRepository;
 import com.totaldocs.repository.LayoutRepository;
+import com.totaldocs.repository.LogoCapaRepository;
+import com.totaldocs.repository.LogomodeloRepository;
+import com.totaldocs.repository.LogomodeloTipoRepository;
 import com.totaldocs.repository.MassaDadoRepository;
+import com.totaldocs.repository.ModeloDocumentoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import org.apache.logging.log4j.util.Strings;
@@ -33,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ChecklistVersaoServiceAPI {
@@ -41,15 +51,24 @@ public class ChecklistVersaoServiceAPI {
 	private final LayoutRepository layoutRepository;
 	private final MassaDadoRepository arquivoRepository;
 	private final UsuarioService usuarioService;
+	private final ModeloDocumentoRepository modeloDocumentoRepository;
+	private final LogomodeloRepository logomodeloRepository;
+	private final LogomodeloTipoRepository logomodeloTipoRepository;
 
 	public ChecklistVersaoServiceAPI(ChecklistVersaoRepository checklistVersaoRepository,
 			ChecklistRepository checklistRepository, LayoutRepository layoutRepository,
-			MassaDadoRepository arquivoRepository, UsuarioService usuarioService) {
+			MassaDadoRepository arquivoRepository, UsuarioService usuarioService,
+			ModeloDocumentoRepository modeloDocumentoRepository,
+			LogomodeloRepository logomodeloRepository,
+			LogomodeloTipoRepository logomodeloTipoRepository) {
 		this.checklistVersaoRepository = checklistVersaoRepository;
 		this.checklistRepository = checklistRepository;
 		this.layoutRepository = layoutRepository;
 		this.arquivoRepository = arquivoRepository;
 		this.usuarioService = usuarioService;
+		this.modeloDocumentoRepository = modeloDocumentoRepository;
+		this.logomodeloRepository =  logomodeloRepository;
+		this.logomodeloTipoRepository =  logomodeloTipoRepository;
 	}
 	
 	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
@@ -146,117 +165,249 @@ public class ChecklistVersaoServiceAPI {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto, List<MultipartFile> filesLayout,
-			List<MultipartFile> filesMassas) throws IOException {
+	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto,
+	                                List<MultipartFile> filesLayout,
+	                                List<MultipartFile> filesMassas,
+	                                Map<String, MultipartFile> filesModelos) throws IOException {
 
-		// ===============================
-		// IDENTIFICAÇÃO DO DOCUMENTO
-		// ===============================
-		Checklist checklist = new Checklist();
-		checklist.setNomeDocumento(dto.getNomeDocumento());
-		checklist.setCentroCusto(dto.getCentroCusto());
+	    // Criação checklist e versão (igual ao seu código original)
+	    Checklist checklist = new Checklist();
+	    checklist.setNomeDocumento(dto.getNomeDocumento());
+	    checklist.setCentroCusto(dto.getCentroCusto());
+	    Ramo ramo = new Ramo();
+	    ramo.setIdRamo(dto.getIdRamo());
+	    checklist.setRamo(ramo);
+	    checklist = checklistRepository.save(checklist);
 
-		// Ramo
-		Ramo ramo = new Ramo();
-		ramo.setIdRamo(dto.getIdRamo());
-		checklist.setRamo(ramo);
+	    ChecklistVersao checklistVersao = new ChecklistVersao();
+	    checklistVersao.setChecklist(checklist);
+	    checklistVersao.setStatus(dto.getStatus());
+	    checklistVersao.setIcatu(dto.isIcatu());
+	    checklistVersao.setCaixa(dto.isCaixa());
+	    checklistVersao.setRioGrande(dto.isRioGrande());
+	    checklistVersao.setIdDemanda(dto.getIdDemanda());
+	    checklistVersao.setDataCadastro(LocalDateTime.now());
+	    checklistVersao.setDataAtualizacao(LocalDateTime.now());
 
-		checklist = checklistRepository.save(checklist);
+	    Usuario usuario = new Usuario();
+	    usuario.setId(dto.getIdUsuario());
+	    checklistVersao.setUsuario(usuario);
 
-		ChecklistVersao checklistVersao = new ChecklistVersao();
-		checklistVersao.setChecklist(checklist);
-		checklistVersao.setStatus(dto.getStatus());
-		checklistVersao.setIcatu(dto.isIcatu());
-		checklistVersao.setCaixa(dto.isCaixa());
-		checklistVersao.setRioGrande(dto.isRioGrande());
-		checklistVersao.setIdDemanda(dto.getIdDemanda());
-		checklistVersao.setDataCadastro(LocalDateTime.now());
-		checklistVersao.setDataAtualizacao(LocalDateTime.now());
+	    Integer versao = checklistVersaoRepository.findMaxVersaoByChecklistId(checklistVersao.getIdChecklistVersao())
+	            .orElse(0);
+	    checklistVersao.setVersao(versao + 1);
+	    checklistVersao = checklistVersaoRepository.save(checklistVersao);
 
-		// Usuário
-		Usuario usuario = new Usuario();
-		usuario.setId(dto.getIdUsuario());
-		checklistVersao.setUsuario(usuario);
+	    // Layouts e Massas (igual ao seu código)
 
-		// ===============================
-		// SALVAR CHECKLIST PRIMEIRO
-		// ===============================
-		Integer versao = checklistVersaoRepository.findMaxVersaoByChecklistId(checklistVersao.getIdChecklistVersao())
-				.orElse(0);
-		checklistVersao.setVersao(versao + 1);
-		checklistVersao = checklistVersaoRepository.save(checklistVersao);
+	    checklistVersao.setLayouts(addOrUpdateLayout(dto.getLayouts(), checklistVersao, filesLayout, filesMassas, dto));
 
-		// ===============================
-		// TI → LAYOUTS
-		// ===============================
-		List<Layout> listaLayouts = new ArrayList<>();
-		int fileLayoutIndex = 0;
-		int fileMassaIndex = 0;
+	    // Modelos com arquivos identificados por chave
+	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos);
+	    
+	    checklistVersao = checklistVersaoRepository.save(checklistVersao);
 
-		if (dto.getLayouts() != null) {
-
-			for (LayoutDTO layoutDTO : dto.getLayouts()) {
-
-				boolean novoLayout = temporalCryptoIdUtil.isUUID(layoutDTO.getId());
-				if(novoLayout)
-				{
-					Layout layout = new Layout();
-					layout.setChecklistVersao(checklistVersao);
-					layout.setObservacao(layoutDTO.getObservacao());
-					layout.setDataAtualizacao(LocalDateTime.now());
-					layout.setViaServico(dto.isViaServico());
-					layout.setViaTxt(dto.isViaTxt());
+	    return dto;
+	}
 	
-					// arquivo do layout
-					if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
-						MultipartFile fl = filesLayout.get(fileLayoutIndex++);
+	private List<Layout> addOrUpdateLayout(
+	        List<LayoutDTO> layoutDTOs,
+	        ChecklistVersao checklistVersao,
+	        List<MultipartFile> filesLayout,
+	        List<MultipartFile> filesMassas, ChecklistVersaoDTO dto) throws IOException {
+
+	    List<Layout> listaLayouts = new ArrayList<>();
+	    int fileLayoutIndex = 0;
+	    int fileMassaIndex = 0;
+
+	    if (layoutDTOs != null) {
+	        for (LayoutDTO layoutDTO : layoutDTOs) {
+	            Layout layoutNovo = new Layout();
+	            layoutNovo.setChecklistVersao(checklistVersao);
+	            layoutNovo.setObservacao(layoutDTO.getObservacao());
+	            layoutNovo.setDataAtualizacao(LocalDateTime.now());
+	            layoutNovo.setViaServico(dto.isViaServico());
+	            layoutNovo.setViaTxt(dto.isViaTxt());
+
+	            // Arquivo do layout
+	            if (filesLayout != null && fileLayoutIndex < filesLayout.size()) {
+	                MultipartFile fl = filesLayout.get(fileLayoutIndex++);
+	                layoutNovo.setTipoMIME(fl.getContentType());
+	                layoutNovo.setConteudoLayout(fl.getBytes());
+	                layoutNovo.setNomeLayout(fl.getOriginalFilename());
+	            }
+
+	            layoutNovo = layoutRepository.save(layoutNovo);
+
+	            // Massas do layout
+	            List<MassaDados> listaMassas = new ArrayList<>();
+	            if (layoutDTO.getMassasDados() != null) {
+	                for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
+	                    MassaDados massa = new MassaDados();
+	                    massa.setLayout(layoutNovo);
+	                    massa.setObservacao(massaDTO.getObservacao());
+	                    massa.setDataAtualizacao(LocalDateTime.now());
+
+	                    if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
+	                        MultipartFile fm = filesMassas.get(fileMassaIndex++);
+	                        massa.setNomeMassaDados(fm.getOriginalFilename());
+	                        massa.setTipoMIME(fm.getContentType());
+	                        massa.setConteudoMassaDados(fm.getBytes());
+	                    }
+
+	                    massa = arquivoRepository.save(massa);
+	                    listaMassas.add(massa);
+	                }
+	            }
+
+	            layoutNovo.setMassasDados(listaMassas);
+	            listaLayouts.add(layoutNovo);
+	        }
+	    }
+
+	    return listaLayouts;
+	}
 	
-						layout.setTipoMIME(fl.getContentType());
-						layout.setConteudoLayout(fl.getBytes());
-						layout.setNomeLayout(fl.getOriginalFilename());
-					}
-	
-					layout = layoutRepository.save(layout);
-					
-					// ===============================
-					// MASSAS DO LAYOUT
-					// ===============================
-					List<MassaDados> listaMassas = new ArrayList<>();
+	private ChecklistVersao addOrUpdateModel(
+	        List<ModeloDTO> models,
+	        ChecklistVersao checklistVersao,
+	        Map<String, MultipartFile> arquivosModelos) throws IOException {
 
-					if (layoutDTO.getMassasDados() != null) {
-						for (MassaDTO massaDTO : layoutDTO.getMassasDados()) {
+	    List<ModeloDocumento> list = new ArrayList<>();
 
-							boolean novaMassa = temporalCryptoIdUtil.isUUID(massaDTO.getId());
-							MassaDados massa = null;
-							if(novaMassa)
-								massa = new MassaDados();
-								massa.setLayout(layout);
-								massa.setObservacao(massaDTO.getObservacao());
-								massa.setDataAtualizacao(LocalDateTime.now());
-		
-								if (filesMassas != null && fileMassaIndex < filesMassas.size()) {
-									MultipartFile fm = filesMassas.get(fileMassaIndex++);
-									massa.setNomeMassaDados(fm.getOriginalFilename());
-									massa.setTipoMIME(fm.getContentType());
-									massa.setConteudoMassaDados(fm.getBytes());
-								}
-		
-								massa = arquivoRepository.save(massa);
-								listaMassas.add(massa);
-						}
-					}
+	    if (models != null && !models.isEmpty()) {
+	        for (int i = 0; i < models.size(); i++) {
+	            ModeloDTO m = models.get(i);
+	            ModeloDocumento modeloDocumento;
+	            boolean novoModelo = temporalCryptoIdUtil.isUUID(m.getId());
 
-					layout.setMassasDados(listaMassas);
-					listaLayouts.add(layout);
-				}
+	            if (novoModelo) {
+	                modeloDocumento = new ModeloDocumento();
+	                modeloDocumento.setChecklist(checklistVersao.getChecklist());
+	            } else {
+	                Integer id = temporalCryptoIdUtil.extractId(m.getId());
+	                modeloDocumento = modeloDocumentoRepository.getById(id);
+	            }
 
-				
-			}
-		}
+	            modeloDocumento.setDataAtualizacao(LocalDateTime.now());
+	            modeloDocumento.setObservacao(m.getObservacao());
+	            modeloDocumento.setImpresso(m.isArquivoImpressao());
+	            modeloDocumento.setCRC(false);
+	            modeloDocumento.setArmazenamento(m.isTemArquivo());
 
-		checklistVersao.setLayouts(listaLayouts);
+	            // --- Arquivo principal ---
+	            MultipartFile filePrincipal = arquivosModelos.get("modelo-" + i + "-principal");
+	            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
 
-		return dto;
+	            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
+	            modeloDocumento.setTipoMIME(filePrincipal.getContentType());
+	            modeloDocumento.setConteudoRecurso(filePrincipal.getBytes());
+
+	           
+	            // --- Logos ---
+	            if (m.getLogos() != null) {
+	                for (int j = 0; j < m.getLogos().size(); j++) {
+	                    var logo = m.getLogos().get(j);
+
+	                    if (logo.isTemArquivo()) {
+	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-logo-" + j);
+	                        if (file == null) throw new RuntimeException("Arquivo de logo não enviado");
+
+	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.LOGO.getCodigo())
+	                                .orElseThrow(() -> new RuntimeException("Tipo LOGO não encontrado"));
+
+	                        Logomodelo lm = new Logomodelo();
+	                        lm.setModeloDocumento(modeloDocumento); // modelo atualizado no laço
+	                        lm.setCodigo(LogomodeloTipoCodigo.LOGO.getCodigo()); // ou outro critério
+	                        lm.setTipo(tipo);
+	                        lm.setArquivo(file.getBytes());
+	                        lm.setTipoMIME(file.getContentType());
+
+	                        logomodeloRepository.save(lm);
+	                    }
+	                }
+	            }
+
+	            // --- Assinaturas ---
+	            if (m.getAssinaturas() != null) {
+	                for (int j = 0; j < m.getAssinaturas().size(); j++) {
+	                    var ass = m.getAssinaturas().get(j);
+
+	                    if (ass.isTemArquivo()) {
+	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-assinatura-" + j);
+	                        if (file == null) throw new RuntimeException("Arquivo de assinatura não enviado");
+
+	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.ASSINATURA.getCodigo())
+	                                .orElseThrow(() -> new RuntimeException("Tipo ASSINATURA não encontrado"));
+
+	                        Logomodelo lm = new Logomodelo();
+	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setCodigo(LogomodeloTipoCodigo.ASSINATURA.getCodigo());
+	                        lm.setTipo(tipo);
+	                        lm.setArquivo(file.getBytes());
+	                        lm.setTipoMIME(file.getContentType());
+
+	                        logomodeloRepository.save(lm);
+	                    }
+	                }
+	            }
+
+	            // --- Arquivos adicionais ---
+	            if (m.getArquivosAdicionais() != null) {
+	                for (int j = 0; j < m.getArquivosAdicionais().size(); j++) {
+	                    var arq = m.getArquivosAdicionais().get(j);
+
+	                    if (arq.isTemArquivo()) {
+	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-adicional-" + j);
+	                        if (file == null) throw new RuntimeException("Arquivo adicional não enviado");
+
+	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
+	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
+
+	                        Logomodelo lm = new Logomodelo();
+	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setCodigo(LogomodeloTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
+	                        lm.setTipo(tipo);
+	                        lm.setArquivo(file.getBytes());
+	                        lm.setTipoMIME(file.getContentType());
+
+	                        logomodeloRepository.save(lm);
+	                    }
+	                }
+	            }
+
+	            modeloDocumento.setDuplex(m.getTipoImpressao() != null && m.getTipoImpressao().contains("DUPLEX"));
+	            if (m.getTipoAcabamento() != null && !m.getTipoAcabamento().isEmpty()) {
+	                try {
+	                    modeloDocumento.setAcabamento(Integer.parseInt(m.getTipoAcabamento().get(0)));
+	                } catch (Exception e) {
+	                    modeloDocumento.setAcabamento(null);
+	                }
+	            }
+
+	            // Campos de busca
+	            if (m.getCamposBusca() != null) {
+	                modeloDocumento.setAcessoBackOffice(m.getCamposBusca().getBackoffice() != null);
+	                modeloDocumento.setCamposBuscaBackOffice(m.getCamposBusca().getBackoffice());
+	                modeloDocumento.setAcessoCliente(m.getCamposBusca().getCliente() != null);
+	                modeloDocumento.setCamposBuscaCliente(m.getCamposBusca().getCliente());
+	                modeloDocumento.setAcessoCorretor(m.getCamposBusca().getCorretor() != null);
+	                modeloDocumento.setCamposBuscaCorretor(m.getCamposBusca().getCorretor());
+	                modeloDocumento.setAcessoEstipulante(m.getCamposBusca().getEstipulante() != null);
+	                modeloDocumento.setCamposBuscaEstipulante(m.getCamposBusca().getEstipulante());
+	                modeloDocumento.setAcessoSubEstipulante(m.getCamposBusca().getSubestipulante() != null);
+	                modeloDocumento.setCamposBuscaSubEstipulante(m.getCamposBusca().getSubestipulante());
+	            }
+
+	            modeloDocumento.setTempoArmazenamento(0);
+
+	            list.add(modeloDocumento);
+	        }
+	    }
+
+	    checklistVersao.setModelosDocumento(list);
+
+	    return checklistVersao;
 	}
 	
 	@Autowired
@@ -264,7 +415,7 @@ public class ChecklistVersaoServiceAPI {
 
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
-			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws Exception {
+			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas, Map<String, MultipartFile> arquivosModelos) throws Exception {
 
 		// =========================
 		// VERSÃO ATUAL
@@ -449,6 +600,11 @@ public class ChecklistVersaoServiceAPI {
 		}
 
 		checklistVersaoNova.setLayouts(layoutsNovos);
+		
+		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
+				
+		checklistVersaoNova = checklistVersaoRepository.save(checklistVersaoNova);
+		
 		return dto;
 	}
 	

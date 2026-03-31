@@ -7,8 +7,8 @@ import lombok.Data;
 public class ChecklistVersaoDTO {
 
     // -------- Identificação --------
-	private String idChecklistVersao;
-	private String idChecklist;
+    private String idChecklistVersao;
+    private String idChecklist;
     private String nomeDocumento;
     private Integer idRamo;
     private String nomeRamo;
@@ -19,7 +19,7 @@ public class ChecklistVersaoDTO {
     private boolean caixa;
     private boolean rioGrande;
     private String idDemanda;
-    
+
     // -------- TI Layout --------
     private boolean temLayout;
     private boolean viaServico;
@@ -27,4 +27,7 @@ public class ChecklistVersaoDTO {
     private ChecklistDTO checklistDTO;
     private UsuarioDTO usuario; 
     private List<LayoutDTO> layouts;
+
+    // -------- Modelos --------
+    private List<ModeloDTO> modelos;
 }
