@@ -9,6 +9,8 @@ public class ModeloDTO {
     private String id;
     private String observacao;
     private String regrasAcesso;
+    
+    private String nomeRecurso;
 
     private CamposBuscaDTO camposBusca;
 

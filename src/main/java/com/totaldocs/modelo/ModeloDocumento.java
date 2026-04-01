@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,8 +19,8 @@ public class ModeloDocumento {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IdCheckList", nullable = false)
-    private Checklist checklist;
+    @JoinColumn(name = "IdChecklistVersao", nullable = false)
+    private ChecklistVersao checklistVersao;
 
     @Column(name = "DataAtualizacao", nullable = false)
     private LocalDateTime dataAtualizacao;
@@ -110,4 +111,7 @@ public class ModeloDocumento {
     @Lob
     @Column(name = "CamposBuscaSubEstipulante")
     private String camposBuscaSubEstipulante;
+    
+    @OneToMany(mappedBy = "modeloDocumento", fetch = FetchType.LAZY)
+    private List<Logomodelo> logos;
 }

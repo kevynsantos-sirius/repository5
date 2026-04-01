@@ -2,6 +2,7 @@ package com.totaldocs.service;
 
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.dto.ChecklistVersaoResumoDTO;
+import com.totaldocs.dto.ItemArquivoDTO;
 import com.totaldocs.dto.LayoutDTO;
 import com.totaldocs.dto.MassaDTO;
 import com.totaldocs.dto.ModeloDTO;
@@ -283,7 +284,7 @@ public class ChecklistVersaoServiceAPI {
 
 	            if (novoModelo) {
 	                modeloDocumento = new ModeloDocumento();
-	                modeloDocumento.setChecklist(checklistVersao.getChecklist());
+	                modeloDocumento.setChecklistVersao(checklistVersao);
 	            } else {
 	                Integer id = temporalCryptoIdUtil.extractId(m.getId());
 	                modeloDocumento = modeloDocumentoRepository.getById(id);
@@ -296,7 +297,7 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDocumento.setArmazenamento(m.isTemArquivo());
 
 	            // --- Arquivo principal ---
-	            MultipartFile filePrincipal = arquivosModelos.get("modelo-" + i + "-principal");
+	            MultipartFile filePrincipal = arquivosModelos != null ? arquivosModelos.get("modelo-" + i + "-principal"): null;
 	            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
 
 	            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
@@ -691,83 +692,128 @@ public class ChecklistVersaoServiceAPI {
 	@Transactional(readOnly = true)
 	public ChecklistVersaoDTO getChecklistVersaoDTOById(Integer idChecklistVersao) {
 
-		ChecklistVersao c = checklistVersaoRepository.findById(idChecklistVersao)
-				.orElseThrow(() -> new RuntimeException("Documento não localizado id " + idChecklistVersao));
+	    ChecklistVersao c = checklistVersaoRepository.findById(idChecklistVersao)
+	            .orElseThrow(() -> new RuntimeException("Documento não localizado id " + idChecklistVersao));
 
-		ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
+	    ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
 
-		// -------- Identificação --------
-		// Checklist
-		String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
-		String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
-		dto.setIdChecklist(uuidGenerateToken);
-		dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
-		dto.setCentroCusto(c.getChecklist().getCentroCusto());
-		Ramo ramo = c.getChecklist().getRamo();
-		dto.setIdRamo(ramo.getIdRamo());
-		dto.setNomeRamo(ramo.getNomeRamo());
+	    // -------- Identificação --------
+	    String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
+	    String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
 
-		// ChecklistVersao
-		dto.setIdChecklistVersao(uuidGenerateTokenVersion);
-		dto.setStatus(c.getStatus());
-		dto.setIcatu(c.isIcatu());
-		dto.setCaixa(c.isCaixa());
-		dto.setRioGrande(c.isRioGrande());
-		dto.setIdUsuario(c.getUsuario().getId());
-		dto.setIdDemanda(c.getIdDemanda());
+	    dto.setIdChecklist(uuidGenerateToken);
+	    dto.setIdChecklistVersao(uuidGenerateTokenVersion);
+	    dto.setNomeDocumento(c.getChecklist().getNomeDocumento());
+	    dto.setCentroCusto(c.getChecklist().getCentroCusto());
 
-		// (Opcional) preencher usuarioDTO se você usa:
-		UsuarioDTO usuarioDTO = new UsuarioDTO();
-		usuarioDTO.setId(c.getUsuario().getId());
-		usuarioDTO.setNomeUsuario(c.getUsuario().getNome());
-		dto.setUsuario(usuarioDTO);
+	    Ramo ramo = c.getChecklist().getRamo();
+	    dto.setIdRamo(ramo.getIdRamo());
+	    dto.setNomeRamo(ramo.getNomeRamo());
 
-		// -------- Layouts + Massas --------
-		List<LayoutDTO> layoutDtos = new ArrayList<>();
+	    dto.setStatus(c.getStatus());
+	    dto.setIcatu(c.isIcatu());
+	    dto.setCaixa(c.isCaixa());
+	    dto.setRioGrande(c.isRioGrande());
+	    dto.setIdUsuario(c.getUsuario().getId());
+	    dto.setIdDemanda(c.getIdDemanda());
 
-		boolean temLayout = c.getLayouts() != null && !c.getLayouts().isEmpty();
-		boolean viaServico = false;
-		boolean viaTxt = false;
+	    // -------- Usuário DTO --------
+	    UsuarioDTO usuarioDTO = new UsuarioDTO();
+	    usuarioDTO.setId(c.getUsuario().getId());
+	    usuarioDTO.setNomeUsuario(c.getUsuario().getNome());
+	    dto.setUsuario(usuarioDTO);
 
-		if (c.getLayouts() != null) {
-			for (Layout layout : c.getLayouts()) {
+	    // ===============================================================
+	    // -------- Layouts + Massas ------------------------------------
+	    // ===============================================================
 
-				// acumula flags globais para o DTO principal
-				if (layout.isViaServico()) {
-					viaServico = true;
-				}
-				if (layout.isViaTxt()) {
-					viaTxt = true;
-				}
+	    List<LayoutDTO> layoutDtos = new ArrayList<>();
 
-				LayoutDTO layoutDTO = new LayoutDTO();
-				String token = temporalCryptoIdUtil.generateToken(layout.getId());
-				layoutDTO.setId(token);
-				layoutDTO.setNomeLayout(layout.getNomeLayout());
-				layoutDTO.setObservacao(layout.getObservacao());
+	    boolean temLayout = c.getLayouts() != null && !c.getLayouts().isEmpty();
+	    boolean viaServico = false;
+	    boolean viaTxt = false;
 
-				List<MassaDTO> massaDtos = new ArrayList<>();
-				if (layout.getMassasDados() != null) {
-					for (MassaDados massa : layout.getMassasDados()) {
-						MassaDTO massaDTO = new MassaDTO();
-						String tokenMassa = temporalCryptoIdUtil.generateToken(massa.getId());
-						massaDTO.setId(tokenMassa);
-						massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
-						massaDTO.setObservacao(massa.getObservacao());
-						massaDtos.add(massaDTO);
-					}
-				}
+	    if (c.getLayouts() != null) {
+	        for (Layout layout : c.getLayouts()) {
 
-				layoutDTO.setMassasDados(massaDtos);
-				layoutDtos.add(layoutDTO);
-			}
-		}
+	            if (layout.isViaServico()) {
+	                viaServico = true;
+	            }
+	            if (layout.isViaTxt()) {
+	                viaTxt = true;
+	            }
 
-		dto.setTemLayout(temLayout);
-		dto.setViaServico(viaServico);
-		dto.setViaTxt(viaTxt);
-		dto.setLayouts(layoutDtos);
+	            LayoutDTO layoutDTO = new LayoutDTO();
+	            layoutDTO.setId(temporalCryptoIdUtil.generateToken(layout.getId()));
+	            layoutDTO.setNomeLayout(layout.getNomeLayout());
+	            layoutDTO.setObservacao(layout.getObservacao());
 
-		return dto;
+	            List<MassaDTO> massaDtos = new ArrayList<>();
+	            if (layout.getMassasDados() != null) {
+	                for (MassaDados massa : layout.getMassasDados()) {
+
+	                    MassaDTO massaDTO = new MassaDTO();
+	                    massaDTO.setId(temporalCryptoIdUtil.generateToken(massa.getId()));
+	                    massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
+	                    massaDTO.setObservacao(massa.getObservacao());
+
+	                    massaDtos.add(massaDTO);
+	                }
+	            }
+
+	            layoutDTO.setMassasDados(massaDtos);
+	            layoutDtos.add(layoutDTO);
+	        }
+	    }
+
+	    dto.setTemLayout(temLayout);
+	    dto.setViaServico(viaServico);
+	    dto.setViaTxt(viaTxt);
+	    dto.setLayouts(layoutDtos);
+
+	    // ===============================================================
+	    // -------- MODELOS ----------------------------------------------
+	    // ===============================================================
+
+	    List<ModeloDTO> modeloDtos = new ArrayList<>();
+
+	    if (c.getModelosDocumento() != null) {
+	        for (ModeloDocumento modelo : c.getModelosDocumento()) {
+
+	            ModeloDTO modeloDTO = new ModeloDTO();
+	            modeloDTO.setId(temporalCryptoIdUtil.generateToken(modelo.getId()));
+	            modeloDTO.setNomeRecurso(modelo.getNomeRecurso());
+	            modeloDTO.setObservacao(modelo.getObservacao());
+
+	            // -------- LOGO / ASSINATURA / ARQUIVO_ADICIONAL ----------
+	            List<ItemArquivoDTO> logosDto = new ArrayList<>();
+
+	            if (modelo.getLogos() != null) {
+	                for (Logomodelo lm : modelo.getLogos()) {
+
+	                	ItemArquivoDTO lmDTO = new ItemArquivoDTO();
+	                    lmDTO.setId(temporalCryptoIdUtil.generateToken(lm.getId()));
+	                    lmDTO.setCodigo(lm.getCodigo());
+
+	                    // Tipo (enum via tabela)
+	                    lmDTO.setTipo(lm.getTipo().getCodigo());
+	                    lmDTO.setDescricaoTipo(lm.getTipo().getDescricao());
+
+	                    // Arquivo (bytes) + MimeType
+	                    lmDTO.setArquivo(lm.getArquivo());
+	                    lmDTO.setMimeType(lm.getTipoMIME());
+
+	                    logosDto.add(lmDTO);
+	                }
+	            }
+
+	            modeloDTO.setLogos(logosDto);
+	            modeloDtos.add(modeloDTO);
+	        }
+	    }
+
+	    dto.setModelos(modeloDtos);
+
+	    return dto;
 	}
 }

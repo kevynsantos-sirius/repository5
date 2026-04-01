@@ -12,6 +12,7 @@ import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,22 +35,49 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	public ChecklistVersaoControleAPI(ChecklistVersaoServiceAPI serviceVersao) {
 		this.checklistVersaoServiceAPI = serviceVersao;
 	}
+	
+	private Map<String, MultipartFile> collectModels(
+	        List<MultipartFile> arquivosModelos,
+	        List<String> keysModelos) {
 
-	@PostMapping(value = "/salvar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	    Map<String, MultipartFile> mapa = new HashMap<>();
+
+	    if (arquivosModelos == null || keysModelos == null) {
+	        return mapa;
+	    }
+
+	    for (int i = 0; i < keysModelos.size(); i++) {
+	        String key = keysModelos.get(i);
+
+	        // IGNORA keys vazias (OCORRE NO SEU CASO AGORA)
+	        if (key == null || key.trim().isEmpty()) {
+	            continue;
+	        }
+
+	        mapa.put(key, arquivosModelos.get(i));
+	    }
+
+	    return mapa;
+	}
+
+	@PostMapping(value = "/salvar")
 	@CheckSession
 	public ResponseEntity<?> criar(
-	        @RequestPart("dados") String dadosJson,
+	        @RequestPart(value = "dados", required = false) String dadosJson,
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
 	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas,
-	        @RequestPart(value = "filesModelos", required = false) Map<String, MultipartFile> arquivosModelos, // ⚡ map now
+	        @RequestPart(value = "arquivosModelos", required = false) List<MultipartFile> arquivosModelos,
+	        @RequestPart(value = "keysModelos", required = false) List<String> keysModelos, // ⚡ map now
 	        HttpSession session) {
 
 	    try {
 	        ObjectMapper mapper = new ObjectMapper();
 
 	        ChecklistVersaoDTO dto = mapper.readValue(dadosJson, ChecklistVersaoDTO.class);
+	        
+	        Map arquivosModelosNew = collectModels(arquivosModelos, keysModelos);
 
-	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelos);
+	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew);
 
 	        return ResponseEntity
 	                .status(HttpStatus.CREATED)
@@ -63,14 +91,21 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	    }
 	}
 	
-	@PostMapping("/{idChecklist}/editar")
+	@PostMapping(value = "/{idChecklist}/editar")
 	@CheckSession
 	public ChecklistVersaoDTO editar(@PathVariable String idChecklist,
-								     @RequestPart("dto") ChecklistVersaoDTO dto,
-								     @RequestPart(value = "filesLayout", required = false ) List<MultipartFile> filesLayout,
-								     @RequestPart(value = "filesMassas", required = false ) List<MultipartFile> filesMassas,
-								     @RequestPart(value = "filesModelos", required = false) Map<String, MultipartFile> arquivosModelos) throws Exception {
-	    	return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelos);
+	     @RequestPart(value = "dto", required = false) String dtoJson,
+	     @RequestPart(value = "filesLayout", required = false) List<MultipartFile> filesLayout,
+	     @RequestPart(value = "filesMassas", required = false) List<MultipartFile> filesMassas,
+	     @RequestPart(value = "arquivosModelos", required = false) List<MultipartFile> arquivosModelos,
+	     @RequestPart(value = "keysModelos", required = false) List<String> keysModelos) throws Exception {
+
+	     ObjectMapper mapper = new ObjectMapper();
+	     ChecklistVersaoDTO dto = mapper.readValue(dtoJson, ChecklistVersaoDTO.class);
+
+	     Map arquivosModelosNew = collectModels(arquivosModelos, keysModelos);
+
+	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew);
 	}
 		
 	@GetMapping("/page")

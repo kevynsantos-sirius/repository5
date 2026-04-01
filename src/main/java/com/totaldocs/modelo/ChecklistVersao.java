@@ -55,6 +55,6 @@ public class ChecklistVersao {
     @OneToMany(mappedBy = "checklistVersao")
     private List<Layout> layouts;
     
-    @OneToMany(mappedBy = "checklist")
+    @OneToMany(mappedBy = "checklistVersao")
     private List<ModeloDocumento> modelosDocumento;
 }
