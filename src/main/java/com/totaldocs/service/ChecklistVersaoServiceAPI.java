@@ -324,7 +324,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 
-	                        logomodeloRepository.save(lm);
+	                        logomodeloRepository.saveAndFlush(lm);
 	                    }
 	                }
 	            }
@@ -348,7 +348,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 
-	                        logomodeloRepository.save(lm);
+	                        logomodeloRepository.saveAndFlush(lm);
 	                    }
 	                }
 	            }
@@ -372,7 +372,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 
-	                        logomodeloRepository.save(lm);
+	                        logomodeloRepository.saveAndFlush(lm);
 	                    }
 	                }
 	            }
@@ -401,7 +401,9 @@ public class ChecklistVersaoServiceAPI {
 	            }
 
 	            modeloDocumento.setTempoArmazenamento(0);
-
+	            
+	            modeloDocumentoRepository.saveAndFlush(modeloDocumento);
+	            
 	            list.add(modeloDocumento);
 	        }
 	    }
@@ -604,7 +606,7 @@ public class ChecklistVersaoServiceAPI {
 		
 		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
 				
-		checklistVersaoNova = checklistVersaoRepository.save(checklistVersaoNova);
+		checklistVersaoNova = checklistVersaoRepository.saveAndFlush(checklistVersaoNova);
 		
 		return dto;
 	}
