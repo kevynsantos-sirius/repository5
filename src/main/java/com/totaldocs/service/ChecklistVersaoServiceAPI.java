@@ -786,6 +786,7 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDTO.setId(temporalCryptoIdUtil.generateToken(modelo.getId()));
 	            modeloDTO.setNomeRecurso(modelo.getNomeRecurso());
 	            modeloDTO.setObservacao(modelo.getObservacao());
+	            modeloDTO.setTemArquivo(modelo.getNomeRecurso() != null);
 
 	            // -------- LOGO / ASSINATURA / ARQUIVO_ADICIONAL ----------
 	            List<ItemArquivoDTO> logosDto = new ArrayList<>();
