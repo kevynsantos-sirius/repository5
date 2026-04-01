@@ -1,5 +1,7 @@
 package com.totaldocs.modelo;
 
+import org.hibernate.annotations.Formula;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +25,12 @@ public class Logomodelo {
     private Integer codigo;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idLogomodeloTipo", nullable = false)
+    @JoinColumn(
+        name = "codigo",                 // coluna na tabela atual
+        referencedColumnName = "codigo", // coluna na tabela CL_logomodelotipo
+        insertable = false,
+        updatable = false
+    )
     private LogomodeloTipo tipo;
 
     @Lob
