@@ -282,12 +282,12 @@ public class ChecklistVersaoServiceAPI {
 
 	            if (novoModelo) {
 	                modeloDocumento = new ModeloDocumento();
-	                modeloDocumento.setChecklistVersao(checklistVersao);
 	            } else {
 	                Integer id = temporalCryptoIdUtil.extractId(m.getId());
 	                modeloDocumento = modeloDocumentoRepository.getById(id);
 	            }
-
+	            
+	            modeloDocumento.setChecklistVersao(checklistVersao);
 	            modeloDocumento.setDataAtualizacao(LocalDateTime.now());
 	            modeloDocumento.setObservacao(m.getObservacao());
 	            modeloDocumento.setImpresso(m.isArquivoImpressao());
