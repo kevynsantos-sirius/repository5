@@ -800,8 +800,8 @@ public class ChecklistVersaoServiceAPI {
 	            // -------- LOGO / ASSINATURA / ARQUIVO_ADICIONAL ----------
 	            List<ItemArquivoDTO> logosDto = new ArrayList<>();
 
-	            if (modelo.getLogos() != null) {
-	                for (Logomodelo lm : modelo.getLogos()) {
+	            if (c.getLogos() != null) {
+	                for (Logomodelo lm : c.getLogos()) {
 
 	                	ItemArquivoDTO lmDTO = new ItemArquivoDTO();
 	                    lmDTO.setId(temporalCryptoIdUtil.generateToken(lm.getId()));

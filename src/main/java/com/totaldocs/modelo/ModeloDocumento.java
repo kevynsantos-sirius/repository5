@@ -111,7 +111,4 @@ public class ModeloDocumento {
     @Lob
     @Column(name = "CamposBuscaSubEstipulante")
     private String camposBuscaSubEstipulante;
-    
-    @OneToMany(mappedBy = "modeloDocumento", fetch = FetchType.LAZY)
-    private List<Logomodelo> logos;
 }
