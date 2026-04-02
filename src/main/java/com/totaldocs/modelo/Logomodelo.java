@@ -41,4 +41,7 @@ public class Logomodelo {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idCheckListVersao", nullable = false)
     private ChecklistVersao checklistVersao;
+    
+    @Column(name = "nomeRecurso")
+    private String nomeRecurso;
 }

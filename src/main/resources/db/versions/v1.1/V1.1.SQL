@@ -193,3 +193,6 @@ ADD tipoMIME VARCHAR(200) NULL;
 
 ALTER TABLE CL_Logomodelo
 ADD idCheckListVersao INT NULL;
+
+ALTER TABLE CL_Logomodelo
+ADD nomeRecurso varchar(100) COLLATE Latin1_General_CI_AS NULL;

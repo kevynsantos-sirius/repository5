@@ -329,6 +329,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
+	                        lm.setNomeRecurso(file.getOriginalFilename());
 
 	                        logomodeloRepository.save(lm);
 	                    }
@@ -354,6 +355,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
+	                        lm.setNomeRecurso(file.getOriginalFilename());
 
 	                        logomodeloRepository.save(lm);
 	                    }
@@ -379,6 +381,7 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
+	                        lm.setNomeRecurso(file.getOriginalFilename());
 
 	                        logomodeloRepository.save(lm);
 	                    }
