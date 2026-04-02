@@ -205,8 +205,6 @@ public class ChecklistVersaoServiceAPI {
 
 	    // Modelos com arquivos identificados por chave
 	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos);
-	    
-	    checklistVersao = checklistVersaoRepository.save(checklistVersao);
 
 	    return dto;
 	}
@@ -298,15 +296,19 @@ public class ChecklistVersaoServiceAPI {
 
 	            // --- Arquivo principal ---
 	            MultipartFile filePrincipal = arquivosModelos != null ? arquivosModelos.get("modelo-" + i + "-principal"): null;
-	            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
-
-	            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
-	            modeloDocumento.setTipoMIME(filePrincipal.getContentType());
-	            modeloDocumento.setConteudoRecurso(filePrincipal.getBytes());
 	            
-	            modeloDocumento.setTempoArmazenamento(0);
+	            if(null == modeloDocumento.getNomeRecurso())
+	            {
+		            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
+	
+		            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
+		            modeloDocumento.setTipoMIME(filePrincipal.getContentType());
+		            modeloDocumento.setConteudoRecurso(filePrincipal.getBytes());
+		            
+		            modeloDocumento.setTempoArmazenamento(0);
+	            }
 
-	            modeloDocumento = modeloDocumentoRepository.saveAndFlush(modeloDocumento);
+	            modeloDocumento = modeloDocumentoRepository.save(modeloDocumento);
 	            
 	            // --- Logos ---
 	            if (m.getLogos() != null) {
@@ -326,8 +328,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
+	                        lm.setChecklistVersao(checklistVersao);
 
-	                        logomodeloRepository.saveAndFlush(lm);
+	                        logomodeloRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -350,8 +353,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
+	                        lm.setChecklistVersao(checklistVersao);
 
-	                        logomodeloRepository.saveAndFlush(lm);
+	                        logomodeloRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -374,8 +378,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
+	                        lm.setChecklistVersao(checklistVersao);
 
-	                        logomodeloRepository.saveAndFlush(lm);
+	                        logomodeloRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -405,7 +410,7 @@ public class ChecklistVersaoServiceAPI {
 
 	           
 	            
-	            modeloDocumentoRepository.saveAndFlush(modeloDocumento);
+	            modeloDocumentoRepository.save(modeloDocumento);
 	            
 	            list.add(modeloDocumento);
 	        }
@@ -455,7 +460,7 @@ public class ChecklistVersaoServiceAPI {
 		usuario.setId(dto.getIdUsuario());
 		checklistVersaoNova.setUsuario(usuario);
 
-		checklistVersaoNova = checklistVersaoRepository.saveAndFlush(checklistVersaoNova);
+		checklistVersaoNova = checklistVersaoRepository.save(checklistVersaoNova);
 
 		// =========================
 		// ITERATORS DE ARQUIVOS
@@ -608,8 +613,6 @@ public class ChecklistVersaoServiceAPI {
 		checklistVersaoNova.setLayouts(layoutsNovos);
 		
 		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
-				
-		checklistVersaoNova = checklistVersaoRepository.saveAndFlush(checklistVersaoNova);
 		
 		return dto;
 	}

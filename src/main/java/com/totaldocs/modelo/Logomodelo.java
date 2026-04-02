@@ -1,7 +1,5 @@
 package com.totaldocs.modelo;
 
-import org.hibernate.annotations.Formula;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,4 +37,8 @@ public class Logomodelo {
 
     @Column(name = "tipoMIME")
     private String tipoMIME;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idCheckListVersao", nullable = false)
+    private ChecklistVersao checklistVersao;
 }
