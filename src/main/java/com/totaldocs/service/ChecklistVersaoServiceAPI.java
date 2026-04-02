@@ -303,8 +303,11 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
 	            modeloDocumento.setTipoMIME(filePrincipal.getContentType());
 	            modeloDocumento.setConteudoRecurso(filePrincipal.getBytes());
+	            
+	            modeloDocumento.setTempoArmazenamento(0);
 
-	           
+	            modeloDocumento = modeloDocumentoRepository.saveAndFlush(modeloDocumento);
+	            
 	            // --- Logos ---
 	            if (m.getLogos() != null) {
 	                for (int j = 0; j < m.getLogos().size(); j++) {
@@ -400,7 +403,7 @@ public class ChecklistVersaoServiceAPI {
 	                modeloDocumento.setCamposBuscaSubEstipulante(m.getCamposBusca().getSubestipulante());
 	            }
 
-	            modeloDocumento.setTempoArmazenamento(0);
+	           
 	            
 	            modeloDocumentoRepository.saveAndFlush(modeloDocumento);
 	            
