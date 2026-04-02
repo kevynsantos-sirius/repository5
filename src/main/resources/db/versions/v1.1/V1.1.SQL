@@ -190,3 +190,6 @@ ADD arquivo VARBINARY(MAX) NULL;
 
 ALTER TABLE CL_Logomodelo
 ADD tipoMIME VARCHAR(200) NULL;
+
+ALTER TABLE CL_Logomodelo
+ADD idCheckListVersao INT NULL;
