@@ -27,6 +27,9 @@ import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.repository.ModeloDocumentoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -279,13 +282,7 @@ public class ChecklistVersaoServiceAPI {
 	            ModeloDTO m = models.get(i);
 	            ModeloDocumento modeloDocumento;
 	            boolean novoModelo = temporalCryptoIdUtil.isUUID(m.getId());
-
-	            if (novoModelo) {
-	                modeloDocumento = new ModeloDocumento();
-	            } else {
-	                Integer id = temporalCryptoIdUtil.extractId(m.getId());
-	                modeloDocumento = modeloDocumentoRepository.getById(id);
-	            }
+	            modeloDocumento = new ModeloDocumento();
 	            
 	            modeloDocumento.setChecklistVersao(checklistVersao);
 	            modeloDocumento.setDataAtualizacao(LocalDateTime.now());
@@ -293,19 +290,27 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDocumento.setImpresso(m.isArquivoImpressao());
 	            modeloDocumento.setCRC(false);
 	            modeloDocumento.setArmazenamento(m.isTemArquivo());
+	            modeloDocumento.setTempoArmazenamento(0);
 
 	            // --- Arquivo principal ---
 	            MultipartFile filePrincipal = arquivosModelos != null ? arquivosModelos.get("modelo-" + i + "-principal"): null;
 	            
-	            if(null == modeloDocumento.getNomeRecurso())
+	            if(novoModelo)
 	            {
 		            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
 	
 		            modeloDocumento.setNomeRecurso(filePrincipal.getOriginalFilename());
 		            modeloDocumento.setTipoMIME(filePrincipal.getContentType());
 		            modeloDocumento.setConteudoRecurso(filePrincipal.getBytes());
-		            
-		            modeloDocumento.setTempoArmazenamento(0);
+	            }
+	            else
+	            {
+	            	Integer id = temporalCryptoIdUtil.extractId(m.getId());
+	            	ModeloDocumento modeloDocumentoAtual = modeloDocumentoRepository.getById(id);
+	            	
+	            	modeloDocumento.setNomeRecurso(modeloDocumentoAtual.getNomeRecurso());
+		            modeloDocumento.setTipoMIME(modeloDocumentoAtual.getTipoMIME());
+		            modeloDocumento.setConteudoRecurso(modeloDocumentoAtual.getConteudoRecurso());
 	            }
 
 	            modeloDocumento = modeloDocumentoRepository.save(modeloDocumento);
@@ -423,6 +428,9 @@ public class ChecklistVersaoServiceAPI {
 
 	    return checklistVersao;
 	}
+	
+	@PersistenceContext
+	private EntityManager entityManager;
 	
 	@Autowired
 	private TemporalCryptoIdUtil temporalCryptoIdUtil;
@@ -797,29 +805,52 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDTO.setObservacao(modelo.getObservacao());
 	            modeloDTO.setTemArquivo(modelo.getNomeRecurso() != null);
 
-	            // -------- LOGO / ASSINATURA / ARQUIVO_ADICIONAL ----------
+	         // -------- LISTAS DE DESTINO --------
 	            List<ItemArquivoDTO> logosDto = new ArrayList<>();
+	            List<ItemArquivoDTO> arquivosAdicionaisDto = new ArrayList<>();
+	            List<ItemArquivoDTO> assinaturasDto = new ArrayList<>();
 
+	            // -------- LOOP ÚNICO --------
 	            if (c.getLogos() != null) {
 	                for (Logomodelo lm : c.getLogos()) {
 
-	                	ItemArquivoDTO lmDTO = new ItemArquivoDTO();
-	                    lmDTO.setId(temporalCryptoIdUtil.generateToken(lm.getId()));
-	                    lmDTO.setCodigo(lm.getCodigo());
+	                    LogomodeloTipoCodigo tipoEnum = lm.getTipo().getEnum(); // já pega uma vez
 
-	                    // Tipo (enum via tabela)
-	                    lmDTO.setTipo(lm.getTipo().getCodigo());
-	                    lmDTO.setDescricaoTipo(lm.getTipo().getDescricao());
+	                    // Prepara DTO (evita duplicação)
+	                    ItemArquivoDTO dto2 = new ItemArquivoDTO();
+	                    dto2.setId(temporalCryptoIdUtil.generateToken(lm.getId()));
+	                    dto2.setCodigo(lm.getCodigo());
+	                    dto2.setTipo(lm.getTipo().getCodigo());
+	                    dto2.setDescricaoTipo(lm.getTipo().getDescricao());
+	                    dto2.setArquivo(lm.getArquivo());
+	                    dto2.setMimeType(lm.getTipoMIME());
+	                    dto2.setName(lm.getNomeRecurso());
 
-	                    // Arquivo (bytes) + MimeType
-	                    lmDTO.setArquivo(lm.getArquivo());
-	                    lmDTO.setMimeType(lm.getTipoMIME());
+	                    // Direciona conforme o tipo
+	                    switch (tipoEnum) {
+	                        case LOGO:
+	                            logosDto.add(dto2);
+	                            break;
 
-	                    logosDto.add(lmDTO);
+	                        case ARQUIVO_ADICIONAL:
+	                            arquivosAdicionaisDto.add(dto2);
+	                            break;
+
+	                        case ASSINATURA:
+	                            assinaturasDto.add(dto2);
+	                            break;
+
+	                        default:
+	                            // se aparecer outro tipo no futuro
+	                            break;
+	                    }
 	                }
 	            }
 
+	            // -------- SETA NOS DTOs --------
 	            modeloDTO.setLogos(logosDto);
+	            modeloDTO.setArquivosAdicionais(arquivosAdicionaisDto);
+	            modeloDTO.setAssinaturas(assinaturasDto);
 	            modeloDtos.add(modeloDTO);
 	        }
 	    }
