@@ -196,3 +196,31 @@ ADD idCheckListVersao INT NULL;
 
 ALTER TABLE CL_Logomodelo
 ADD nomeRecurso varchar(100) COLLATE Latin1_General_CI_AS NULL;
+
+alter table CL_ModeloDocumento drop column Acabamento;
+
+alter table CL_ModeloDocumento add AcabamentoAutoEnvelope bit;
+
+alter table CL_ModeloDocumento add AcabamentoManuseio bit;
+
+alter table CL_ModeloDocumento add AcabamentoInsercao bit;
+
+alter table CL_ModeloDocumento add DisponibilizacaoCorreioSimples bit;
+
+alter table CL_ModeloDocumento add DisponibilizacaoCorreioSimplesAR bit;
+
+alter table CL_ModeloDocumento add DisponibilizacaoMeusDocumentosPDF bit;
+
+alter table CL_ModeloDocumento add DisponibilizacaoSMS bit;
+
+alter table CL_ModeloDocumento add EmailComDocumentoAnexo bit;
+
+alter table CL_ModeloDocumento add EmailComDocumentoAnexoEarmazenamento bit;
+
+alter table CL_ModeloDocumento add EmailComDocumentoAnexoEcorpoEmail bit;
+
+alter table CL_ModeloDocumento add EmailComDocumentoAnexoEarmazenamentoEemail bit;
+
+alter table CL_ModeloDocumento add EmailComDocumentoAnexoECarimbo bit;
+
+alter table CL_ModeloDocumento add RegrasAcesso varchar(max);

@@ -64,13 +64,47 @@ public class ModeloDocumento {
 
     @Column(name = "IsCRC", nullable = false)
     private boolean isCRC;
-
+    
+    @Column(name = "EmailComDocumentoAnexoECarimbo", nullable = false)
+    private boolean emailComDocumentoAnexoECarimbo;
+    
+    @Column(name = "EmailComDocumentoAnexoEcorpoEmail", nullable = false)
+    private boolean emailComDocumentoAnexoEcorpoEmail;
+    
+    
+    @Column(name = "EmailComDocumentoAnexoEarmazenamento", nullable = false)
+    private boolean emailComDocumentoAnexoEarmazenamento;
+    
+    @Column(name = "EmailComDocumentoAnexoEarmazenamentoEemail", nullable = false)
+    private boolean emailComDocumentoAnexoEarmazenamentoEemail;
+    
+    @Column(name = "DisponibilizacaoSMS", nullable = false)
+    private boolean disponibilizacaoSMS;
+    
+    @Column(name = "DisponibilizacaoMeusDocumentosPDF", nullable = false)
+    private boolean disponibilizacaoMeusDocumentosPDF;
+    
+    @Column(name = "DisponibilizacaoCorreioSimples", nullable = false)
+    private boolean disponibilizacaoCorreioSimples;
+    
+    @Column(name = "DisponibilizacaoCorreioSimplesAR", nullable = false)
+    private boolean disponibilizacaoCorreioSimplesAR;
+    
     @Column(name = "Duplex")
     private Boolean duplex;
-
-    @Column(name = "Acabamento")
-    private Integer acabamento;
-
+    
+    @Column(name = "EmailComDocumentoAnexo")
+    private Boolean emailComDocumentoAnexo;
+    
+    @Column(name = "AcabamentoAutoEnvelope", nullable = false)
+    private boolean acabamentoAutoEnvelope;
+    
+    @Column(name = "AcabamentoManuseio", nullable = false)
+    private boolean acabamentoManuseio;
+    
+    @Column(name = "AcabamentoInsercao", nullable = false)
+    private boolean acabamentoInsercao;
+    
     @Column(name = "IsArmazenamento", nullable = false)
     private boolean isArmazenamento;
 
@@ -97,6 +131,10 @@ public class ModeloDocumento {
     @Lob
     @Column(name = "CamposBuscaCorretor")
     private String camposBuscaCorretor;
+    
+    @Lob
+    @Column(name = "RegrasAcesso")
+    private String regrasAcesso;
 
     @Column(name = "AcessoEstipulante")
     private Boolean acessoEstipulante;

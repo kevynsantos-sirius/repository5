@@ -1,5 +1,6 @@
 package com.totaldocs.service;
 
+import com.totaldocs.dto.CamposBuscaDTO;
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.dto.ChecklistVersaoResumoDTO;
 import com.totaldocs.dto.ItemArquivoDTO;
@@ -8,6 +9,7 @@ import com.totaldocs.dto.MassaDTO;
 import com.totaldocs.dto.ModeloDTO;
 import com.totaldocs.dto.UsuarioDTO;
 import com.totaldocs.enums.LogomodeloTipoCodigo;
+import com.totaldocs.exception.UmTipoDeImpressaoException;
 import com.totaldocs.modelo.Checklist;
 import com.totaldocs.modelo.ChecklistVersao;
 import com.totaldocs.modelo.Layout;
@@ -172,7 +174,7 @@ public class ChecklistVersaoServiceAPI {
 	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto,
 	                                List<MultipartFile> filesLayout,
 	                                List<MultipartFile> filesMassas,
-	                                Map<String, MultipartFile> filesModelos) throws IOException {
+	                                Map<String, MultipartFile> filesModelos) throws IOException, UmTipoDeImpressaoException {
 
 	    // Criação checklist e versão (igual ao seu código original)
 	    Checklist checklist = new Checklist();
@@ -273,7 +275,7 @@ public class ChecklistVersaoServiceAPI {
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
-	        Map<String, MultipartFile> arquivosModelos) throws IOException {
+	        Map<String, MultipartFile> arquivosModelos) throws IOException, UmTipoDeImpressaoException {
 
 	    List<ModeloDocumento> list = new ArrayList<>();
 
@@ -287,7 +289,6 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDocumento.setChecklistVersao(checklistVersao);
 	            modeloDocumento.setDataAtualizacao(LocalDateTime.now());
 	            modeloDocumento.setObservacao(m.getObservacao());
-	            modeloDocumento.setImpresso(m.isArquivoImpressao());
 	            modeloDocumento.setCRC(false);
 	            modeloDocumento.setArmazenamento(m.isTemArquivo());
 	            modeloDocumento.setTempoArmazenamento(0);
@@ -393,15 +394,41 @@ public class ChecklistVersaoServiceAPI {
 	                }
 	            }
 
-	            modeloDocumento.setDuplex(m.getTipoImpressao() != null && m.getTipoImpressao().contains("DUPLEX"));
-	            if (m.getTipoAcabamento() != null && !m.getTipoAcabamento().isEmpty()) {
-	                try {
-	                    modeloDocumento.setAcabamento(Integer.parseInt(m.getTipoAcabamento().get(0)));
-	                } catch (Exception e) {
-	                    modeloDocumento.setAcabamento(null);
-	                }
+	            //Formatação & Impressão
+	            boolean duplex = m.getTipoImpressao() != null && m.getTipoImpressao().contains("DUPLEX");
+	            boolean isImpresso = m.getTipoImpressao() != null && m.getTipoImpressao().contains("simples");
+	            
+	            if(duplex && isImpresso)
+	            {
+	            	throw new UmTipoDeImpressaoException();
 	            }
-
+	            
+	            modeloDocumento.setDuplex(duplex);
+				modeloDocumento.setImpresso(isImpresso);
+	            
+	            //Tipo de Acabamento
+	            modeloDocumento.setAcabamentoAutoEnvelope(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("autoEnvelope"));
+	            modeloDocumento.setAcabamentoManuseio(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("manuseio"));
+	            modeloDocumento.setAcabamentoInsercao(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("insercao"));
+	            
+	            //Disponibilização
+	            modeloDocumento.setDisponibilizacaoCorreioSimples(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimples"));
+	            modeloDocumento.setDisponibilizacaoCorreioSimplesAR(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimplesAR"));
+	            modeloDocumento.setCRC(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("impressaoSobDemanda"));
+	            modeloDocumento.setDisponibilizacaoMeusDocumentosPDF(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("meusDocumentosPdf"));
+	            modeloDocumento.setDisponibilizacaoSMS(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("sms"));
+	            
+	            
+	            //Email
+	            modeloDocumento.setEmailComDocumentoAnexo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexo"));
+	            modeloDocumento.setEmailComDocumentoAnexoEarmazenamento(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoArmazenamento"));
+	            modeloDocumento.setEmailComDocumentoAnexoEcorpoEmail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmail"));
+	            modeloDocumento.setEmailComDocumentoAnexoEarmazenamentoEemail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmailArmazenamento"));
+	            modeloDocumento.setEmailComDocumentoAnexoECarimbo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoCarimboTempo"));
+	            
+	            //Regras de acesso
+	            modeloDocumento.setRegrasAcesso(m.getRegrasAcesso());
+	            
 	            // Campos de busca
 	            if (m.getCamposBusca() != null) {
 	                modeloDocumento.setAcessoBackOffice(m.getCamposBusca().getBackoffice() != null);
@@ -844,6 +871,8 @@ public class ChecklistVersaoServiceAPI {
 	                            // se aparecer outro tipo no futuro
 	                            break;
 	                    }
+	                    
+	                    
 	                }
 	            }
 
@@ -852,6 +881,16 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDTO.setArquivosAdicionais(arquivosAdicionaisDto);
 	            modeloDTO.setAssinaturas(assinaturasDto);
 	            modeloDtos.add(modeloDTO);
+	            
+	            CamposBuscaDTO camposBuscaDTO = new CamposBuscaDTO();
+	            
+	            camposBuscaDTO.setBackoffice(modelo.getCamposBuscaBackOffice());
+	            camposBuscaDTO.setCliente(modelo.getCamposBuscaCliente());
+	            camposBuscaDTO.setCorretor(modelo.getCamposBuscaCorretor());
+	            camposBuscaDTO.setEstipulante(modelo.getCamposBuscaEstipulante());
+	            camposBuscaDTO.setEstipulante(modelo.getCamposBuscaEstipulante());
+	            
+	            modeloDTO.setCamposBusca(camposBuscaDTO);
 	        }
 	    }
 
