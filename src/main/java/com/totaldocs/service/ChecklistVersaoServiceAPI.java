@@ -394,32 +394,6 @@ public class ChecklistVersaoServiceAPI {
 	                }
 	            }
 	            
-	         // --- Arquivos adicionais ---
-	            if (m.getArquivosAdicionais() != null) {
-	                for (int j = 0; j < m.getArquivosAdicionais().size(); j++) {
-	                    var arq = m.getArquivosAdicionais().get(j);
-
-	                    if (arq.isTemArquivo()) {
-	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-adicional-" + j);
-	                        if (file == null) throw new RuntimeException("Arquivo adicional não enviado");
-
-	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
-	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
-
-	                        Recurso lm = new Recurso();
-	                        lm.setModeloDocumento(modeloDocumento);
-	                        lm.setCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
-	                        lm.setTipo(tipo);
-	                        lm.setArquivo(file.getBytes());
-	                        lm.setTipoMIME(file.getContentType());
-	                        lm.setChecklistVersao(checklistVersao);
-	                        lm.setNomeRecurso(file.getOriginalFilename());
-
-	                        recursoRepository.save(lm);
-	                    }
-	                }
-	            }
-	            
 	         // --- Arquivos de impressão ---
 	            if (m.getArquivosImpressao() != null) {
 	                for (int j = 0; j < m.getArquivosImpressao().size(); j++) {
