@@ -447,7 +447,7 @@ public class ChecklistVersaoServiceAPI {
 	            }
 
 	            //Formatação & Impressão
-	            boolean duplex = m.getTipoImpressao() != null && m.getTipoImpressao().contains("DUPLEX");
+	            boolean duplex = m.getTipoImpressao() != null && m.getTipoImpressao().contains("duplex");
 	            boolean isImpresso = m.getTipoImpressao() != null && m.getTipoImpressao().contains("simples");
 	            
 	            if(duplex && isImpresso)
