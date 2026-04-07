@@ -26,22 +26,6 @@ public class ModeloDocumento {
     private LocalDateTime dataAtualizacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IdLogoCapa")
-    private LogoCapa logoCapa;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IdLogoProduto")
-    private LogoProduto logoProduto;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CodAssIH")
-    private AssinatIcatu assinaturaIcatu;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CodAssParc")
-    private AssinatParc assinaturaParc;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IdPreImpresso")
     private PreImpresso preImpresso;
 

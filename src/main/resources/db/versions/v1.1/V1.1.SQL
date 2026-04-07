@@ -166,35 +166,35 @@ ALTER TABLE GIMP_DSV.dbo.CL_ModeloDocumento ADD CONSTRAINT FK_ModeloDocumento_Pr
 
 ALTER TABLE GIMP_DSV.dbo.CL_TipoEnvio ADD CONSTRAINT FK_TipoEnvio_ChecklistVersao FOREIGN KEY (IdChecklistVersao) REFERENCES GIMP_DSV.dbo.CL_ChecklistVersao(Id) ON DELETE CASCADE;
 
--- GIMP_DSV.dbo.CL_logomodelotipo e CL_Logomodelo e chaves estrangeiras
+-- CL_TipoRecurso e CL_Recurso
 
-create table CL_logomodelotipo(idLogomodeloTipo int IDENTITY(1,1) primary key, codigo int, descricao varchar(20));
+create table CL_TipoRecurso(idTipoRecurso int IDENTITY(1,1) primary key, codigo int, descricao varchar(20));
 
-INSERT INTO CL_logomodelotipo (codigo, descricao) VALUES
+INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
 (1, 'Logo'),
 (2, 'Arquivo Adicional'),
 (3, 'Assinatura');
 
-CREATE TABLE CL_Logomodelo (
-    idLogoModelo INT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE CL_Recurso (
+    idRecurso INT IDENTITY(1,1) PRIMARY KEY,
     idModelo INT NOT NULL,              -- FK para CL_ModeloDocumento(Id)
     codigo INT NOT NULL,
 
-    CONSTRAINT FK_Logomodelo_ModeloDocumento
+    CONSTRAINT FK_CL_Recurso_ModeloDocumento
         FOREIGN KEY (idModelo)
         REFERENCES CL_ModeloDocumento(Id)
 );
 
-ALTER TABLE CL_Logomodelo
+ALTER TABLE CL_Recurso
 ADD arquivo VARBINARY(MAX) NULL;
 
-ALTER TABLE CL_Logomodelo
+ALTER TABLE CL_Recurso
 ADD tipoMIME VARCHAR(200) NULL;
 
-ALTER TABLE CL_Logomodelo
+ALTER TABLE CL_Recurso
 ADD idCheckListVersao INT NULL;
 
-ALTER TABLE CL_Logomodelo
+ALTER TABLE CL_Recurso
 ADD nomeRecurso varchar(100) COLLATE Latin1_General_CI_AS NULL;
 
 alter table CL_ModeloDocumento drop column Acabamento;

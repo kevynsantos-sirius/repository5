@@ -60,5 +60,5 @@ public class ChecklistVersao {
     
     
     @OneToMany(mappedBy = "checklistVersao", fetch = FetchType.LAZY)
-    private List<Logomodelo> logos;
+    private List<Recurso> logos;
 }

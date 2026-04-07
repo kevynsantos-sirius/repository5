@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "CL_Logomodelo")
+@Table(name = "CL_Recurso")
 @Getter
 @Setter
-public class Logomodelo {
+public class Recurso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idLogoModelo")
+    @Column(name = "idRecurso")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -25,11 +25,11 @@ public class Logomodelo {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
         name = "codigo",                 // coluna na tabela atual
-        referencedColumnName = "codigo", // coluna na tabela CL_logomodelotipo
+        referencedColumnName = "codigo", // coluna na tabela
         insertable = false,
         updatable = false
     )
-    private LogomodeloTipo tipo;
+    private TipoRecurso tipo;
 
     @Lob
     @Column(name = "arquivo")

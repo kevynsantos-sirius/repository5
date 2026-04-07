@@ -26,4 +26,6 @@ public class ModeloDTO {
     
     private List<String> disponibilizacao; 
     private List<String> emailOpcoes;
+    
+    private List<ItemArquivoDTO> arquivosImpressao;
 }

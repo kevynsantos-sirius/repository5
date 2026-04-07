@@ -1,20 +1,20 @@
 package com.totaldocs.modelo;
 
-import com.totaldocs.enums.LogomodeloTipoCodigo;
+import com.totaldocs.enums.RecursoTipoCodigo;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "CL_logomodelotipo")
+@Table(name = "CL_TipoRecurso")
 @Getter
 @Setter
-public class LogomodeloTipo {
+public class TipoRecurso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idLogomodeloTipo")
+    @Column(name = "idTipoRecurso")
     private Integer id;
 
     @Column(name = "codigo")
@@ -24,7 +24,7 @@ public class LogomodeloTipo {
     private String descricao;
 
     @Transient
-    public LogomodeloTipoCodigo getEnum() {
-        return LogomodeloTipoCodigo.fromCodigo(this.codigo);
+    public RecursoTipoCodigo getEnum() {
+        return RecursoTipoCodigo.fromCodigo(this.codigo);
     }
 }

@@ -8,13 +8,13 @@ import com.totaldocs.dto.LayoutDTO;
 import com.totaldocs.dto.MassaDTO;
 import com.totaldocs.dto.ModeloDTO;
 import com.totaldocs.dto.UsuarioDTO;
-import com.totaldocs.enums.LogomodeloTipoCodigo;
+import com.totaldocs.enums.RecursoTipoCodigo;
 import com.totaldocs.exception.UmTipoDeImpressaoException;
 import com.totaldocs.modelo.Checklist;
 import com.totaldocs.modelo.ChecklistVersao;
 import com.totaldocs.modelo.Layout;
-import com.totaldocs.modelo.Logomodelo;
-import com.totaldocs.modelo.LogomodeloTipo;
+import com.totaldocs.modelo.Recurso;
+import com.totaldocs.modelo.TipoRecurso;
 import com.totaldocs.modelo.MassaDados;
 import com.totaldocs.modelo.ModeloDocumento;
 import com.totaldocs.modelo.Ramo;
@@ -22,11 +22,10 @@ import com.totaldocs.modelo.Usuario;
 import com.totaldocs.repository.ChecklistRepository;
 import com.totaldocs.repository.ChecklistVersaoRepository;
 import com.totaldocs.repository.LayoutRepository;
-import com.totaldocs.repository.LogoCapaRepository;
-import com.totaldocs.repository.LogomodeloRepository;
-import com.totaldocs.repository.LogomodeloTipoRepository;
 import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.repository.ModeloDocumentoRepository;
+import com.totaldocs.repository.RecursoRepository;
+import com.totaldocs.repository.TipoRecursoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
 import jakarta.persistence.EntityManager;
@@ -42,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,23 +58,23 @@ public class ChecklistVersaoServiceAPI {
 	private final MassaDadoRepository arquivoRepository;
 	private final UsuarioService usuarioService;
 	private final ModeloDocumentoRepository modeloDocumentoRepository;
-	private final LogomodeloRepository logomodeloRepository;
-	private final LogomodeloTipoRepository logomodeloTipoRepository;
+	private final RecursoRepository recursoRepository;
+	private final TipoRecursoRepository tipoRecursoRepository;
 
 	public ChecklistVersaoServiceAPI(ChecklistVersaoRepository checklistVersaoRepository,
 			ChecklistRepository checklistRepository, LayoutRepository layoutRepository,
 			MassaDadoRepository arquivoRepository, UsuarioService usuarioService,
 			ModeloDocumentoRepository modeloDocumentoRepository,
-			LogomodeloRepository logomodeloRepository,
-			LogomodeloTipoRepository logomodeloTipoRepository) {
+			RecursoRepository logomodeloRepository,
+			TipoRecursoRepository logomodeloTipoRepository) {
 		this.checklistVersaoRepository = checklistVersaoRepository;
 		this.checklistRepository = checklistRepository;
 		this.layoutRepository = layoutRepository;
 		this.arquivoRepository = arquivoRepository;
 		this.usuarioService = usuarioService;
 		this.modeloDocumentoRepository = modeloDocumentoRepository;
-		this.logomodeloRepository =  logomodeloRepository;
-		this.logomodeloTipoRepository =  logomodeloTipoRepository;
+		this.recursoRepository =  logomodeloRepository;
+		this.tipoRecursoRepository =  logomodeloTipoRepository;
 	}
 	
 	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
@@ -325,19 +325,19 @@ public class ChecklistVersaoServiceAPI {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-logo-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo de logo não enviado");
 
-	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.LOGO.getCodigo())
+	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.LOGO.getCodigo())
 	                                .orElseThrow(() -> new RuntimeException("Tipo LOGO não encontrado"));
 
-	                        Logomodelo lm = new Logomodelo();
+	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(modeloDocumento); // modelo atualizado no laço
-	                        lm.setCodigo(LogomodeloTipoCodigo.LOGO.getCodigo()); // ou outro critério
+	                        lm.setCodigo(RecursoTipoCodigo.LOGO.getCodigo()); // ou outro critério
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        logomodeloRepository.save(lm);
+	                        recursoRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -351,19 +351,19 @@ public class ChecklistVersaoServiceAPI {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-assinatura-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo de assinatura não enviado");
 
-	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.ASSINATURA.getCodigo())
+	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ASSINATURA.getCodigo())
 	                                .orElseThrow(() -> new RuntimeException("Tipo ASSINATURA não encontrado"));
 
-	                        Logomodelo lm = new Logomodelo();
+	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(modeloDocumento);
-	                        lm.setCodigo(LogomodeloTipoCodigo.ASSINATURA.getCodigo());
+	                        lm.setCodigo(RecursoTipoCodigo.ASSINATURA.getCodigo());
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        logomodeloRepository.save(lm);
+	                        recursoRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -377,19 +377,71 @@ public class ChecklistVersaoServiceAPI {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-adicional-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo adicional não enviado");
 
-	                        LogomodeloTipo tipo = logomodeloTipoRepository.findByCodigo(LogomodeloTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
+	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
 	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
 
-	                        Logomodelo lm = new Logomodelo();
+	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(modeloDocumento);
-	                        lm.setCodigo(LogomodeloTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
+	                        lm.setCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
 	                        lm.setTipoMIME(file.getContentType());
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        logomodeloRepository.save(lm);
+	                        recursoRepository.save(lm);
+	                    }
+	                }
+	            }
+	            
+	         // --- Arquivos adicionais ---
+	            if (m.getArquivosAdicionais() != null) {
+	                for (int j = 0; j < m.getArquivosAdicionais().size(); j++) {
+	                    var arq = m.getArquivosAdicionais().get(j);
+
+	                    if (arq.isTemArquivo()) {
+	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-adicional-" + j);
+	                        if (file == null) throw new RuntimeException("Arquivo adicional não enviado");
+
+	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
+	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
+
+	                        Recurso lm = new Recurso();
+	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
+	                        lm.setTipo(tipo);
+	                        lm.setArquivo(file.getBytes());
+	                        lm.setTipoMIME(file.getContentType());
+	                        lm.setChecklistVersao(checklistVersao);
+	                        lm.setNomeRecurso(file.getOriginalFilename());
+
+	                        recursoRepository.save(lm);
+	                    }
+	                }
+	            }
+	            
+	         // --- Arquivos de impressão ---
+	            if (m.getArquivosImpressao() != null) {
+	                for (int j = 0; j < m.getArquivosImpressao().size(); j++) {
+	                    var arq = m.getArquivosImpressao().get(j);
+
+	                    if (arq.isTemArquivo()) {
+	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-impressao-" + j);
+	                        if (file == null) throw new RuntimeException("Arquivo Impressão não enviado");
+
+	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo())
+	                                .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
+
+	                        Recurso lm = new Recurso();
+	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
+	                        lm.setTipo(tipo);
+	                        lm.setArquivo(file.getBytes());
+	                        lm.setTipoMIME(file.getContentType());
+	                        lm.setChecklistVersao(checklistVersao);
+	                        lm.setNomeRecurso(file.getOriginalFilename());
+
+	                        recursoRepository.save(lm);
 	                    }
 	                }
 	            }
@@ -839,9 +891,9 @@ public class ChecklistVersaoServiceAPI {
 
 	            // -------- LOOP ÚNICO --------
 	            if (c.getLogos() != null) {
-	                for (Logomodelo lm : c.getLogos()) {
+	                for (Recurso lm : c.getLogos()) {
 
-	                    LogomodeloTipoCodigo tipoEnum = lm.getTipo().getEnum(); // já pega uma vez
+	                    RecursoTipoCodigo tipoEnum = lm.getTipo().getEnum(); // já pega uma vez
 
 	                    // Prepara DTO (evita duplicação)
 	                    ItemArquivoDTO dto2 = new ItemArquivoDTO();

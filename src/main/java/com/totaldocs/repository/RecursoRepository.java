@@ -3,7 +3,7 @@ package com.totaldocs.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.totaldocs.modelo.Logomodelo;
+import com.totaldocs.modelo.Recurso;
 
 @Repository
-public interface LogomodeloRepository extends JpaRepository<Logomodelo, Integer> {}
+public interface RecursoRepository extends JpaRepository<Recurso, Integer> {}
