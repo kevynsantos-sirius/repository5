@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ChecklistVersaoServiceAPI {
@@ -312,9 +313,67 @@ public class ChecklistVersaoServiceAPI {
 	            	modeloDocumento.setNomeRecurso(modeloDocumentoAtual.getNomeRecurso());
 		            modeloDocumento.setTipoMIME(modeloDocumentoAtual.getTipoMIME());
 		            modeloDocumento.setConteudoRecurso(modeloDocumentoAtual.getConteudoRecurso());
+		            
+		            ChecklistVersao checklistVersaoModelo = modeloDocumentoAtual.getChecklistVersao();
+		            
+		            List<Recurso> recursos = checklistVersaoModelo.getRecursos();
+		            
+		            List<ItemArquivoDTO> logos = m.getLogos();
+	            	List<ItemArquivoDTO> arquivosAdicionais = m.getArquivosAdicionais();
+	            	List<ItemArquivoDTO> assinaturas = m.getAssinaturas();
+	            	List<ItemArquivoDTO> arquivosImpressao = m.getArquivosImpressao();
+	            	
+	            	List<ItemArquivoDTO> arquivosNaoExcluidos = new ArrayList<>();
+		            
+		            for(Recurso r : recursos)
+		            {
+		            	
+		            	List<ItemArquivoDTO> filtradosLogos = logos.stream()
+		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    		&& !l.getExcluido())
+		            		    .toList();
+		            	List<ItemArquivoDTO> filtradosArquivosAdicionais = arquivosAdicionais.stream()
+		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    		&& !l.getExcluido())
+		            		    .toList();
+		            	List<ItemArquivoDTO> filtradosAssinaturas = assinaturas.stream()
+		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    		&& !l.getExcluido())
+		            		    .toList();
+		            	List<ItemArquivoDTO> filtradosArquivosImpressao = arquivosImpressao.stream()
+		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    		&& !l.getExcluido())
+		            		    .toList();
+		            	
+		            	arquivosNaoExcluidos.addAll(filtradosLogos);
+		            	arquivosNaoExcluidos.addAll(filtradosArquivosAdicionais);
+		            	arquivosNaoExcluidos.addAll(filtradosAssinaturas);
+		            	arquivosNaoExcluidos.addAll(filtradosArquivosImpressao);
+		            }
+		            
+		            arquivosNaoExcluidos.forEach(a -> {
+		            	
+		            	Integer idRecurso = temporalCryptoIdUtil.extractId(a.getId());
+		            	Optional<Recurso> recurso = recursoRepository.findById(idRecurso);
+		            	Recurso r = recurso.get();
+		            	TipoRecurso tipo = r.getTipo();
+
+                        Recurso lm = new Recurso();
+                        lm.setModeloDocumento(modeloDocumento); // modelo atualizado no laço
+                        lm.setCodigo(tipo.getCodigo()); // ou outro critério
+                        lm.setTipo(tipo);
+                        lm.setArquivo(r.getArquivo());
+                        lm.setTipoMIME(r.getTipoMIME());
+                        lm.setChecklistVersao(checklistVersao);
+                        lm.setNomeRecurso(r.getNomeRecurso());
+
+                        recursoRepository.save(lm);
+		            	
+		            });
+			            
 	            }
 
-	            modeloDocumento = modeloDocumentoRepository.save(modeloDocumento);
+	            ModeloDocumento newModeloDocumento = modeloDocumentoRepository.save(modeloDocumento);
 	            
 	            // --- Logos ---
 	            if (m.getLogos() != null) {
@@ -329,7 +388,7 @@ public class ChecklistVersaoServiceAPI {
 	                                .orElseThrow(() -> new RuntimeException("Tipo LOGO não encontrado"));
 
 	                        Recurso lm = new Recurso();
-	                        lm.setModeloDocumento(modeloDocumento); // modelo atualizado no laço
+	                        lm.setModeloDocumento(newModeloDocumento); // modelo atualizado no laço
 	                        lm.setCodigo(RecursoTipoCodigo.LOGO.getCodigo()); // ou outro critério
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
@@ -355,7 +414,7 @@ public class ChecklistVersaoServiceAPI {
 	                                .orElseThrow(() -> new RuntimeException("Tipo ASSINATURA não encontrado"));
 
 	                        Recurso lm = new Recurso();
-	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setModeloDocumento(newModeloDocumento);
 	                        lm.setCodigo(RecursoTipoCodigo.ASSINATURA.getCodigo());
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
@@ -381,7 +440,7 @@ public class ChecklistVersaoServiceAPI {
 	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
 
 	                        Recurso lm = new Recurso();
-	                        lm.setModeloDocumento(modeloDocumento);
+	                        lm.setModeloDocumento(newModeloDocumento);
 	                        lm.setCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo());
 	                        lm.setTipo(tipo);
 	                        lm.setArquivo(file.getBytes());
@@ -407,7 +466,7 @@ public class ChecklistVersaoServiceAPI {
 		                                .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
 
 		                        Recurso lm = new Recurso();
-		                        lm.setModeloDocumento(modeloDocumento);
+		                        lm.setModeloDocumento(newModeloDocumento);
 		                        lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
 		                        lm.setTipo(tipo);
 		                        lm.setArquivo(file.getBytes());
@@ -430,51 +489,51 @@ public class ChecklistVersaoServiceAPI {
 	            	throw new UmTipoDeImpressaoException();
 	            }
 	            
-	            modeloDocumento.setDuplex(duplex);
-				modeloDocumento.setImpresso(isImpresso);
+	            newModeloDocumento.setDuplex(duplex);
+	            newModeloDocumento.setImpresso(isImpresso);
 	            
 	            //Tipo de Acabamento
-	            modeloDocumento.setAcabamentoAutoEnvelope(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("autoEnvelope"));
-	            modeloDocumento.setAcabamentoManuseio(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("manuseio"));
-	            modeloDocumento.setAcabamentoInsercao(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("insercao"));
+	            newModeloDocumento.setAcabamentoAutoEnvelope(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("autoEnvelope"));
+	            newModeloDocumento.setAcabamentoManuseio(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("manuseio"));
+	            newModeloDocumento.setAcabamentoInsercao(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("insercao"));
 	            
 	            //Disponibilização
-	            modeloDocumento.setDisponibilizacaoCorreioSimples(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimples"));
-	            modeloDocumento.setDisponibilizacaoCorreioSimplesAR(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimplesAR"));
-	            modeloDocumento.setCRC(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("impressaoSobDemanda"));
-	            modeloDocumento.setDisponibilizacaoMeusDocumentosPDF(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("meusDocumentosPdf"));
-	            modeloDocumento.setDisponibilizacaoSMS(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("sms"));
+	            newModeloDocumento.setDisponibilizacaoCorreioSimples(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimples"));
+	            newModeloDocumento.setDisponibilizacaoCorreioSimplesAR(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("correiosSimplesAR"));
+	            newModeloDocumento.setCRC(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("impressaoSobDemanda"));
+	            newModeloDocumento.setDisponibilizacaoMeusDocumentosPDF(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("meusDocumentosPdf"));
+	            newModeloDocumento.setDisponibilizacaoSMS(m.getDisponibilizacao() != null && m.getDisponibilizacao().contains("sms"));
 	            
 	            
 	            //Email
-	            modeloDocumento.setEmailComDocumentoAnexo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexo"));
-	            modeloDocumento.setEmailComDocumentoAnexoEarmazenamento(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoArmazenamento"));
-	            modeloDocumento.setEmailComDocumentoAnexoEcorpoEmail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmail"));
-	            modeloDocumento.setEmailComDocumentoAnexoEarmazenamentoEemail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmailArmazenamento"));
-	            modeloDocumento.setEmailComDocumentoAnexoECarimbo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoCarimboTempo"));
+	            newModeloDocumento.setEmailComDocumentoAnexo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexo"));
+	            newModeloDocumento.setEmailComDocumentoAnexoEarmazenamento(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoArmazenamento"));
+	            newModeloDocumento.setEmailComDocumentoAnexoEcorpoEmail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmail"));
+	            newModeloDocumento.setEmailComDocumentoAnexoEarmazenamentoEemail(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("corpoEmailArmazenamento"));
+	            newModeloDocumento.setEmailComDocumentoAnexoECarimbo(m.getEmailOpcoes() != null && m.getEmailOpcoes().contains("anexoCarimboTempo"));
 	            
 	            //Regras de acesso
-	            modeloDocumento.setRegrasAcesso(m.getRegrasAcesso());
+	            newModeloDocumento.setRegrasAcesso(m.getRegrasAcesso());
 	            
 	            // Campos de busca
 	            if (m.getCamposBusca() != null) {
-	                modeloDocumento.setAcessoBackOffice(m.getCamposBusca().getBackoffice() != null);
-	                modeloDocumento.setCamposBuscaBackOffice(m.getCamposBusca().getBackoffice());
-	                modeloDocumento.setAcessoCliente(m.getCamposBusca().getCliente() != null);
-	                modeloDocumento.setCamposBuscaCliente(m.getCamposBusca().getCliente());
-	                modeloDocumento.setAcessoCorretor(m.getCamposBusca().getCorretor() != null);
-	                modeloDocumento.setCamposBuscaCorretor(m.getCamposBusca().getCorretor());
-	                modeloDocumento.setAcessoEstipulante(m.getCamposBusca().getEstipulante() != null);
-	                modeloDocumento.setCamposBuscaEstipulante(m.getCamposBusca().getEstipulante());
-	                modeloDocumento.setAcessoSubEstipulante(m.getCamposBusca().getSubestipulante() != null);
-	                modeloDocumento.setCamposBuscaSubEstipulante(m.getCamposBusca().getSubestipulante());
+	            	newModeloDocumento.setAcessoBackOffice(m.getCamposBusca().getBackoffice() != null);
+	            	newModeloDocumento.setCamposBuscaBackOffice(m.getCamposBusca().getBackoffice());
+	            	newModeloDocumento.setAcessoCliente(m.getCamposBusca().getCliente() != null);
+	            	newModeloDocumento.setCamposBuscaCliente(m.getCamposBusca().getCliente());
+	            	newModeloDocumento.setAcessoCorretor(m.getCamposBusca().getCorretor() != null);
+	            	newModeloDocumento.setCamposBuscaCorretor(m.getCamposBusca().getCorretor());
+	            	newModeloDocumento.setAcessoEstipulante(m.getCamposBusca().getEstipulante() != null);
+	            	newModeloDocumento.setCamposBuscaEstipulante(m.getCamposBusca().getEstipulante());
+	                newModeloDocumento.setAcessoSubEstipulante(m.getCamposBusca().getSubestipulante() != null);
+	                newModeloDocumento.setCamposBuscaSubEstipulante(m.getCamposBusca().getSubestipulante());
 	            }
 
 	           
 	            
-	            modeloDocumentoRepository.save(modeloDocumento);
+	            modeloDocumentoRepository.save(newModeloDocumento);
 	            
-	            list.add(modeloDocumento);
+	            list.add(newModeloDocumento);
 	        }
 	    }
 
@@ -866,8 +925,9 @@ public class ChecklistVersaoServiceAPI {
 	            List<ItemArquivoDTO> impressoesDto = new ArrayList<>();
 
 	            // -------- LOOP ÚNICO --------
-	            if (c.getLogos() != null) {
-	                for (Recurso lm : c.getLogos()) {
+	            List<Recurso> recursos = c.getRecursos();
+				if (recursos != null) {
+	                for (Recurso lm : recursos) {
 
 	                    RecursoTipoCodigo tipoEnum = lm.getTipo().getEnum(); // já pega uma vez
 

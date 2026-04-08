@@ -19,4 +19,6 @@ public class ItemArquivoDTO {
     private byte[] arquivo;         // bytes
     private String mimeType;        // tipo MIME: image/png, application/pdf...
     private String nomeArquivo;     // útil para download/exibição
+    
+    private Boolean excluido;
 }
