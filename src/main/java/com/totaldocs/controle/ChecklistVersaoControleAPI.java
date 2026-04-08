@@ -46,15 +46,20 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        return mapa;
 	    }
 
+	    int fileIndex = 0;
+
 	    for (int i = 0; i < keysModelos.size(); i++) {
 	        String key = keysModelos.get(i);
 
-	        // IGNORA keys vazias (OCORRE NO SEU CASO AGORA)
 	        if (key == null || key.trim().isEmpty()) {
 	            continue;
 	        }
 
-	        mapa.put(key, arquivosModelos.get(i));
+	        // Só pega File quando existir File
+	        if (fileIndex < arquivosModelos.size()) {
+	            mapa.put(key, arquivosModelos.get(fileIndex));
+	            fileIndex++; // avança só na lista de FILES novos
+	        }
 	    }
 
 	    return mapa;

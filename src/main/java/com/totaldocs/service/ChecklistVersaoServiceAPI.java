@@ -863,6 +863,7 @@ public class ChecklistVersaoServiceAPI {
 	            List<ItemArquivoDTO> logosDto = new ArrayList<>();
 	            List<ItemArquivoDTO> arquivosAdicionaisDto = new ArrayList<>();
 	            List<ItemArquivoDTO> assinaturasDto = new ArrayList<>();
+	            List<ItemArquivoDTO> impressoesDto = new ArrayList<>();
 
 	            // -------- LOOP ÚNICO --------
 	            if (c.getLogos() != null) {
@@ -893,7 +894,10 @@ public class ChecklistVersaoServiceAPI {
 	                        case ASSINATURA:
 	                            assinaturasDto.add(dto2);
 	                            break;
-
+	                            
+	                        case IMPRESSAO:
+	                        	impressoesDto.add(dto2);
+	                        	break;
 	                        default:
 	                            // se aparecer outro tipo no futuro
 	                            break;
@@ -907,6 +911,7 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDTO.setLogos(logosDto);
 	            modeloDTO.setArquivosAdicionais(arquivosAdicionaisDto);
 	            modeloDTO.setAssinaturas(assinaturasDto);
+	            modeloDTO.setArquivosImpressao(impressoesDto);
 	            modeloDtos.add(modeloDTO);
 	            
 	            CamposBuscaDTO camposBuscaDTO = new CamposBuscaDTO();
@@ -918,6 +923,32 @@ public class ChecklistVersaoServiceAPI {
 	            camposBuscaDTO.setEstipulante(modelo.getCamposBuscaEstipulante());
 	            
 	            modeloDTO.setCamposBusca(camposBuscaDTO);
+	            
+	            modeloDTO.setDuplex(modelo.getDuplex());
+	            modeloDTO.setIsImpresso(modelo.isImpresso());
+		            
+		            //Tipo de Acabamento
+	            modeloDTO.setAcabamentoAutoEnvelope(modelo.isAcabamentoAutoEnvelope());
+	            modeloDTO.setAcabamentoManuseio(modelo.isAcabamentoManuseio());
+	            modeloDTO.setAcabamentoInsercao(modelo.isAcabamentoInsercao());
+		            
+		            //Disponibilização
+	            modeloDTO.setDisponibilizacaoCorreioSimples(modelo.isDisponibilizacaoCorreioSimples());
+	            modeloDTO.setDisponibilizacaoCorreioSimplesAR(modelo.isDisponibilizacaoCorreioSimplesAR());
+	            modeloDTO.setCrc(modelo.isCRC());
+	            modeloDTO.setDisponibilizacaoMeusDocumentosPDF(modelo.isDisponibilizacaoMeusDocumentosPDF());
+	            modeloDTO.setDisponibilizacaoSMS(modelo.isDisponibilizacaoSMS());
+		            
+		            
+		            //Email
+	            modeloDTO.setEmailComDocumentoAnexo(modelo.getEmailComDocumentoAnexo());
+	            modeloDTO.setEmailComDocumentoAnexoEarmazenamento(modelo.isEmailComDocumentoAnexoEarmazenamento());
+	            modeloDTO.setEmailComDocumentoAnexoEcorpoEmail(modelo.isEmailComDocumentoAnexoEcorpoEmail());
+	            modeloDTO.setEmailComDocumentoAnexoEarmazenamentoEemail(modelo.isEmailComDocumentoAnexoEarmazenamentoEemail());
+	            modeloDTO.setEmailComDocumentoAnexoECarimbo(modelo.isEmailComDocumentoAnexoECarimbo());
+		            
+		            //Regras de acesso
+	            modeloDTO.setRegrasAcesso(modelo.getRegrasAcesso());
 	        }
 	    }
 
