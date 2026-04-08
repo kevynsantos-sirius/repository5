@@ -296,7 +296,7 @@ public class ChecklistVersaoServiceAPI {
 
 	            // --- Arquivo principal ---
 	            MultipartFile filePrincipal = arquivosModelos != null ? arquivosModelos.get("modelo-" + i + "-principal"): null;
-	            
+	            ModeloDocumento newModeloDocumento = null;
 	            if(novoModelo)
 	            {
 		            if (filePrincipal == null) throw new RuntimeException("Arquivo principal do modelo não enviado");
@@ -324,24 +324,26 @@ public class ChecklistVersaoServiceAPI {
 	            	List<ItemArquivoDTO> arquivosImpressao = m.getArquivosImpressao();
 	            	
 	            	List<ItemArquivoDTO> arquivosNaoExcluidos = new ArrayList<>();
-		            
+	            	
+	            	ModeloDocumento modeloDocumentoForItem = modeloDocumentoRepository.save(modeloDocumento);
+	            	newModeloDocumento = modeloDocumentoForItem;
 		            for(Recurso r : recursos)
 		            {
 		            	
 		            	List<ItemArquivoDTO> filtradosLogos = logos.stream()
-		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId())) 
 		            		    		&& !l.getExcluido())
 		            		    .toList();
 		            	List<ItemArquivoDTO> filtradosArquivosAdicionais = arquivosAdicionais.stream()
-		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
 		            		    		&& !l.getExcluido())
 		            		    .toList();
 		            	List<ItemArquivoDTO> filtradosAssinaturas = assinaturas.stream()
-		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
 		            		    		&& !l.getExcluido())
 		            		    .toList();
 		            	List<ItemArquivoDTO> filtradosArquivosImpressao = arquivosImpressao.stream()
-		            		    .filter(l -> temporalCryptoIdUtil.extractId(l.getId()).equals(r.getId())
+		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
 		            		    		&& !l.getExcluido())
 		            		    .toList();
 		            	
@@ -359,7 +361,7 @@ public class ChecklistVersaoServiceAPI {
 		            	TipoRecurso tipo = r.getTipo();
 
                         Recurso lm = new Recurso();
-                        lm.setModeloDocumento(modeloDocumento); // modelo atualizado no laço
+                        lm.setModeloDocumento(modeloDocumentoForItem); // modelo atualizado no laço
                         lm.setCodigo(tipo.getCodigo()); // ou outro critério
                         lm.setTipo(tipo);
                         lm.setArquivo(r.getArquivo());
@@ -373,7 +375,7 @@ public class ChecklistVersaoServiceAPI {
 			            
 	            }
 
-	            ModeloDocumento newModeloDocumento = modeloDocumentoRepository.save(modeloDocumento);
+	            newModeloDocumento = newModeloDocumento != null ? newModeloDocumento: modeloDocumentoRepository.save(modeloDocumento);
 	            
 	            // --- Logos ---
 	            if (m.getLogos() != null) {
