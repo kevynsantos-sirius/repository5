@@ -401,21 +401,22 @@ public class ChecklistVersaoServiceAPI {
 
 	                    if (arq.isTemArquivo()) {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-impressao-" + j);
-	                        if (file == null) throw new RuntimeException("Arquivo Impressão não enviado");
+	                        if (file != null)
+	                        {
+	                        	TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo())
+		                                .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
 
-	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo())
-	                                .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
+		                        Recurso lm = new Recurso();
+		                        lm.setModeloDocumento(modeloDocumento);
+		                        lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
+		                        lm.setTipo(tipo);
+		                        lm.setArquivo(file.getBytes());
+		                        lm.setTipoMIME(file.getContentType());
+		                        lm.setChecklistVersao(checklistVersao);
+		                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        Recurso lm = new Recurso();
-	                        lm.setModeloDocumento(modeloDocumento);
-	                        lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
-	                        lm.setTipo(tipo);
-	                        lm.setArquivo(file.getBytes());
-	                        lm.setTipoMIME(file.getContentType());
-	                        lm.setChecklistVersao(checklistVersao);
-	                        lm.setNomeRecurso(file.getOriginalFilename());
-
-	                        recursoRepository.save(lm);
+		                        recursoRepository.save(lm);
+	                        }
 	                    }
 	                }
 	            }
