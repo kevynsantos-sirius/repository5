@@ -920,7 +920,7 @@ public class ChecklistVersaoServiceAPI {
 	            camposBuscaDTO.setCliente(modelo.getCamposBuscaCliente());
 	            camposBuscaDTO.setCorretor(modelo.getCamposBuscaCorretor());
 	            camposBuscaDTO.setEstipulante(modelo.getCamposBuscaEstipulante());
-	            camposBuscaDTO.setEstipulante(modelo.getCamposBuscaEstipulante());
+	            camposBuscaDTO.setSubestipulante(modelo.getCamposBuscaSubEstipulante());;
 	            
 	            modeloDTO.setCamposBusca(camposBuscaDTO);
 	            
