@@ -224,3 +224,22 @@ alter table CL_ModeloDocumento add EmailComDocumentoAnexoEarmazenamentoEemail bi
 alter table CL_ModeloDocumento add EmailComDocumentoAnexoECarimbo bit;
 
 alter table CL_ModeloDocumento add RegrasAcesso varchar(max);
+
+CREATE TABLE CL_Recurso_Modelo (
+    idRecursoModelo INT IDENTITY(1,1) PRIMARY KEY,
+    idRecurso INT NOT NULL,
+    idChecklistVersao INT NOT NULL,
+    idModeloDocumento INT NOT NULL,
+
+    CONSTRAINT FK_CL_Recurso_Modelo_ModeloDocumento
+        FOREIGN KEY (idModeloDocumento)
+        REFERENCES CL_ModeloDocumento(Id),
+        
+    CONSTRAINT FK_CL_Recurso_Modelo_ChecklistVersao
+        FOREIGN KEY (idChecklistVersao)
+        REFERENCES CL_ChecklistVersao(Id),
+        
+    CONSTRAINT FK_CL_Recurso_Modelo_Recurso
+        FOREIGN KEY (idRecurso)
+        REFERENCES CL_Recurso(idRecurso)
+);

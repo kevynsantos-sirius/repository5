@@ -14,6 +14,7 @@ import com.totaldocs.modelo.Checklist;
 import com.totaldocs.modelo.ChecklistVersao;
 import com.totaldocs.modelo.Layout;
 import com.totaldocs.modelo.Recurso;
+import com.totaldocs.modelo.RecursoModelo;
 import com.totaldocs.modelo.TipoRecurso;
 import com.totaldocs.modelo.MassaDados;
 import com.totaldocs.modelo.ModeloDocumento;
@@ -24,6 +25,7 @@ import com.totaldocs.repository.ChecklistVersaoRepository;
 import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.repository.ModeloDocumentoRepository;
+import com.totaldocs.repository.RecursoModeloRepository;
 import com.totaldocs.repository.RecursoRepository;
 import com.totaldocs.repository.TipoRecursoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
@@ -61,13 +63,15 @@ public class ChecklistVersaoServiceAPI {
 	private final ModeloDocumentoRepository modeloDocumentoRepository;
 	private final RecursoRepository recursoRepository;
 	private final TipoRecursoRepository tipoRecursoRepository;
+	private final RecursoModeloRepository recursoModeloRepository;
 
 	public ChecklistVersaoServiceAPI(ChecklistVersaoRepository checklistVersaoRepository,
 			ChecklistRepository checklistRepository, LayoutRepository layoutRepository,
 			MassaDadoRepository arquivoRepository, UsuarioService usuarioService,
 			ModeloDocumentoRepository modeloDocumentoRepository,
 			RecursoRepository logomodeloRepository,
-			TipoRecursoRepository logomodeloTipoRepository) {
+			TipoRecursoRepository logomodeloTipoRepository,
+			RecursoModeloRepository recursoModeloRepository) {
 		this.checklistVersaoRepository = checklistVersaoRepository;
 		this.checklistRepository = checklistRepository;
 		this.layoutRepository = layoutRepository;
@@ -76,6 +80,7 @@ public class ChecklistVersaoServiceAPI {
 		this.modeloDocumentoRepository = modeloDocumentoRepository;
 		this.recursoRepository =  logomodeloRepository;
 		this.tipoRecursoRepository =  logomodeloTipoRepository;
+		this.recursoModeloRepository = recursoModeloRepository;
 	}
 	
 	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
@@ -273,6 +278,18 @@ public class ChecklistVersaoServiceAPI {
 	    return listaLayouts;
 	}
 	
+	
+	
+	private void addRecursoModelo(ChecklistVersao checklistversao, Recurso recurso, ModeloDocumento modelodocumento)
+	{
+		RecursoModelo recursoModelo = new RecursoModelo();
+		recursoModelo.setChecklistVersao(checklistversao);
+		recursoModelo.setModeloDocumento(modelodocumento);
+		recursoModelo.setRecurso(recurso);
+		
+		this.recursoModeloRepository.save(recursoModelo);
+	}
+	
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
@@ -358,18 +375,8 @@ public class ChecklistVersaoServiceAPI {
 		            	Integer idRecurso = temporalCryptoIdUtil.extractId(a.getId());
 		            	Optional<Recurso> recurso = recursoRepository.findById(idRecurso);
 		            	Recurso r = recurso.get();
-		            	TipoRecurso tipo = r.getTipo();
-
-                        Recurso lm = new Recurso();
-                        lm.setModeloDocumento(modeloDocumentoForItem); // modelo atualizado no laço
-                        lm.setCodigo(tipo.getCodigo()); // ou outro critério
-                        lm.setTipo(tipo);
-                        lm.setArquivo(r.getArquivo());
-                        lm.setTipoMIME(r.getTipoMIME());
-                        lm.setChecklistVersao(checklistVersao);
-                        lm.setNomeRecurso(r.getNomeRecurso());
-
-                        recursoRepository.save(lm);
+                        
+		            	addRecursoModelo(checklistVersao,r,modeloDocumentoForItem);
 		            	
 		            });
 			            
@@ -398,7 +405,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        recursoRepository.save(lm);
+	                        lm = recursoRepository.save(lm);
+	                        
+	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
 	                    }
 	                }
 	            }
@@ -424,7 +433,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        recursoRepository.save(lm);
+	                        lm = recursoRepository.save(lm);
+	                        
+	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
 	                    }
 	                }
 	            }
@@ -450,7 +461,9 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setChecklistVersao(checklistVersao);
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
-	                        recursoRepository.save(lm);
+	                        lm = recursoRepository.save(lm);
+	                        
+	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
 	                    }
 	                }
 	            }
@@ -476,7 +489,9 @@ public class ChecklistVersaoServiceAPI {
 		                        lm.setChecklistVersao(checklistVersao);
 		                        lm.setNomeRecurso(file.getOriginalFilename());
 
-		                        recursoRepository.save(lm);
+		                        lm = recursoRepository.save(lm);
+		                        
+		                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
 	                        }
 	                    }
 	                }
@@ -927,10 +942,10 @@ public class ChecklistVersaoServiceAPI {
 	            List<ItemArquivoDTO> impressoesDto = new ArrayList<>();
 
 	            // -------- LOOP ÚNICO --------
-	            List<Recurso> recursos = c.getRecursos();
+	            List<RecursoModelo> recursos = this.recursoModeloRepository.findByChecklistVersaoIdChecklistVersao(c.getIdChecklistVersao());
 				if (recursos != null) {
-	                for (Recurso lm : recursos) {
-
+	                for (RecursoModelo r : recursos) {
+	                	Recurso lm = r.getRecurso();
 	                    RecursoTipoCodigo tipoEnum = lm.getTipo().getEnum(); // já pega uma vez
 
 	                    // Prepara DTO (evita duplicação)
