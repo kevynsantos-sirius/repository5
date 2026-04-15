@@ -72,7 +72,9 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        @RequestPart(value = "filesLayout", required = false) List<MultipartFile> arquivosLayout,
 	        @RequestPart(value = "filesMassas", required = false) List<MultipartFile> arquivosMassas,
 	        @RequestPart(value = "arquivosModelos", required = false) List<MultipartFile> arquivosModelos,
+	        @RequestPart(value = "arquivosPlano", required = false) List<MultipartFile> arquivosPlano,
 	        @RequestPart(value = "keysModelos", required = false) List<String> keysModelos, // ⚡ map now
+	        @RequestPart(value = "keysPlanos", required = false) List<String> keysPlanos,
 	        HttpSession session) {
 
 	    try {
@@ -81,6 +83,10 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        ChecklistVersaoDTO dto = mapper.readValue(dadosJson, ChecklistVersaoDTO.class);
 	        
 	        Map arquivosModelosNew = collectModels(arquivosModelos, keysModelos);
+	        
+	        Map arquivosPlanoNew = collectModels(arquivosPlano, keysPlanos);
+	        
+	        System.out.print(arquivosPlanoNew);
 
 	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew);
 
@@ -103,12 +109,18 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	     @RequestPart(value = "filesLayout", required = false) List<MultipartFile> filesLayout,
 	     @RequestPart(value = "filesMassas", required = false) List<MultipartFile> filesMassas,
 	     @RequestPart(value = "arquivosModelos", required = false) List<MultipartFile> arquivosModelos,
-	     @RequestPart(value = "keysModelos", required = false) List<String> keysModelos) throws Exception {
+	     @RequestPart(value = "arquivosPlano", required = false) List<MultipartFile> arquivosPlano,
+	     @RequestPart(value = "keysModelos", required = false) List<String> keysModelos,
+	     @RequestPart(value = "keysPlanos", required = false) List<String> keysPlanos) throws Exception {
 
 	     ObjectMapper mapper = new ObjectMapper();
 	     ChecklistVersaoDTO dto = mapper.readValue(dtoJson, ChecklistVersaoDTO.class);
 
 	     Map arquivosModelosNew = collectModels(arquivosModelos, keysModelos);
+	     
+	     Map arquivosPlanoNew = collectModels(arquivosPlano, keysPlanos);
+	     
+	     System.out.print(arquivosPlanoNew);
 
 	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew);
 	}

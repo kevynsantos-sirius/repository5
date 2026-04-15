@@ -175,6 +175,9 @@ INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
 (2, 'Arquivo Adicional'),
 (3, 'Assinatura');
 
+INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
+(4, 'Impressão');
+
 CREATE TABLE CL_Recurso (
     idRecurso INT IDENTITY(1,1) PRIMARY KEY,
     idModelo INT NOT NULL,              -- FK para CL_ModeloDocumento(Id)
@@ -243,3 +246,21 @@ CREATE TABLE CL_Recurso_Modelo (
         FOREIGN KEY (idRecurso)
         REFERENCES CL_Recurso(idRecurso)
 );
+
+CREATE TABLE CL_Plano_Comunicacao (
+    idPlano INT IDENTITY(1,1) PRIMARY KEY,
+    observacao varchar(100) COLLATE Latin1_General_CI_AS NULL,       
+    idRecurso INT NOT NULL,
+    idChecklistVersao INT NOT NULL,
+
+    CONSTRAINT FK_CL_Plano_Comunicacao
+        FOREIGN KEY (idRecurso)
+        REFERENCES CL_Recurso(idRecurso),
+        
+    CONSTRAINT FK_CL_Plano_Comunicacao_ChecklistVersao
+        FOREIGN KEY (idChecklistVersao)
+        REFERENCES CL_ChecklistVersao(Id),
+);
+
+INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
+(5, 'Plano de Comunicação');

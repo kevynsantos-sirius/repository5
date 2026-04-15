@@ -10,7 +10,8 @@ public enum RecursoTipoCodigo {
     LOGO(1),
     ARQUIVO_ADICIONAL(2),
     ASSINATURA(3),
-    IMPRESSAO(4);
+    IMPRESSAO(4),
+    PLANO_COMUNICACAO(5);
 
     private final int codigo;
 

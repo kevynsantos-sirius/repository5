@@ -30,4 +30,7 @@ public class ChecklistVersaoDTO {
 
     // -------- Modelos --------
     private List<ModeloDTO> modelos;
+    
+    // -------- Plano Comunicação ------
+    private List<ArquivoPlanoDTO> planosComunicacao;
 }
