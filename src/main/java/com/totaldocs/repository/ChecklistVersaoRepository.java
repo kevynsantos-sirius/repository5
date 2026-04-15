@@ -1,6 +1,6 @@
 package com.totaldocs.repository;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,23 +21,33 @@ public interface ChecklistVersaoRepository extends JpaRepository<ChecklistVersao
 	
 	
 	@Query("""
-		    SELECT v
-		    FROM ChecklistVersao v
-		    WHERE v.versao = (
-		        SELECT MAX(v2.versao)
-		        FROM ChecklistVersao v2
-		        WHERE v2.checklist.id = v.checklist.id
+		    SELECT cv 
+		    FROM ChecklistVersao cv
+		    WHERE cv.idChecklistVersao = (
+		        SELECT MAX(cv2.idChecklistVersao)
+		        FROM ChecklistVersao cv2
+		        WHERE cv2.checklist.id = cv.checklist.id
 		    )
-		    
-		     ORDER BY v.dataAtualizacao DESC
 		""")
-		Page<ChecklistVersao> findUltimasVersoes(org.springframework.data.domain.Pageable pageable);
+		Page<ChecklistVersao> findUltimasVersoes(Pageable pageable);
 	
 	
 	List<ChecklistVersao> findByChecklistIdOrderByVersaoDesc(Integer idChecklist);
 	
-	Page<ChecklistVersao> findByUsuarioIdOrderByDataAtualizacaoDesc(
-	        Integer idUser,
-	        org.springframework.data.domain.Pageable pageable
-	);
+	@Query("""
+		    SELECT cv 
+		    FROM ChecklistVersao cv
+		    WHERE cv.idChecklistVersao = (
+		        SELECT MAX(cv2.idChecklistVersao)
+		        FROM ChecklistVersao cv2
+		        WHERE cv2.checklist.id = cv.checklist.id
+		        AND cv2.usuario.id = :idUser
+		    )
+		    AND cv.usuario.id = :idUser
+		    ORDER BY cv.dataAtualizacao DESC
+		""")
+		Page<ChecklistVersao> findByUsuarioIdUltimasVersoes(
+		    @Param("idUser") Integer idUser,
+		    Pageable pageable
+		);
 }

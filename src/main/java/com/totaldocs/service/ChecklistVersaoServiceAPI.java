@@ -802,7 +802,7 @@ public class ChecklistVersaoServiceAPI {
 	    }
 
 	    return checklistVersaoRepository
-	            .findByUsuarioIdOrderByDataAtualizacaoDesc(idUser, pageable)
+	            .findByUsuarioIdUltimasVersoes(idUser, pageable)
 	            .map(this::converterParaDTO);
 	}
 
