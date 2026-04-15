@@ -180,7 +180,8 @@ public class ChecklistVersaoServiceAPI {
 	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto,
 	                                List<MultipartFile> filesLayout,
 	                                List<MultipartFile> filesMassas,
-	                                Map<String, MultipartFile> filesModelos) throws IOException, UmTipoDeImpressaoException {
+	                                Map<String, MultipartFile> filesModelos,
+	                                Map<String, MultipartFile> filesPlanos) throws IOException, UmTipoDeImpressaoException {
 
 	    // Criação checklist e versão (igual ao seu código original)
 	    Checklist checklist = new Checklist();
@@ -499,15 +500,12 @@ public class ChecklistVersaoServiceAPI {
 
 	            //Formatação & Impressão
 	            boolean duplex = m.getTipoImpressao() != null && m.getTipoImpressao().contains("duplex");
-	            boolean isImpresso = m.getTipoImpressao() != null && m.getTipoImpressao().contains("simples");
+	            boolean simples = m.getTipoImpressao() != null && m.getTipoImpressao().contains("simples");
 	            
-	            if(duplex && isImpresso)
-	            {
-	            	throw new UmTipoDeImpressaoException();
-	            }
+
 	            
 	            newModeloDocumento.setDuplex(duplex);
-	            newModeloDocumento.setImpresso(isImpresso);
+	            newModeloDocumento.setSimples(simples);
 	            
 	            //Tipo de Acabamento
 	            newModeloDocumento.setAcabamentoAutoEnvelope(m.getTipoAcabamento() != null && m.getTipoAcabamento().contains("autoEnvelope"));
@@ -567,7 +565,8 @@ public class ChecklistVersaoServiceAPI {
 
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
-			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas, Map<String, MultipartFile> arquivosModelos) throws Exception {
+			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas, Map<String, MultipartFile> arquivosModelos,
+			Map<String, MultipartFile> filesPlanos) throws Exception {
 
 		// =========================
 		// VERSÃO ATUAL
@@ -1002,7 +1001,7 @@ public class ChecklistVersaoServiceAPI {
 	            modeloDTO.setCamposBusca(camposBuscaDTO);
 	            
 	            modeloDTO.setDuplex(modelo.getDuplex());
-	            modeloDTO.setIsImpresso(modelo.isImpresso());
+	            modeloDTO.setSimples(modelo.getSimples());
 		            
 		            //Tipo de Acabamento
 	            modeloDTO.setAcabamentoAutoEnvelope(modelo.isAcabamentoAutoEnvelope());
@@ -1026,6 +1025,38 @@ public class ChecklistVersaoServiceAPI {
 		            
 		            //Regras de acesso
 	            modeloDTO.setRegrasAcesso(modelo.getRegrasAcesso());
+	            
+	            List<String> tipoImpressao = new ArrayList<>();
+	            if(modelo.getDuplex())
+	            {
+	            	tipoImpressao.add("duplex");
+	            }
+	            
+	            if(modelo.getSimples())
+	            {
+	            	tipoImpressao.add("simples");
+	            }
+	            
+	            List<String> tipoAcabamento = new ArrayList<>();
+	            
+	            if(modelo.isAcabamentoAutoEnvelope())
+	            {
+	            	tipoAcabamento.add("autoEnvelope");
+	            }
+	            
+	            if(modelo.isAcabamentoManuseio())
+	            {
+	            	tipoAcabamento.add("manuseio");
+	            }
+	            
+	            if(modelo.isAcabamentoInsercao())
+	            {
+	            	tipoAcabamento.add("insercao");
+	            }
+	            
+	            
+	            modeloDTO.setTipoAcabamento(tipoAcabamento);
+	            modeloDTO.setTipoImpressao(tipoImpressao);
 	        }
 	    }
 

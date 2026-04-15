@@ -29,7 +29,7 @@ public class ModeloDTO {
     private List<ItemArquivoDTO> arquivosImpressao;
 
     private Boolean duplex;
-    private Boolean isImpresso;
+    private Boolean simples;
 
 
     // ---------------------------------------------------------

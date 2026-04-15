@@ -88,7 +88,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        
 	        System.out.print(arquivosPlanoNew);
 
-	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew);
+	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew, arquivosPlanoNew);
 
 	        return ResponseEntity
 	                .status(HttpStatus.CREATED)
@@ -122,7 +122,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	     
 	     System.out.print(arquivosPlanoNew);
 
-	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew);
+	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew, arquivosPlanoNew);
 	}
 		
 	@GetMapping("/page")

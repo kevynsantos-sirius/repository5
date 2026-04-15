@@ -264,3 +264,5 @@ CREATE TABLE CL_Plano_Comunicacao (
 
 INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
 (5, 'Plano de Comunicação');
+
+alter table CL_ModeloDocumento add simples bit;

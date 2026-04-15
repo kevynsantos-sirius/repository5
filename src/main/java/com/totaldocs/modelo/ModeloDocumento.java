@@ -133,4 +133,7 @@ public class ModeloDocumento {
     @Lob
     @Column(name = "CamposBuscaSubEstipulante")
     private String camposBuscaSubEstipulante;
+    
+    @Column(name = "simples")
+    private Boolean simples;
 }
