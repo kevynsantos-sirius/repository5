@@ -216,7 +216,7 @@ public class ChecklistVersaoServiceAPI {
 	    checklistVersao.setLayouts(addOrUpdateLayout(dto.getLayouts(), checklistVersao, filesLayout, filesMassas, dto));
 
 	    // Modelos com arquivos identificados por chave
-	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos);
+	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos, checklistVersao);
 
 	    return dto;
 	}
@@ -294,7 +294,7 @@ public class ChecklistVersaoServiceAPI {
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
-	        Map<String, MultipartFile> arquivosModelos) throws IOException, UmTipoDeImpressaoException {
+	        Map<String, MultipartFile> arquivosModelos, ChecklistVersao versaoAtual) throws IOException, UmTipoDeImpressaoException {
 
 	    List<ModeloDocumento> list = new ArrayList<>();
 
@@ -331,55 +331,10 @@ public class ChecklistVersaoServiceAPI {
 	            	modeloDocumento.setNomeRecurso(modeloDocumentoAtual.getNomeRecurso());
 		            modeloDocumento.setTipoMIME(modeloDocumentoAtual.getTipoMIME());
 		            modeloDocumento.setConteudoRecurso(modeloDocumentoAtual.getConteudoRecurso());
-		            
-		            ChecklistVersao checklistVersaoModelo = modeloDocumentoAtual.getChecklistVersao();
-		            
-		            List<Recurso> recursos = checklistVersaoModelo.getRecursos();
-		            
-		            List<ItemArquivoDTO> logos = m.getLogos();
-	            	List<ItemArquivoDTO> arquivosAdicionais = m.getArquivosAdicionais();
-	            	List<ItemArquivoDTO> assinaturas = m.getAssinaturas();
-	            	List<ItemArquivoDTO> arquivosImpressao = m.getArquivosImpressao();
-	            	
-	            	List<ItemArquivoDTO> arquivosNaoExcluidos = new ArrayList<>();
 	            	
 	            	ModeloDocumento modeloDocumentoForItem = modeloDocumentoRepository.save(modeloDocumento);
 	            	newModeloDocumento = modeloDocumentoForItem;
-		            for(Recurso r : recursos)
-		            {
-		            	
-		            	List<ItemArquivoDTO> filtradosLogos = logos.stream()
-		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId())) 
-		            		    		&& !l.getExcluido())
-		            		    .toList();
-		            	List<ItemArquivoDTO> filtradosArquivosAdicionais = arquivosAdicionais.stream()
-		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
-		            		    		&& !l.getExcluido())
-		            		    .toList();
-		            	List<ItemArquivoDTO> filtradosAssinaturas = assinaturas.stream()
-		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
-		            		    		&& !l.getExcluido())
-		            		    .toList();
-		            	List<ItemArquivoDTO> filtradosArquivosImpressao = arquivosImpressao.stream()
-		            		    .filter(l -> r.getId().equals(temporalCryptoIdUtil.extractId(l.getId()))
-		            		    		&& !l.getExcluido())
-		            		    .toList();
-		            	
-		            	arquivosNaoExcluidos.addAll(filtradosLogos);
-		            	arquivosNaoExcluidos.addAll(filtradosArquivosAdicionais);
-		            	arquivosNaoExcluidos.addAll(filtradosAssinaturas);
-		            	arquivosNaoExcluidos.addAll(filtradosArquivosImpressao);
-		            }
-		            
-		            arquivosNaoExcluidos.forEach(a -> {
-		            	
-		            	Integer idRecurso = temporalCryptoIdUtil.extractId(a.getId());
-		            	Optional<Recurso> recurso = recursoRepository.findById(idRecurso);
-		            	Recurso r = recurso.get();
-                        
-		            	addRecursoModelo(checklistVersao,r,modeloDocumentoForItem);
-		            	
-		            });
+		          
 			            
 	            }
 
@@ -387,15 +342,14 @@ public class ChecklistVersaoServiceAPI {
 	            
 	            // --- Logos ---
 	            if (m.getLogos() != null) {
+	            	 TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.LOGO.getCodigo())
+                             .orElseThrow(() -> new RuntimeException("Tipo LOGO não encontrado"));
 	                for (int j = 0; j < m.getLogos().size(); j++) {
 	                    var logo = m.getLogos().get(j);
-
+	                    boolean newFile = false;
 	                    if (logo.isTemArquivo()) {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-logo-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo de logo não enviado");
-
-	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.LOGO.getCodigo())
-	                                .orElseThrow(() -> new RuntimeException("Tipo LOGO não encontrado"));
 
 	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(newModeloDocumento); // modelo atualizado no laço
@@ -409,21 +363,30 @@ public class ChecklistVersaoServiceAPI {
 	                        lm = recursoRepository.save(lm);
 	                        
 	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
+	                        newFile = true;
 	                    }
+	                   if(!newFile && !logo.getExcluido())
+	                   {
+	                	   Integer id = temporalCryptoIdUtil.extractId(logo.getId());
+	                	   Optional<Recurso> recurso = this.recursoRepository.findById(id);
+	                	   Recurso lm = recurso.get();
+	                        
+	                       addRecursoModelo(checklistVersao,lm,newModeloDocumento);
+	                   }
 	                }
 	            }
-
-	            // --- Assinaturas ---
+	         // --- Assinaturas ---
 	            if (m.getAssinaturas() != null) {
+	                TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ASSINATURA.getCodigo())
+	                        .orElseThrow(() -> new RuntimeException("Tipo ASSINATURA não encontrado"));
+
 	                for (int j = 0; j < m.getAssinaturas().size(); j++) {
 	                    var ass = m.getAssinaturas().get(j);
+	                    boolean newFile = false;
 
 	                    if (ass.isTemArquivo()) {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-assinatura-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo de assinatura não enviado");
-
-	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ASSINATURA.getCodigo())
-	                                .orElseThrow(() -> new RuntimeException("Tipo ASSINATURA não encontrado"));
 
 	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(newModeloDocumento);
@@ -435,23 +398,33 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
 	                        lm = recursoRepository.save(lm);
-	                        
-	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
+	                        addRecursoModelo(checklistVersao, lm, newModeloDocumento);
+
+	                        newFile = true;
+	                    }
+
+	                    if (!newFile && !ass.getExcluido()) {
+	                        Integer id = temporalCryptoIdUtil.extractId(ass.getId());
+	                        Recurso lm = recursoRepository.findById(id)
+	                                .orElseThrow(() -> new RuntimeException("Assinatura não encontrada"));
+
+	                        addRecursoModelo(checklistVersao, lm, newModeloDocumento);
 	                    }
 	                }
 	            }
 
-	            // --- Arquivos adicionais ---
+	         // --- Arquivos adicionais ---
 	            if (m.getArquivosAdicionais() != null) {
+	                TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
+	                        .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
+
 	                for (int j = 0; j < m.getArquivosAdicionais().size(); j++) {
 	                    var arq = m.getArquivosAdicionais().get(j);
+	                    boolean newFile = false;
 
 	                    if (arq.isTemArquivo()) {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-adicional-" + j);
 	                        if (file == null) throw new RuntimeException("Arquivo adicional não enviado");
-
-	                        TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.ARQUIVO_ADICIONAL.getCodigo())
-	                                .orElseThrow(() -> new RuntimeException("Tipo ARQUIVO_ADICIONAL não encontrado"));
 
 	                        Recurso lm = new Recurso();
 	                        lm.setModeloDocumento(newModeloDocumento);
@@ -463,37 +436,56 @@ public class ChecklistVersaoServiceAPI {
 	                        lm.setNomeRecurso(file.getOriginalFilename());
 
 	                        lm = recursoRepository.save(lm);
-	                        
-	                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
+	                        addRecursoModelo(checklistVersao, lm, newModeloDocumento);
+
+	                        newFile = true;
+	                    }
+
+	                    if (!newFile && !arq.getExcluido()) {
+	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId());
+	                        Recurso lm = recursoRepository.findById(id)
+	                                .orElseThrow(() -> new RuntimeException("Arquivo adicional não encontrado"));
+
+	                        addRecursoModelo(checklistVersao, lm, newModeloDocumento);
 	                    }
 	                }
 	            }
 	            
 	         // --- Arquivos de impressão ---
 	            if (m.getArquivosImpressao() != null) {
+	                TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo())
+	                        .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
+
 	                for (int j = 0; j < m.getArquivosImpressao().size(); j++) {
 	                    var arq = m.getArquivosImpressao().get(j);
+	                    boolean newFile = false;
 
 	                    if (arq.isTemArquivo()) {
 	                        MultipartFile file = arquivosModelos.get("modelo-" + i + "-impressao-" + j);
-	                        if (file != null)
-	                        {
-	                        	TipoRecurso tipo = tipoRecursoRepository.findByCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo())
-		                                .orElseThrow(() -> new RuntimeException("Tipo Impressão não encontrado"));
 
-		                        Recurso lm = new Recurso();
-		                        lm.setModeloDocumento(newModeloDocumento);
-		                        lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
-		                        lm.setTipo(tipo);
-		                        lm.setArquivo(file.getBytes());
-		                        lm.setTipoMIME(file.getContentType());
-		                        lm.setChecklistVersao(checklistVersao);
-		                        lm.setNomeRecurso(file.getOriginalFilename());
+	                        if (file != null) {
+	                            Recurso lm = new Recurso();
+	                            lm.setModeloDocumento(newModeloDocumento);
+	                            lm.setCodigo(RecursoTipoCodigo.IMPRESSAO.getCodigo());
+	                            lm.setTipo(tipo);
+	                            lm.setArquivo(file.getBytes());
+	                            lm.setTipoMIME(file.getContentType());
+	                            lm.setChecklistVersao(checklistVersao);
+	                            lm.setNomeRecurso(file.getOriginalFilename());
 
-		                        lm = recursoRepository.save(lm);
-		                        
-		                        addRecursoModelo(checklistVersao,lm,newModeloDocumento);
+	                            lm = recursoRepository.save(lm);
+	                            addRecursoModelo(checklistVersao, lm, newModeloDocumento);
+
+	                            newFile = true;
 	                        }
+	                    }
+
+	                    if (!newFile && !arq.getExcluido()) {
+	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId());
+	                        Recurso lm = recursoRepository.findById(id)
+	                                .orElseThrow(() -> new RuntimeException("Arquivo de impressão não encontrado"));
+
+	                        addRecursoModelo(checklistVersao, lm, newModeloDocumento);
 	                    }
 	                }
 	            }
@@ -752,7 +744,7 @@ public class ChecklistVersaoServiceAPI {
 
 		checklistVersaoNova.setLayouts(layoutsNovos);
 		
-		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
+		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos, versaoAtual);
 		
 		return dto;
 	}
