@@ -180,7 +180,7 @@ INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
 
 CREATE TABLE CL_Recurso (
     idRecurso INT IDENTITY(1,1) PRIMARY KEY,
-    idModelo INT NOT NULL,              -- FK para CL_ModeloDocumento(Id)
+    idModelo INT NULL,              -- FK para CL_ModeloDocumento(Id)
     codigo INT NOT NULL,
 
     CONSTRAINT FK_CL_Recurso_ModeloDocumento
@@ -266,3 +266,27 @@ INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
 (5, 'Plano de Comunicação');
 
 alter table CL_ModeloDocumento add simples bit;
+
+alter table CL_Recurso alter column idModelo int NULL;
+
+CREATE TABLE CL_Recurso_Plano_Comunicacao (
+    idPlanoComunicacaoVersao INT IDENTITY(1,1) PRIMARY KEY,
+    
+    idPlanoComunicacao INT NOT NULL,
+    idChecklistVersao INT NOT NULL,
+	idRecurso INT NOT NULL,
+
+    CONSTRAINT FK_PCM_Plano
+        FOREIGN KEY (idPlanoComunicacao)
+        REFERENCES CL_Plano_Comunicacao(idPlano),
+
+    CONSTRAINT FK_PCM_ChecklistVersao
+        FOREIGN KEY (idChecklistVersao)
+        REFERENCES CL_ChecklistVersao(Id),
+
+	CONSTRAINT FK_PCM_Recurso
+        FOREIGN KEY (idRecurso)
+        REFERENCES CL_Recurso(idRecurso)
+);
+
+alter table CL_Plano_Comunicacao alter column idRecurso int NULL;

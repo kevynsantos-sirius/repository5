@@ -16,7 +16,7 @@ public class Recurso {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idModelo", nullable = false)
+    @JoinColumn(name = "idModelo")
     private ModeloDocumento modeloDocumento;
 
     @Column(name = "codigo", nullable = false)

@@ -32,4 +32,38 @@ public class PlanoComunicacao {
 	@ManyToOne
 	private ChecklistVersao checklistVersao;
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getObservacao() {
+		return observacao;
+	}
+
+	public void setObservacao(String observacao) {
+		this.observacao = observacao;
+	}
+
+	public List<Recurso> getRecursos() {
+		return recursos;
+	}
+
+	public void setRecursos(List<Recurso> recursos) {
+		this.recursos = recursos;
+	}
+
+	public ChecklistVersao getChecklistVersao() {
+		return checklistVersao;
+	}
+
+	public void setChecklistVersao(ChecklistVersao checklistVersao) {
+		this.checklistVersao = checklistVersao;
+	}
+	
+	
+
 }

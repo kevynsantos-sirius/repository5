@@ -1,5 +1,6 @@
 package com.totaldocs.service;
 
+import com.totaldocs.dto.ArquivoPlanoDTO;
 import com.totaldocs.dto.CamposBuscaDTO;
 import com.totaldocs.dto.ChecklistVersaoDTO;
 import com.totaldocs.dto.ChecklistVersaoResumoDTO;
@@ -18,6 +19,8 @@ import com.totaldocs.modelo.RecursoModelo;
 import com.totaldocs.modelo.TipoRecurso;
 import com.totaldocs.modelo.MassaDados;
 import com.totaldocs.modelo.ModeloDocumento;
+import com.totaldocs.modelo.PlanoComunicacao;
+import com.totaldocs.modelo.RecursoPlanoComunicacao;
 import com.totaldocs.modelo.Ramo;
 import com.totaldocs.modelo.Usuario;
 import com.totaldocs.repository.ChecklistRepository;
@@ -25,7 +28,9 @@ import com.totaldocs.repository.ChecklistVersaoRepository;
 import com.totaldocs.repository.LayoutRepository;
 import com.totaldocs.repository.MassaDadoRepository;
 import com.totaldocs.repository.ModeloDocumentoRepository;
+import com.totaldocs.repository.PlanoComunicacaoRepository;
 import com.totaldocs.repository.RecursoModeloRepository;
+import com.totaldocs.repository.RecursoPlanoComunicacaoRepository;
 import com.totaldocs.repository.RecursoRepository;
 import com.totaldocs.repository.TipoRecursoRepository;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
@@ -64,6 +69,8 @@ public class ChecklistVersaoServiceAPI {
 	private final RecursoRepository recursoRepository;
 	private final TipoRecursoRepository tipoRecursoRepository;
 	private final RecursoModeloRepository recursoModeloRepository;
+	private final PlanoComunicacaoRepository planoComunicacaoRepository;
+	private final RecursoPlanoComunicacaoRepository recursoPlanoComunicacaoRepository;
 
 	public ChecklistVersaoServiceAPI(ChecklistVersaoRepository checklistVersaoRepository,
 			ChecklistRepository checklistRepository, LayoutRepository layoutRepository,
@@ -71,7 +78,9 @@ public class ChecklistVersaoServiceAPI {
 			ModeloDocumentoRepository modeloDocumentoRepository,
 			RecursoRepository logomodeloRepository,
 			TipoRecursoRepository logomodeloTipoRepository,
-			RecursoModeloRepository recursoModeloRepository) {
+			RecursoModeloRepository recursoModeloRepository,
+			PlanoComunicacaoRepository planoComunicacaoRepository,
+			RecursoPlanoComunicacaoRepository recursoPlanoComunicacaoRepository) {
 		this.checklistVersaoRepository = checklistVersaoRepository;
 		this.checklistRepository = checklistRepository;
 		this.layoutRepository = layoutRepository;
@@ -81,6 +90,8 @@ public class ChecklistVersaoServiceAPI {
 		this.recursoRepository =  logomodeloRepository;
 		this.tipoRecursoRepository =  logomodeloTipoRepository;
 		this.recursoModeloRepository = recursoModeloRepository;
+		this.planoComunicacaoRepository = planoComunicacaoRepository;
+		this.recursoPlanoComunicacaoRepository = recursoPlanoComunicacaoRepository;
 	}
 	
 	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
@@ -216,7 +227,9 @@ public class ChecklistVersaoServiceAPI {
 	    checklistVersao.setLayouts(addOrUpdateLayout(dto.getLayouts(), checklistVersao, filesLayout, filesMassas, dto));
 
 	    // Modelos com arquivos identificados por chave
-	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos, checklistVersao);
+	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos);
+	    
+	    addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersao, filesPlanos);
 
 	    return dto;
 	}
@@ -291,10 +304,24 @@ public class ChecklistVersaoServiceAPI {
 		this.recursoModeloRepository.save(recursoModelo);
 	}
 	
+	private void addPlanoComunicacaoVersao(
+	        ChecklistVersao checklistVersao,
+	        PlanoComunicacao planoComunicacao,
+	        Recurso recurso) {
+
+	    RecursoPlanoComunicacao planoVersao = new RecursoPlanoComunicacao();
+	    
+	    planoVersao.setChecklistVersao(checklistVersao);
+	    planoVersao.setPlanoComunicacao(planoComunicacao);
+	    planoVersao.setRecurso(recurso);
+
+	    this.recursoPlanoComunicacaoRepository.save(planoVersao);
+	}
+	
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
-	        Map<String, MultipartFile> arquivosModelos, ChecklistVersao versaoAtual) throws IOException, UmTipoDeImpressaoException {
+	        Map<String, MultipartFile> arquivosModelos) throws IOException, UmTipoDeImpressaoException {
 
 	    List<ModeloDocumento> list = new ArrayList<>();
 
@@ -744,9 +771,90 @@ public class ChecklistVersaoServiceAPI {
 
 		checklistVersaoNova.setLayouts(layoutsNovos);
 		
-		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos, versaoAtual);
+		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
+		
+		addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersaoNova, filesPlanos);
 		
 		return dto;
+	}
+	
+	
+	private void addOrUpdatePlan(
+	        List<ArquivoPlanoDTO> planosComunicacao,
+	        ChecklistVersao checklistVersaoNova,
+	        Map<String, MultipartFile> filesPlanos) throws IOException {
+
+	    if (planosComunicacao == null) return;
+
+	    TipoRecurso tipo = tipoRecursoRepository
+	            .findByCodigo(RecursoTipoCodigo.PLANO_COMUNICACAO.getCodigo())
+	            .orElseThrow(() -> new RuntimeException("Plano de comunicação não encontrado"));
+
+	    for (int i = 0; i < planosComunicacao.size(); i++) {
+
+	        ArquivoPlanoDTO plano = planosComunicacao.get(i);
+
+	        // 🔥 se plano foi excluído → ignora completamente
+	        if (Boolean.TRUE.equals(plano.getExcluido())) {
+	            continue;
+	        }
+
+	        // 🔥 SEMPRE cria novo plano (versionamento)
+	        PlanoComunicacao planCurrent = new PlanoComunicacao();
+	        planCurrent.setChecklistVersao(checklistVersaoNova);
+	        planCurrent.setObservacao(plano.getObservacao());
+	        planCurrent = planoComunicacaoRepository.save(planCurrent);
+
+	        List<ItemArquivoDTO> files = plano.getFile();
+	        if (files != null) {
+
+	            for (int j = 0; j < files.size(); j++) {
+
+	                ItemArquivoDTO item = files.get(j);
+	                boolean newFile = false;
+
+	                // 🔹 NOVO ARQUIVO
+	                if (item.isTemArquivo()) {
+
+	                    MultipartFile file = filesPlanos.get("plano-" + i);
+
+	                    if (file == null) {
+	                        throw new RuntimeException("Plano de comunicação não enviado");
+	                    }
+
+	                    Recurso recurso = new Recurso();
+	                    recurso.setModeloDocumento(null);
+	                    recurso.setCodigo(RecursoTipoCodigo.PLANO_COMUNICACAO.getCodigo());
+	                    recurso.setTipo(tipo);
+	                    recurso.setArquivo(file.getBytes());
+	                    recurso.setTipoMIME(file.getContentType());
+	                    recurso.setChecklistVersao(checklistVersaoNova);
+	                    recurso.setNomeRecurso(file.getOriginalFilename());
+
+	                    recurso = recursoRepository.save(recurso);
+	                    
+	                    addPlanoComunicacaoVersao(checklistVersaoNova,planCurrent,recurso);
+
+	                    newFile = true;
+	                }
+
+	                // 🔹 REAPROVEITA EXISTENTE
+	                if (!newFile && !Boolean.TRUE.equals(item.getExcluido())) {
+
+	                    Integer id = temporalCryptoIdUtil.extractId(item.getId());
+
+	                    Recurso recurso = recursoRepository.findById(id)
+	                            .orElseThrow(() -> new RuntimeException("Recurso do plano não encontrado"));
+
+	                    addPlanoComunicacaoVersao(checklistVersaoNova,planCurrent,recurso);
+	                }
+
+	                // 🔹 EXCLUÍDO → não adiciona (comportamento correto)
+	            }
+	        }
+
+	        planoComunicacaoRepository.save(planCurrent);
+	    }
 	}
 	
 	private ChecklistVersaoDTO converterParaDTO(ChecklistVersao c) {
