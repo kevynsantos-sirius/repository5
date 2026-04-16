@@ -803,6 +803,7 @@ public class ChecklistVersaoServiceAPI {
 	        PlanoComunicacao planCurrent = new PlanoComunicacao();
 	        planCurrent.setChecklistVersao(checklistVersaoNova);
 	        planCurrent.setObservacao(plano.getObservacao());
+	        planCurrent.setNome(plano.getNomeArquivo());
 	        planCurrent = planoComunicacaoRepository.save(planCurrent);
 
 	        List<ItemArquivoDTO> files = plano.getFile();
@@ -1161,6 +1162,42 @@ public class ChecklistVersaoServiceAPI {
 	    }
 
 	    dto.setModelos(modeloDtos);
+	    
+	    List<ArquivoPlanoDTO> planosComunicacao = new ArrayList<>();
+	    
+	    for(PlanoComunicacao plan : c.getPlanosComunicacao())
+	    {
+	    	ArquivoPlanoDTO dtoPlan = new ArquivoPlanoDTO();
+	    	
+	    	dtoPlan.setNomeArquivo(plan.getNome());
+	    	dtoPlan.setObservacao(plan.getObservacao());
+	    	dtoPlan.setId(temporalCryptoIdUtil.generateToken(plan.getId()));
+	    	
+	    	List<Recurso> recursos = plan.getRecursos();
+	    	
+	    	List<ItemArquivoDTO> files = new ArrayList<>();
+	    	
+	    	recursos.forEach(r -> {
+	    		
+	    		ItemArquivoDTO dto2 = new ItemArquivoDTO();
+                dto2.setId(temporalCryptoIdUtil.generateToken(r.getId()));
+                dto2.setCodigo(r.getCodigo());
+                dto2.setTipo(r.getTipo().getCodigo());
+                dto2.setDescricaoTipo(r.getTipo().getDescricao());
+                dto2.setArquivo(r.getArquivo());
+                dto2.setMimeType(r.getTipoMIME());
+                dto2.setName(r.getNomeRecurso());
+                
+                files.add(dto2);
+	    		
+	    	});
+	    	
+	    	dtoPlan.setFile(files);
+	    	
+	    	planosComunicacao.add(dtoPlan);
+	    }
+	    
+	    dto.setPlanosComunicacao(planosComunicacao);
 
 	    return dto;
 	}

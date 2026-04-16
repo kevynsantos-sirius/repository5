@@ -53,6 +53,15 @@ public class TemporalCryptoIdUtil {
         String payload = recordId + "|" + expiresAt;
         return encrypt(payload);
     }
+    
+    public String generateToken(Long recordId) {
+        long expiresAt = Instant.now()
+                .plusSeconds(expirationSeconds)
+                .toEpochMilli();
+
+        String payload = recordId + "|" + expiresAt;
+        return encrypt(payload);
+    }
 
     public Integer extractId(String token) {
     	
@@ -68,6 +77,29 @@ public class TemporalCryptoIdUtil {
         }
 
         Integer recordId = Integer.parseInt(parts[0]);
+        Long expiresAt = Long.parseLong(parts[1]);
+
+        if (Instant.now().toEpochMilli() > expiresAt) {
+        	throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token expirado");
+        }
+
+        return recordId;
+    }
+    
+    public Long extractIdV2(String token) {
+    	
+    	if(isUUID(token))
+    	{
+    		return null;
+    	}
+        String decrypted = decrypt(token);
+
+        String[] parts = decrypted.split("\\|");
+        if (parts.length != 2) {
+        	throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token inválido");
+        }
+
+        Long recordId = Long.parseLong(parts[0]);
         Long expiresAt = Long.parseLong(parts[1]);
 
         if (Instant.now().toEpochMilli() > expiresAt) {

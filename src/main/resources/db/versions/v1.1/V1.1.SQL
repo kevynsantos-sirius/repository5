@@ -290,3 +290,6 @@ CREATE TABLE CL_Recurso_Plano_Comunicacao (
 );
 
 alter table CL_Plano_Comunicacao alter column idRecurso int NULL;
+
+
+alter table CL_Plano_Comunicacao add nome varchar(100) COLLATE Latin1_General_CI_AS NULL;

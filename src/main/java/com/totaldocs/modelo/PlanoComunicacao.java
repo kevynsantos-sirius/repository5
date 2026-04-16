@@ -24,6 +24,9 @@ public class PlanoComunicacao {
 	@Column(name = "observacao")
 	private String observacao;
 	
+	@Column(name = "nome")
+	private String nome;
+	
 	@JoinColumn(name = "idRecurso")
 	@OneToMany
 	private List<Recurso> recursos;
@@ -63,6 +66,15 @@ public class PlanoComunicacao {
 	public void setChecklistVersao(ChecklistVersao checklistVersao) {
 		this.checklistVersao = checklistVersao;
 	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+	
 	
 	
 
