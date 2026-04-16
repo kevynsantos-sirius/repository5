@@ -318,6 +318,26 @@ public class ChecklistVersaoServiceAPI {
 	    this.recursoPlanoComunicacaoRepository.save(planoVersao);
 	}
 	
+	private void addPlanoComunicacaoVersao(
+	        ChecklistVersao checklistVersao,
+	        PlanoComunicacao planoComunicacao,
+	        List<Recurso> recurso) {
+		if(recurso != null && !recurso.isEmpty())
+		{
+			recurso.forEach(r -> {
+				RecursoPlanoComunicacao planoVersao = new RecursoPlanoComunicacao();
+			    
+			    planoVersao.setChecklistVersao(checklistVersao);
+			    planoVersao.setPlanoComunicacao(planoComunicacao);
+			    planoVersao.setRecurso(r);
+		
+			    this.recursoPlanoComunicacaoRepository.save(planoVersao);
+			});
+				
+		}
+			    
+	}
+	
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
@@ -844,10 +864,10 @@ public class ChecklistVersaoServiceAPI {
 
 	                    Integer id = temporalCryptoIdUtil.extractId(item.getId());
 
-	                    Recurso recurso = recursoRepository.findById(id)
-	                            .orElseThrow(() -> new RuntimeException("Recurso do plano não encontrado"));
+	                    PlanoComunicacao plan = planoComunicacaoRepository.findById(Long.parseLong(id.toString()))
+	                            .orElseThrow(() -> new RuntimeException("Plano não encontrado"));
 
-	                    addPlanoComunicacaoVersao(checklistVersaoNova,planCurrent,recurso);
+	                    addPlanoComunicacaoVersao(checklistVersaoNova,planCurrent,plan.getRecursos());
 	                }
 
 	                // 🔹 EXCLUÍDO → não adiciona (comportamento correto)
