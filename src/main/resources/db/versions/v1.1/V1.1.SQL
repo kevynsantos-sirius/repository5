@@ -293,3 +293,42 @@ alter table CL_Plano_Comunicacao alter column idRecurso int NULL;
 
 
 alter table CL_Plano_Comunicacao add nome varchar(100) COLLATE Latin1_General_CI_AS NULL;
+
+CREATE TABLE CL_Multi_Canal (
+    idMultiCanal INT IDENTITY(1,1) PRIMARY KEY,
+    nome varchar(100),
+    palavraChave varchar(100) COLLATE Latin1_General_CI_AS NULL,       
+    idRecurso INT NULL,
+    idChecklistVersao INT NOT NULL,
+
+    CONSTRAINT CL_Multi_Canal
+        FOREIGN KEY (idRecurso)
+        REFERENCES CL_Recurso(idRecurso),
+        
+    CONSTRAINT FK_CL_Multi_Canal_ChecklistVersao
+        FOREIGN KEY (idChecklistVersao)
+        REFERENCES CL_ChecklistVersao(Id),
+);
+
+CREATE TABLE CL_Recurso_Multi_Canal (
+    idMultiCanalVersao INT IDENTITY(1,1) PRIMARY KEY,
+    
+    idMultiCanal INT NOT NULL,
+    idChecklistVersao INT NOT NULL,
+	idRecurso INT NOT NULL,
+
+    CONSTRAINT FK_PCM_Multi
+        FOREIGN KEY (idMultiCanal)
+        REFERENCES CL_Multi_Canal(idMultiCanal),
+
+    CONSTRAINT FK_PCM_ChecklistVersao
+        FOREIGN KEY (idChecklistVersao)
+        REFERENCES CL_ChecklistVersao(Id),
+
+	CONSTRAINT FK_PCM_Recurso
+        FOREIGN KEY (idRecurso)
+        REFERENCES CL_Recurso(idRecurso)
+);
+
+INSERT INTO CL_TipoRecurso (codigo, descricao) VALUES
+(6, 'Multi Canal');
