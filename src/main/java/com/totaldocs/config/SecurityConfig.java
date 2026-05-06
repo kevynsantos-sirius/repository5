@@ -1,5 +1,7 @@
 package com.totaldocs.config;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -15,17 +17,13 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.totaldocs.security.Md5PasswordEncoder;
 
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.List;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
 @Configuration
@@ -53,15 +51,11 @@ public class SecurityConfig {
 	        .authorizeHttpRequests(auth -> auth
 
 	            // 🔥 LIBERA ARQUIVOS DO REACT
-	            .requestMatchers(
+	            .requestMatchers(HttpMethod.GET,
 	                "/",
 	                "/index.html",
 	                "/favicon.ico",
-	                "/assets/**",
-	                "/*.js",
-	                "/*.css",
-	                "/**/*.js",
-	                "/**/*.css"
+	                "/assets/**"
 	            ).permitAll()
 
 	            // 🔥 LIBERA LOGIN
@@ -93,20 +87,20 @@ public class SecurityConfig {
     @Value("${aplication.frontend.base}")
     private String urlBaseFront;
     
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of(urlBaseFront.split(",")));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // 🔑 sessão / cookie
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//
+//        config.setAllowedOrigins(List.of(urlBaseFront.split(",")));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowCredentials(true); // 🔑 sessão / cookie
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//
+//        return source;
+//    }
     
     // 🔑 ESSENCIAL
     @Bean
