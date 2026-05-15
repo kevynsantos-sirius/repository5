@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import com.totaldocs.service.ChecklistVersaoService;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -43,13 +45,15 @@ public class ChecklistController extends AbstractController {
     public ChecklistPaginadoResponse listar(
     		HttpSession session,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            HttpServletRequest request
     ) {
+    	Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
         Pageable pageable = PageRequest.of(page, size);
         boolean isAdmin = getIsAdminSession(session);
         Integer idUser = getUserIdSession(session);
         Page<ChecklistVersaoDTO> pagina =
-                checkVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser);
+                checkVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser, controle);
 
         return new ChecklistPaginadoResponse(
                 pagina.getContent(),
@@ -70,21 +74,23 @@ public class ChecklistController extends AbstractController {
     @CheckSession
     public ResponseEntity<byte[]> exportChecklist(
             HttpSession session,
+            HttpServletRequest request,
             @PathVariable String idChecklistVersaoStr,
             @RequestParam(defaultValue = "zip") String format
     ) throws IOException {
 
        
-
-        Integer idChecklistVersao = temporalCryptoIdUtil.extractId(idChecklistVersaoStr);
+    	Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
+    	
+        Integer idChecklistVersao = temporalCryptoIdUtil.extractId(idChecklistVersaoStr,controle);
         ChecklistVersaoDTO checklist =
-                checkVersaoServiceAPI.getChecklistVersaoDTOById(idChecklistVersao);
+                checkVersaoServiceAPI.getChecklistVersaoDTOById(idChecklistVersao, controle);
 
         if (!"zip".equalsIgnoreCase(format)) {
             throw new IllegalArgumentException("Formato inválido");
         }
 
-        byte[] zipBytes = checklistVersaoService.generateZipFromCheckList(checklist);
+        byte[] zipBytes = checklistVersaoService.generateZipFromCheckList(checklist,controle);
         
         String zipName = checklistVersaoService.nameFolderOrZip(checklist,true);
 

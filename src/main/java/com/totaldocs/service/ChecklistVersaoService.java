@@ -24,6 +24,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -75,18 +76,18 @@ public class ChecklistVersaoService {
         return response.getBody();
     }
     
-    private Layout buscarArquivoLayout(String layoutIdStr) {
+    private Layout buscarArquivoLayout(String layoutIdStr, Pair<String,Integer> controle) {
 
-    	Integer layoutId = temporalCryptoIdUtil.extractId(layoutIdStr);
+    	Integer layoutId = temporalCryptoIdUtil.extractId(layoutIdStr, controle);
         return layoutRepository.findById(Integer.valueOf(layoutId))
                 .orElseThrow(() ->
                         new RuntimeException("Layout não encontrado id " + layoutId)
                 );
     }
 
-    private MassaDados buscarArquivoMassa(String massaIdStr) {
+    private MassaDados buscarArquivoMassa(String massaIdStr, Pair<String,Integer> controle) {
     	
-    	Integer massaId = temporalCryptoIdUtil.extractId(massaIdStr);
+    	Integer massaId = temporalCryptoIdUtil.extractId(massaIdStr, controle);
         return massaDadoRepository.findById(Integer.valueOf(massaId))
                 .orElseThrow(() ->
                         new RuntimeException("Massa não encontrada id " + massaId)
@@ -99,7 +100,7 @@ public class ChecklistVersaoService {
     }
 
 
-    public byte[] generateZipFromCheckList(ChecklistVersaoDTO checklist) throws IOException {
+    public byte[] generateZipFromCheckList(ChecklistVersaoDTO checklist, Pair<String,Integer> controle) throws IOException {
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {
@@ -121,7 +122,7 @@ public class ChecklistVersaoService {
 
                     String layoutNome = sanitize(layout.getNomeLayout());
 
-                    Layout layoutEntity = buscarArquivoLayout(layout.getId());
+                    Layout layoutEntity = buscarArquivoLayout(layout.getId(), controle);
                     byte[] conteudoLayout = layoutEntity.getConteudoLayout();
 
                     // 🔹 Layout SEM massas → arquivo direto em layouts/
@@ -166,7 +167,7 @@ public class ChecklistVersaoService {
                         // Arquivos das massas (SEM criar pasta com nome do arquivo)
                         for (MassaDTO massa : layout.getMassasDados()) {
 
-                            MassaDados massaEntity = buscarArquivoMassa(massa.getId());
+                            MassaDados massaEntity = buscarArquivoMassa(massa.getId(), controle);
                             byte[] conteudoMassa = massaEntity.getConteudoMassaDados();
 
                             if (conteudoMassa != null && conteudoMassa.length > 0) {

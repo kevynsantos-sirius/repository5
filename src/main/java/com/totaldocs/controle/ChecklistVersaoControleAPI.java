@@ -10,6 +10,7 @@ import com.totaldocs.service.ChecklistService;
 import com.totaldocs.service.ChecklistVersaoServiceAPI;
 import com.totaldocs.utils.TemporalCryptoIdUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
@@ -75,7 +77,9 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        @RequestPart(value = "arquivosPlano", required = false) List<MultipartFile> arquivosPlano,
 	        @RequestPart(value = "keysModelos", required = false) List<String> keysModelos, // ⚡ map now
 	        @RequestPart(value = "keysPlanos", required = false) List<String> keysPlanos,
-	        HttpSession session) {
+	        HttpSession session,
+	        HttpServletRequest request) {
+		Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
 
 	    try {
 	        ObjectMapper mapper = new ObjectMapper();
@@ -88,7 +92,7 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	        
 	        System.out.print(arquivosPlanoNew);
 
-	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew, arquivosPlanoNew);
+	        ChecklistVersaoDTO salvo = checklistVersaoServiceAPI.criar(dto, arquivosLayout, arquivosMassas, arquivosModelosNew, arquivosPlanoNew, controle);
 
 	        return ResponseEntity
 	                .status(HttpStatus.CREATED)
@@ -111,7 +115,11 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	     @RequestPart(value = "arquivosModelos", required = false) List<MultipartFile> arquivosModelos,
 	     @RequestPart(value = "arquivosPlano", required = false) List<MultipartFile> arquivosPlano,
 	     @RequestPart(value = "keysModelos", required = false) List<String> keysModelos,
-	     @RequestPart(value = "keysPlanos", required = false) List<String> keysPlanos) throws Exception {
+	     @RequestPart(value = "keysPlanos", required = false) List<String> keysPlanos,
+	     HttpSession session,
+         HttpServletRequest request) throws Exception {
+		
+		Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
 
 	     ObjectMapper mapper = new ObjectMapper();
 	     ChecklistVersaoDTO dto = mapper.readValue(dtoJson, ChecklistVersaoDTO.class);
@@ -122,15 +130,16 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 	     
 	     System.out.print(arquivosPlanoNew);
 
-	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew, arquivosPlanoNew);
+	     return checklistVersaoServiceAPI.salvarVersao(idChecklist, dto, filesLayout, filesMassas, arquivosModelosNew, arquivosPlanoNew, controle);
 	}
 		
 	@GetMapping("/page")
 	@CheckSession
-	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable, HttpSession session) {
+	public Page<ChecklistVersaoDTO> getDocumentos(Pageable pageable, HttpSession session, HttpServletRequest request) {
+		Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
 		boolean isAdmin = getIsAdminSession(session);
         Integer idUser = getUserIdSession(session);
-		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser);
+		return checklistVersaoServiceAPI.listarPaginadoDTO(pageable,isAdmin,idUser, controle);
 	}
 	
 	@Autowired
@@ -139,15 +148,21 @@ public class ChecklistVersaoControleAPI extends AbstractController {
 
 	@GetMapping("/{idStr}")
 	@CheckSession
-	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable String idStr) {
-		Integer id = temporalCryptoIdUtil.extractId(idStr);
-		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id);
+	public ChecklistVersaoDTO getDocumentoDTOById(@PathVariable String idStr,
+			HttpSession session,
+            HttpServletRequest request) {
+		Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
+		Integer id = temporalCryptoIdUtil.extractId(idStr,controle);
+		return checklistVersaoServiceAPI.getChecklistVersaoDTOById(id, controle);
 	}
 	
 	@GetMapping("/{idChecklistStr}/versoes")
 	@CheckSession
-	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable String idChecklistStr) {
-		Integer idChecklist = temporalCryptoIdUtil.extractId(idChecklistStr);
-	    return checklistVersaoServiceAPI.listarVersoesChecklist(idChecklist);
+	public List<ChecklistVersaoResumoDTO> listarVersoes(@PathVariable String idChecklistStr,
+			HttpSession session,
+            HttpServletRequest request) {
+		Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
+		Integer idChecklist = temporalCryptoIdUtil.extractId(idChecklistStr,controle);
+	    return checklistVersaoServiceAPI.listarVersoesChecklist(idChecklist, controle);
 	}
 }

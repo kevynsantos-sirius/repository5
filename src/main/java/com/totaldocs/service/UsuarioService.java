@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +33,13 @@ public class UsuarioService {
 		return usuarioRepository.findByLogin(login);
 	}
 
-	public List<com.totaldocs.dto.Usuario> listarTodos() {
+	public List<com.totaldocs.dto.Usuario> listarTodos(Pair<String,Integer> controle) {
 
 	    return usuarioRepository.findAll()
 	            .stream()
 	            .map(usuario -> {
 	            	com.totaldocs.dto.Usuario dto = new com.totaldocs.dto.Usuario();
-	                dto.setId(temporalCryptoIdUtil.generateToken(usuario.getId()));
+	                dto.setId(temporalCryptoIdUtil.generateToken(usuario.getId(), controle));
 	                dto.setLogin(usuario.getLogin());
 	                dto.setNome(usuario.getNome());
 	                dto.setBloqueado(usuario.isFlgBloqueado());
@@ -50,12 +51,12 @@ public class UsuarioService {
 	}
 
 	@Transactional
-	public com.totaldocs.dto.Usuario criarUsuario(com.totaldocs.dto.Usuario usuario) {
+	public com.totaldocs.dto.Usuario criarUsuario(com.totaldocs.dto.Usuario usuario, Pair<String,Integer> controle) {
 		// TODO Auto-generated method stub
 		Usuario user = new Usuario();
 		user = putDataUser(usuario, user);
 		user = usuarioRepository.saveAndFlush(user);
-		usuario.setId(temporalCryptoIdUtil.generateToken(user.getId()));
+		usuario.setId(temporalCryptoIdUtil.generateToken(user.getId(), controle));
 		return usuario;
 	}
 
@@ -75,9 +76,9 @@ public class UsuarioService {
 	}
 	
 	@Transactional
-	public com.totaldocs.dto.Usuario atualizarUsuario(String idStr, com.totaldocs.dto.Usuario usuario) throws UserNotExists {
+	public com.totaldocs.dto.Usuario atualizarUsuario(String idStr, com.totaldocs.dto.Usuario usuario, Pair<String,Integer> controle) throws UserNotExists {
 		// TODO Auto-generated method stub
-		Integer id = temporalCryptoIdUtil.extractId(idStr);
+		Integer id = temporalCryptoIdUtil.extractId(idStr, controle);
 		Optional<Usuario> user = usuarioRepository.findById(id);
 		if(user.isPresent())
 		{
@@ -87,7 +88,7 @@ public class UsuarioService {
 			
 			u = usuarioRepository.saveAndFlush(u);
 			
-			usuario.setId(temporalCryptoIdUtil.generateToken(u.getId()));
+			usuario.setId(temporalCryptoIdUtil.generateToken(u.getId(), controle));
 			
 			return usuario;
 		}
@@ -98,9 +99,9 @@ public class UsuarioService {
 	}
 
 	@Transactional
-	public void deletarUsuario(String idStr) throws UserNotExists {
+	public void deletarUsuario(String idStr, Pair<String,Integer> controle) throws UserNotExists {
 		// TODO Auto-generated method stub
-		Integer id = temporalCryptoIdUtil.extractId(idStr);
+		Integer id = temporalCryptoIdUtil.extractId(idStr, controle);
 		Optional<Usuario> user = usuarioRepository.findById(id);
 		
 		if(user.isPresent())

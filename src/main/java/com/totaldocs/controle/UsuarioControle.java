@@ -2,6 +2,7 @@ package com.totaldocs.controle;
 
 import java.util.List;
 
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import com.totaldocs.dto.Usuario;
 import com.totaldocs.exception.UserNotExists;
 import com.totaldocs.service.UsuarioService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
@@ -34,9 +36,10 @@ public class UsuarioControle extends AbstractController {
 
     // ✅ LISTAR
     @GetMapping
-    public List<Usuario> listarUsuarios(HttpSession session) {
+    public List<Usuario> listarUsuarios(HttpSession session, HttpServletRequest request) {
+    	Pair<String,Integer> controle = getSessionIdAndIdUser(session,request);
         verificarAdmin(session);
-        return usuarioService.listarTodos();
+        return usuarioService.listarTodos(controle);
     }
 
 //    // ✅ CRIAR

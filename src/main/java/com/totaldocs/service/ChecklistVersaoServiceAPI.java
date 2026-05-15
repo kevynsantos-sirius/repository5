@@ -93,106 +93,14 @@ public class ChecklistVersaoServiceAPI {
 		this.planoComunicacaoRepository = planoComunicacaoRepository;
 		this.recursoPlanoComunicacaoRepository = recursoPlanoComunicacaoRepository;
 	}
-	
-	public void hasChangesForm(String idChecklistVersao, ChecklistVersaoDTO dto,
-			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas) throws IllegalStateException
-	{
-		Integer idCheckList = temporalCryptoIdUtil.extractId(idChecklistVersao);
-		ChecklistVersao versaoAtual = checklistVersaoRepository.findById(idCheckList)
-				.orElseThrow(() -> new IllegalStateException("Versão não encontrada"));
-		
-		Checklist checklist = versaoAtual.getChecklist();
-		
-		//IDENTIFICAÇÃO
-		
-		boolean centroCustoIsEqual = checklist.getCentroCusto().equals(dto.getCentroCusto());
-		boolean icatuIsEqual = versaoAtual.isIcatu() == dto.isIcatu();
-		boolean caixaIsEqual = versaoAtual.isCaixa() == dto.isCaixa();
-		boolean rioGrandeIsEqual = versaoAtual.isRioGrande() == dto.isRioGrande();
-		boolean idDemandaIsEqual = versaoAtual.getIdDemanda().equals(dto.getIdDemanda());
-		boolean statusIsEqual = versaoAtual.getStatus().equals(dto.getStatus());
-		
-		boolean identificationIsEqual = centroCustoIsEqual && icatuIsEqual 
-				&& caixaIsEqual && rioGrandeIsEqual && idDemandaIsEqual && statusIsEqual;
-		
-		if(!identificationIsEqual)
-		{
-			return;
-		}
-		
-		//LAYOUT E FORMA DE ENVIO - TI
-		
-		ChecklistVersao lastVersion = versaoAtual;
-		
-		
-		boolean qtdMassasIsDifference = false;
-		
-		for (LayoutDTO dtoLayout : dto.getLayouts()) {
-			String token = dtoLayout.getId();
-			boolean nameLayoutIsEqual = false;
-			boolean observationLayoutIsEqual = false;
-			if (!Strings.isBlank(token) && temporalCryptoIdUtil.extractId(token) != null) {
-				
-				Integer layoutId = temporalCryptoIdUtil.extractId(token);
-				
-				if(layoutId != null) {
-					
-					Layout layoutOrigem = layoutRepository.findById(layoutId)
-							.orElseThrow(() -> new IllegalStateException("Layout não encontrado"));
-					
-					nameLayoutIsEqual = layoutOrigem.getNomeLayout().equals(dtoLayout.getNomeLayout());
-					
-					observationLayoutIsEqual = layoutOrigem.getObservacao().equals(dtoLayout.getObservacao());
-					
-					qtdMassasIsDifference = layoutOrigem.getMassasDados().size() != dtoLayout.getMassasDados().size();
-					
-					if((!nameLayoutIsEqual || !observationLayoutIsEqual) || qtdMassasIsDifference)
-					{
-						return;
-					}
-					
-					
-				}
-				
-			}
-			
-			for (MassaDTO dtoMassa : dtoLayout.getMassasDados()) {
-				boolean nameMassaIsEqual = false;
-				boolean observationMassaIsEqual = false;
-				boolean exitsRegistry = !temporalCryptoIdUtil.isUUID(dtoMassa.getId());
-				if (exitsRegistry) {
-					Integer massaId = temporalCryptoIdUtil.extractId(dtoMassa.getId());
-					MassaDados massa = arquivoRepository.findById(massaId)
-							.orElseThrow(() -> new IllegalStateException("Massa não encontrada"));
-					
-					nameMassaIsEqual = massa.getNomeMassaDados().equals(dtoMassa.getNomeMassaDados());
-					observationMassaIsEqual = massa.getObservacao().equals(dtoMassa.getObservacao());
-					
-					if(!nameMassaIsEqual || !observationMassaIsEqual)
-					{
-						return;
-					}
-				}
-			}
-		}
-		
-		boolean qtdLayoutsIsDifference = lastVersion.getLayouts().size() != dto.getLayouts().size();
-		
-		if(qtdLayoutsIsDifference)
-		{
-			return;
-		}
-		
-		throw new IllegalStateException("Formulário sem nenhuma alteração");
-		
-	}
 
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO criar(ChecklistVersaoDTO dto,
 	                                List<MultipartFile> filesLayout,
 	                                List<MultipartFile> filesMassas,
 	                                Map<String, MultipartFile> filesModelos,
-	                                Map<String, MultipartFile> filesPlanos) throws IOException, UmTipoDeImpressaoException {
+	                                Map<String, MultipartFile> filesPlanos,
+	                                Pair<String,Integer> controle) throws IOException, UmTipoDeImpressaoException {
 
 	    // Criação checklist e versão (igual ao seu código original)
 	    Checklist checklist = new Checklist();
@@ -227,9 +135,9 @@ public class ChecklistVersaoServiceAPI {
 	    checklistVersao.setLayouts(addOrUpdateLayout(dto.getLayouts(), checklistVersao, filesLayout, filesMassas, dto));
 
 	    // Modelos com arquivos identificados por chave
-	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos);
+	    checklistVersao = addOrUpdateModel(dto.getModelos(), checklistVersao, filesModelos, controle);
 	    
-	    addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersao, filesPlanos);
+	    addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersao, filesPlanos, controle);
 
 	    return dto;
 	}
@@ -341,7 +249,8 @@ public class ChecklistVersaoServiceAPI {
 	private ChecklistVersao addOrUpdateModel(
 	        List<ModeloDTO> models,
 	        ChecklistVersao checklistVersao,
-	        Map<String, MultipartFile> arquivosModelos) throws IOException, UmTipoDeImpressaoException {
+	        Map<String, MultipartFile> arquivosModelos,
+	        Pair<String,Integer> controle) throws IOException, UmTipoDeImpressaoException {
 
 	    List<ModeloDocumento> list = new ArrayList<>();
 
@@ -372,7 +281,7 @@ public class ChecklistVersaoServiceAPI {
 	            }
 	            else
 	            {
-	            	Integer id = temporalCryptoIdUtil.extractId(m.getId());
+	            	Integer id = temporalCryptoIdUtil.extractId(m.getId(), controle);
 	            	ModeloDocumento modeloDocumentoAtual = modeloDocumentoRepository.getById(id);
 	            	
 	            	modeloDocumento.setNomeRecurso(modeloDocumentoAtual.getNomeRecurso());
@@ -414,7 +323,7 @@ public class ChecklistVersaoServiceAPI {
 	                    }
 	                   if(!newFile && !logo.getExcluido())
 	                   {
-	                	   Integer id = temporalCryptoIdUtil.extractId(logo.getId());
+	                	   Integer id = temporalCryptoIdUtil.extractId(logo.getId(), controle);
 	                	   Optional<Recurso> recurso = this.recursoRepository.findById(id);
 	                	   Recurso lm = recurso.get();
 	                        
@@ -451,7 +360,7 @@ public class ChecklistVersaoServiceAPI {
 	                    }
 
 	                    if (!newFile && !ass.getExcluido()) {
-	                        Integer id = temporalCryptoIdUtil.extractId(ass.getId());
+	                        Integer id = temporalCryptoIdUtil.extractId(ass.getId(), controle);
 	                        Recurso lm = recursoRepository.findById(id)
 	                                .orElseThrow(() -> new RuntimeException("Assinatura não encontrada"));
 
@@ -489,7 +398,7 @@ public class ChecklistVersaoServiceAPI {
 	                    }
 
 	                    if (!newFile && !arq.getExcluido()) {
-	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId());
+	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId(), controle);
 	                        Recurso lm = recursoRepository.findById(id)
 	                                .orElseThrow(() -> new RuntimeException("Arquivo adicional não encontrado"));
 
@@ -528,7 +437,7 @@ public class ChecklistVersaoServiceAPI {
 	                    }
 
 	                    if (!newFile && !arq.getExcluido()) {
-	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId());
+	                        Integer id = temporalCryptoIdUtil.extractId(arq.getId(), controle);
 	                        Recurso lm = recursoRepository.findById(id)
 	                                .orElseThrow(() -> new RuntimeException("Arquivo de impressão não encontrado"));
 
@@ -605,12 +514,12 @@ public class ChecklistVersaoServiceAPI {
 	@Transactional(rollbackFor = Exception.class)
 	public ChecklistVersaoDTO salvarVersao(String idChecklistVersao, ChecklistVersaoDTO dto,
 			List<MultipartFile> filesLayout, List<MultipartFile> filesMassas, Map<String, MultipartFile> arquivosModelos,
-			Map<String, MultipartFile> filesPlanos) throws Exception {
+			Map<String, MultipartFile> filesPlanos, Pair<String,Integer> controle) throws Exception {
 
 		// =========================
 		// VERSÃO ATUAL
 		// =========================
-		Integer idCheckList = temporalCryptoIdUtil.extractId(idChecklistVersao);
+		Integer idCheckList = temporalCryptoIdUtil.extractId(idChecklistVersao, controle);
 		ChecklistVersao versaoAtual = checklistVersaoRepository.findById(idCheckList)
 				.orElseThrow(() -> new IllegalStateException("Versão não encontrada"));
 
@@ -661,9 +570,9 @@ public class ChecklistVersaoServiceAPI {
 
 				// -------- LAYOUT EXISTENTE --------
 				String token = dtoLayout.getId();
-				if (!Strings.isBlank(token) && temporalCryptoIdUtil.extractId(token) != null) {
+				if (!Strings.isBlank(token) && temporalCryptoIdUtil.extractId(token, controle) != null) {
 					
-					Integer layoutId = temporalCryptoIdUtil.extractId(token);
+					Integer layoutId = temporalCryptoIdUtil.extractId(token, controle);
 					
 					if(layoutId != null) {
 
@@ -735,7 +644,7 @@ public class ChecklistVersaoServiceAPI {
 						// ---- MASSA EXISTENTE ----
 						boolean exitsRegistry = !temporalCryptoIdUtil.isUUID(dtoMassa.getId());
 						if (exitsRegistry) {
-							Integer massaId = temporalCryptoIdUtil.extractId(dtoMassa.getId());
+							Integer massaId = temporalCryptoIdUtil.extractId(dtoMassa.getId(), controle);
 							massa = arquivoRepository.findById(massaId)
 									.orElseThrow(() -> new IllegalStateException("Massa não encontrada"));
 
@@ -791,9 +700,9 @@ public class ChecklistVersaoServiceAPI {
 
 		checklistVersaoNova.setLayouts(layoutsNovos);
 		
-		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos);
+		checklistVersaoNova = addOrUpdateModel(dto.getModelos(), checklistVersaoNova, arquivosModelos, controle);
 		
-		addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersaoNova, filesPlanos);
+		addOrUpdatePlan(dto.getPlanosComunicacao(), checklistVersaoNova, filesPlanos, controle);
 		
 		return dto;
 	}
@@ -802,7 +711,8 @@ public class ChecklistVersaoServiceAPI {
 	private void addOrUpdatePlan(
 	        List<ArquivoPlanoDTO> planosComunicacao,
 	        ChecklistVersao checklistVersaoNova,
-	        Map<String, MultipartFile> filesPlanos) throws IOException {
+	        Map<String, MultipartFile> filesPlanos,
+	        Pair<String,Integer> controle) throws IOException {
 
 	    if (planosComunicacao == null) return;
 
@@ -862,7 +772,7 @@ public class ChecklistVersaoServiceAPI {
 	                // 🔹 REAPROVEITA EXISTENTE
 	                if (!newFile && !Boolean.TRUE.equals(item.getExcluido())) {
 
-	                    Integer id = temporalCryptoIdUtil.extractId(item.getId());
+	                    Integer id = temporalCryptoIdUtil.extractId(item.getId(), controle);
 
 	                    PlanoComunicacao plan = planoComunicacaoRepository.findById(Long.parseLong(id.toString()))
 	                            .orElseThrow(() -> new RuntimeException("Plano não encontrado"));
@@ -878,15 +788,15 @@ public class ChecklistVersaoServiceAPI {
 	    }
 	}
 	
-	private ChecklistVersaoDTO converterParaDTO(ChecklistVersao c) {
+	private ChecklistVersaoDTO converterParaDTO(ChecklistVersao c, Pair<String, Integer> controle) {
 
 	    ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
 
 	    String uuidGenerateTokenVersion =
-	            temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
+	            temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao(), controle);
 
 	    String uuidGenerateToken =
-	            temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
+	            temporalCryptoIdUtil.generateToken(c.getChecklist().getId(), controle);
 
 	    dto.setIdChecklist(uuidGenerateToken);
 	    dto.setIdChecklistVersao(uuidGenerateTokenVersion);
@@ -914,20 +824,21 @@ public class ChecklistVersaoServiceAPI {
 	public Page<ChecklistVersaoDTO> listarPaginadoDTO(
 			org.springframework.data.domain.Pageable pageable,
 	        boolean isAdmin,
-	        Integer idUser) {
+	        Integer idUser,
+	        Pair<String,Integer> controle) {
 
 	    if (isAdmin) {
 	        return checklistVersaoRepository
 	                .findUltimasVersoes(pageable)
-	                .map(this::converterParaDTO);
+	                .map(c -> converterParaDTO(c, controle));
 	    }
 
 	    return checklistVersaoRepository
 	            .findByUsuarioIdUltimasVersoes(idUser, pageable)
-	            .map(this::converterParaDTO);
+	            .map(c -> converterParaDTO(c, controle));
 	}
 
-	public List<ChecklistVersaoResumoDTO> listarVersoesChecklist(Integer idChecklist) {
+	public List<ChecklistVersaoResumoDTO> listarVersoesChecklist(Integer idChecklist, Pair<String,Integer> controle) {
 
 		List<ChecklistVersao> versoes = checklistVersaoRepository.findByChecklistIdOrderByVersaoDesc(idChecklist);
 
@@ -936,7 +847,7 @@ public class ChecklistVersaoServiceAPI {
 		return versoes.stream().map(v -> {
 
 			ChecklistVersaoResumoDTO dto = new ChecklistVersaoResumoDTO();
-			dto.setIdChecklistVersao(temporalCryptoIdUtil.generateToken(v.getIdChecklistVersao()));
+			dto.setIdChecklistVersao(temporalCryptoIdUtil.generateToken(v.getIdChecklistVersao(), controle));
 			dto.setIdDemanda(v.getIdDemanda());
 			dto.setVersao(v.getVersao());
 			dto.setDataCadastro(v.getDataCadastro());
@@ -959,7 +870,7 @@ public class ChecklistVersaoServiceAPI {
 	}
 
 	@Transactional(readOnly = true)
-	public ChecklistVersaoDTO getChecklistVersaoDTOById(Integer idChecklistVersao) {
+	public ChecklistVersaoDTO getChecklistVersaoDTOById(Integer idChecklistVersao, Pair<String,Integer> controle) {
 
 	    ChecklistVersao c = checklistVersaoRepository.findById(idChecklistVersao)
 	            .orElseThrow(() -> new RuntimeException("Documento não localizado id " + idChecklistVersao));
@@ -967,8 +878,8 @@ public class ChecklistVersaoServiceAPI {
 	    ChecklistVersaoDTO dto = new ChecklistVersaoDTO();
 
 	    // -------- Identificação --------
-	    String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao());
-	    String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId());
+	    String uuidGenerateTokenVersion = temporalCryptoIdUtil.generateToken(c.getIdChecklistVersao(), controle);
+	    String uuidGenerateToken = temporalCryptoIdUtil.generateToken(c.getChecklist().getId(), controle);
 
 	    dto.setIdChecklist(uuidGenerateToken);
 	    dto.setIdChecklistVersao(uuidGenerateTokenVersion);
@@ -1013,7 +924,7 @@ public class ChecklistVersaoServiceAPI {
 	            }
 
 	            LayoutDTO layoutDTO = new LayoutDTO();
-	            layoutDTO.setId(temporalCryptoIdUtil.generateToken(layout.getId()));
+	            layoutDTO.setId(temporalCryptoIdUtil.generateToken(layout.getId(), controle));
 	            layoutDTO.setNomeLayout(layout.getNomeLayout());
 	            layoutDTO.setObservacao(layout.getObservacao());
 
@@ -1022,7 +933,7 @@ public class ChecklistVersaoServiceAPI {
 	                for (MassaDados massa : layout.getMassasDados()) {
 
 	                    MassaDTO massaDTO = new MassaDTO();
-	                    massaDTO.setId(temporalCryptoIdUtil.generateToken(massa.getId()));
+	                    massaDTO.setId(temporalCryptoIdUtil.generateToken(massa.getId(), controle));
 	                    massaDTO.setNomeMassaDados(massa.getNomeMassaDados());
 	                    massaDTO.setObservacao(massa.getObservacao());
 
@@ -1050,7 +961,7 @@ public class ChecklistVersaoServiceAPI {
 	        for (ModeloDocumento modelo : c.getModelosDocumento()) {
 
 	            ModeloDTO modeloDTO = new ModeloDTO();
-	            modeloDTO.setId(temporalCryptoIdUtil.generateToken(modelo.getId()));
+	            modeloDTO.setId(temporalCryptoIdUtil.generateToken(modelo.getId(), controle));
 	            modeloDTO.setNomeRecurso(modelo.getNomeRecurso());
 	            modeloDTO.setObservacao(modelo.getObservacao());
 	            modeloDTO.setTemArquivo(modelo.getNomeRecurso() != null);
@@ -1070,7 +981,7 @@ public class ChecklistVersaoServiceAPI {
 
 	                    // Prepara DTO (evita duplicação)
 	                    ItemArquivoDTO dto2 = new ItemArquivoDTO();
-	                    dto2.setId(temporalCryptoIdUtil.generateToken(lm.getId()));
+	                    dto2.setId(temporalCryptoIdUtil.generateToken(lm.getId(), controle));
 	                    dto2.setCodigo(lm.getCodigo());
 	                    dto2.setTipo(lm.getTipo().getCodigo());
 	                    dto2.setDescricaoTipo(lm.getTipo().getDescricao());
@@ -1191,7 +1102,7 @@ public class ChecklistVersaoServiceAPI {
 	    	
 	    	dtoPlan.setNomeArquivo(plan.getNome());
 	    	dtoPlan.setObservacao(plan.getObservacao());
-	    	dtoPlan.setId(temporalCryptoIdUtil.generateToken(plan.getId()));
+	    	dtoPlan.setId(temporalCryptoIdUtil.generateTokenLong(plan.getId(), controle));
 	    	
 	    	List<Recurso> recursos = plan.getRecursos();
 	    	
@@ -1200,7 +1111,7 @@ public class ChecklistVersaoServiceAPI {
 	    	recursos.forEach(r -> {
 	    		
 	    		ItemArquivoDTO dto2 = new ItemArquivoDTO();
-                dto2.setId(temporalCryptoIdUtil.generateToken(r.getId()));
+                dto2.setId(temporalCryptoIdUtil.generateToken(r.getId(), controle));
                 dto2.setCodigo(r.getCodigo());
                 dto2.setTipo(r.getTipo().getCodigo());
                 dto2.setDescricaoTipo(r.getTipo().getDescricao());

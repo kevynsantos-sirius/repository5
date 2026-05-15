@@ -1,7 +1,9 @@
 package com.totaldocs.controle;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,15 @@ public abstract class AbstractController {
 	{
 		Object obj = session.getAttribute(USER_ID);
 		return (Integer) obj;
+	}
+	
+	protected Pair<String,Integer> getSessionIdAndIdUser(HttpSession session, HttpServletRequest request)
+	{
+		String sessionId = request.getSession().getId();
+		
+		Integer userId = getUserIdSession(session);
+		
+		return Pair.of(sessionId, userId);
 	}
 	
 	protected Boolean getIsAdminSession(HttpSession session)
